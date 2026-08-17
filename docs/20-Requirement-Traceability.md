@@ -1,18 +1,26 @@
 # 20. Requirement Traceability
 
-High-level mapping (illustrative — full matrix can be expanded during implementation planning).
+This matrix connects major business objectives to concrete functional requirements, business rules, use cases, and data requirements. It is intentionally requirement-level for the core MVP rather than using wildcard-only mappings.
 
-| Business Objective | Key Functional Requirements | Key Business Rules | Key Use Cases | Key Data Entities |
-|--------------------|-----------------------------|--------------------|---------------|-------------------|
-| OBJ-001 Maintain product data | FR-PROD-* | BR-001–006, BR-018 | UC-004, UC-005, UC-006 | Product, Category, Supplier |
-| OBJ-002 Maintain categories, suppliers, customers | FR-CAT-*, FR-SUP-*, FR-CUS-* | BR-007–010 | UC-008 | Category, Supplier, Customer |
-| OBJ-003 Record stock movements | FR-SIN-*, FR-SOUT-*, FR-ADJ-* | BR-011–014, BR-017, BR-025 | UC-009, UC-010, UC-011 | InventoryTransaction |
-| OBJ-004 Accurate current stock | FR-STK-005 | BR-003, BR-015 | UC-009–011 | Product.QuantityOnHand |
-| OBJ-005 Low/Out of stock detection | FR-STK-001–004, FR-DASH-006/007 | BR-015 | UC-012 | Product |
-| OBJ-006 Search & filter | FR-SRCH-* | — | UC-007, UC-013 | All list entities |
-| OBJ-007 Dashboard | FR-DASH-* | — | UC-003 | Aggregates |
-| OBJ-008 Basic reports | FR-RPT-* | — | UC-014 | All |
-| OBJ-009 Enforce rules & integrity | VAL-*, ER-*, many FR | All BR-* | All | All |
-| OBJ-010 Demonstrate C# / WinForms skills | All + WinForms requirements | — | All | — |
+| Objective | Functional Requirements | Business Rules | Use Cases | Data Requirements |
+|---|---|---|---|---|
+| OBJ-001 Maintain product data | FR-PROD-001–009 | BR-001–006, BR-016, BR-018, BR-026–028 | Product CRUD use cases | DR-PROD, DR-CAT, DR-SUP |
+| OBJ-002 Maintain categories | FR-CAT-001–004 | BR-007, BR-008 | Category CRUD use cases | DR-CAT, DR-PROD |
+| OBJ-003 Maintain suppliers | FR-SUP-001–004 | BR-009, BR-028 | Supplier CRUD use cases | DR-SUP, DR-PROD, DR-TXN |
+| OBJ-004 Maintain customers | FR-CUS-001–004 | BR-010, BR-029 | Customer CRUD use cases | DR-CUS, DR-TXN |
+| OBJ-005 Authenticate and authorize users | FR-AUTH-001–008, FR-USR-001–006 | BR-014, BR-019, BR-020 | Login, Logout, User Management use cases | DR-USR |
+| OBJ-006 Record Stock-In | FR-SIN-001–006 | BR-012, BR-016, BR-017, BR-021, BR-027, BR-028, BR-030 | Stock-In use case | DR-TXN, DR-PROD, DR-SUP, DR-USR |
+| OBJ-007 Record Stock-Out | FR-SOUT-001–007 | BR-011, BR-012, BR-016, BR-017, BR-021, BR-025, BR-027, BR-029, BR-030 | Stock-Out use case | DR-TXN, DR-PROD, DR-CUS, DR-USR |
+| OBJ-008 Correct inventory quantities | FR-ADJ-001–005 | BR-013, BR-014, BR-017, BR-027, BR-030 | Inventory Adjustment use case | DR-TXN, DR-PROD, DR-USR |
+| OBJ-009 Maintain accurate stock status | FR-STK-001–004 | BR-003, BR-004, BR-015, BR-025–027 | Stock monitoring use cases | DR-PROD, DR-TXN |
+| OBJ-010 Search and filter information | FR-SRCH-001–005 | — | Search/filter use cases | Relevant list entities |
+| OBJ-011 Provide reports | FR-RPT-001–003 | — | Reporting use cases | DR-PROD, DR-TXN, DR-CAT, DR-SUP, DR-CUS |
+| OBJ-012 Demonstrate C# / WinForms skills | WinForms-specific requirements + all CRUD/event requirements | Validation and business rules | All UI-driven use cases | All relevant entities |
 
-This structure allows verification that every major objective is supported by concrete requirements, rules, behaviours, and data.
+## Traceability Verification
+
+- [x] Major objectives have concrete functional requirements.
+- [x] Core functional requirements reference relevant business rules.
+- [x] Core workflows are represented by use cases.
+- [x] Core data entities are connected to their functionality.
+- [ ] Final use-case IDs will be rechecked after the use-case document is finalized.
