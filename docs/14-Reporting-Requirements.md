@@ -1,46 +1,45 @@
 # 14. Reporting Requirements
 
-All reports are basic, screen-viewable, and printable (or simple export). No enterprise BI tools.
+All MVP reports are screen-viewable and printable. Export is not required for MVP and is treated as future scope.
 
 ## 14.1 Current Inventory Report (RPT-001)
-
-- **Purpose**: Show every active product with current stock position.
-- **Columns**: Product ID, Product Name, Category, Supplier, Quantity on Hand, Minimum Level, Stock Status, Purchase Price, Selling Price, Stock Value (Quantity × Purchase Price).
-- **Filtering**: Optional by Category or Stock Status.
-- **Sorting**: By Product Name or Category.
+- **Purpose:** Show every active product with current stock position.
+- **Columns:** Product ID, Product Name, Category, Default Supplier, Quantity On Hand, Minimum Level, Stock Status, Purchase Price, Selling Price, Stock Value.
+- **Filtering:** Category and Stock Status.
+- **Sorting:** Product Name or Category.
 
 ## 14.2 Low Stock Report (RPT-002)
-
-- **Purpose**: List products that need attention for reordering.
-- **Content**: All products where Stock Status = Low Stock.
-- **Columns**: Product ID, Name, Category, Current Qty, Minimum Level, Supplier, Contact info (optional).
+- **Purpose:** List products requiring attention.
+- **Content:** Products where Stock Status = Low Stock.
+- **Columns:** Product ID, Name, Category, Current Quantity, Minimum Level, Default Supplier, Supplier Contact.
 
 ## 14.3 Out-of-Stock Report (RPT-003)
-
-- **Purpose**: List products that are completely unavailable.
-- **Content**: All products where Quantity on Hand = 0.
+- **Purpose:** List products with QuantityOnHand = 0.
+- **Columns:** Product ID, Name, Category, Default Supplier, Minimum Level.
 
 ## 14.4 Stock-In Report (RPT-004)
-
-- **Purpose**: Show goods received in a period.
-- **Filtering**: Date range (From – To), optional Product or Supplier.
-- **Columns**: Transaction ID, Date, Product, Supplier, Quantity, Unit Price, Total, User, Notes.
+- **Purpose:** Show goods received during a period.
+- **Filtering:** Date range, optional Product or actual Supplier.
+- **Columns:** Transaction ID, Date, Product, Supplier, Quantity, Unit Price, User, Notes.
 
 ## 14.5 Stock-Out Report (RPT-005)
-
-- **Purpose**: Show goods issued/sold in a period.
-- **Filtering**: Date range, optional Product or Customer.
-- **Columns**: Transaction ID, Date, Product, Customer, Quantity, Unit Price, Total, User, Notes.
+- **Purpose:** Show goods issued during a period.
+- **Filtering:** Date range, optional Product or Customer.
+- **Columns:** Transaction ID, Date, Product, Customer when present, Quantity, Unit Price, User, Notes.
 
 ## 14.6 Inventory Transaction History Report (RPT-006)
+- **Purpose:** Show complete stock movement history.
+- **Filtering:** Date range, Transaction Type, Product.
+- **Columns:** Relevant InventoryTransaction fields.
 
-- **Purpose**: Complete movement history for audit or investigation.
-- **Filtering**: Date range, Transaction Type, Product.
-- **Columns**: All key fields from InventoryTransaction.
+## 14.7 Common MVP Requirements
 
-## 14.7 Common Report Requirements
+- Reports shall use current application data.
+- Reports shall be viewable on screen.
+- Reports shall be printable using standard Windows printing facilities.
+- Empty results shall display a clear “No records found” message.
+- Report generation shall remain responsive for the expected university-project data volume.
 
-- Reports shall be generated from current database data.
-- User shall be able to print the report (standard Windows print dialog is acceptable).
-- Empty result sets shall display a friendly “No records found” message.
-- Report generation shall not lock the UI for an unreasonable time (for the expected data volume).
+## 14.8 Future Reporting
+
+Export to formats such as PDF or Excel is not required for MVP and may be considered after the complete MVP is stable.
