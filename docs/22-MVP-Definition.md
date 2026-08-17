@@ -1,39 +1,51 @@
 # 22. MVP Definition
 
-The Minimum Viable Product is the smallest complete system that still fully demonstrates the educational goals of the course.
+The MVP is the smallest complete system that still demonstrates the educational goals of the C# Windows Programming course.
 
 ## MVP Must Include
 
-1. **Login / Logout** with at least two roles (Administrator, Inventory Staff)
-2. **Dashboard** showing key counts and recent activity
-3. **Product Management** — full CRUD + search + filter by category/status
-4. **Category, Supplier, Customer Management** — full CRUD with appropriate delete restrictions
-5. **Stock-In** — creates transaction and increases quantity
-6. **Stock-Out** — creates transaction, enforces available stock, decreases quantity
-7. **Automatic Stock Status** (In Stock / Low Stock / Out of Stock)
-8. **Transaction History** view with basic filtering
-9. **At least three reports**: Current Inventory, Low Stock, Transaction History
-10. **Solid validation** and clear error messages
-11. **Multiple WinForms forms** with navigation and event-driven behaviour
-12. **Relational database** with proper relationships
+1. Login / Logout with Administrator and Inventory Staff roles.
+2. Basic User Management by Administrators: create, edit, deactivate, and assign roles.
+3. Dashboard showing key inventory counts and recent activity.
+4. Product Management: full CRUD subject to deletion rules, search, and filtering.
+5. Category Management: full CRUD subject to business rules.
+6. Supplier Management: full CRUD subject to business rules.
+7. Customer Management: full CRUD subject to business rules.
+8. Stock-In: records actual supplier, creates append-only transaction, and increases QuantityOnHand.
+9. Stock-Out: optionally records customer, creates append-only transaction, rejects insufficient stock, and decreases QuantityOnHand.
+10. Inventory Adjustment: Administrator-only, reason required, append-only, and updates QuantityOnHand.
+11. Automatic In Stock / Low Stock / Out of Stock status.
+12. Transaction History with search/filtering.
+13. Required reports: Current Inventory, Low Stock, Out-of-Stock, Stock-In, Stock-Out, and Transaction History; at minimum they are viewable and printable.
+14. Validation and clear error handling.
+15. Multiple WinForms forms, navigation, controls, and event-driven interactions.
+16. Relational database with the defined relationships and referential integrity.
 
-## Explicitly Deferred from MVP (but documented)
+## Explicitly Deferred from MVP
 
-- Inventory Adjustment (can be added early if time permits)
-- Full user management UI (hard-coded admin user is acceptable for very first demo)
-- Advanced report filters
-- Soft-delete polish
+- PDF/Excel/export functionality
+- Barcode scanning
+- Advanced analytics or forecasting
+- Cloud synchronization
+- Mobile application
+- Multi-branch inventory
+- Automated purchasing/reordering
+- Enterprise reporting/BI
 
-## Success Criteria for MVP
+## MVP Success Criteria
 
-A student (or instructor) can:
+A user can:
 
-- Log in
-- Add categories, suppliers, customers, and products
-- Receive stock and sell stock
-- See quantities and status update correctly
-- Find low-stock items
-- View history and generate a basic report
-- Observe that invalid actions are blocked with clear messages
+- Log in according to their role.
+- Manage users if they are an Administrator.
+- Add and manage categories, suppliers, customers, and products.
+- Create a product with QuantityOnHand = 0.
+- Receive stock and see QuantityOnHand increase.
+- Issue stock and see QuantityOnHand decrease.
+- Record authorized inventory adjustments.
+- See stock status update automatically.
+- Search and filter inventory and transaction history.
+- View and print the required reports.
+- Observe that invalid operations are blocked with clear validation/error messages.
 
-…all through a coherent Windows Forms application.
+All of the above must be achievable through the WinForms application using the defined relational data model.
