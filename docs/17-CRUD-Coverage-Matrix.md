@@ -1,20 +1,18 @@
 # 17. CRUD Coverage Matrix
 
-| Entity                | Create | Read (List) | Read (Detail) | Update | Delete | Search | Filter | Notes / Restrictions |
-|-----------------------|--------|-------------|---------------|--------|--------|--------|--------|----------------------|
-| User                  | Yes (Admin) | Yes (Admin) | Yes | Yes (Admin) | Soft (Admin) | Yes | — | Cannot delete self |
-| Category              | Yes | Yes | Yes | Yes | Conditional | Yes | — | Block if products exist |
-| Supplier              | Yes | Yes | Yes | Yes | Conditional / Soft | Yes | — | Block if referenced |
-| Customer              | Yes | Yes | Yes | Yes | Conditional / Soft | Yes | — | Block if transactions exist |
-| Product               | Yes | Yes | Yes | Yes | Conditional | Yes | Yes (Category, Supplier, Status) | Block if transactions exist |
-| Stock-In Transaction  | Yes | Yes | Yes | No | No | Yes | Yes (Date, Product, Supplier) | Append-only |
-| Stock-Out Transaction | Yes | Yes | Yes | No | No | Yes | Yes (Date, Product, Customer) | Append-only |
-| Inventory Adjustment  | Yes (Admin) | Yes | Yes | No | No | Yes | Yes | Append-only |
+| Entity | Create | Read (List) | Read (Detail) | Update | Delete | Search | Filter | Notes / Restrictions |
+|---|---|---|---|---|---|---|---|---|
+| User | Yes (Admin) | Yes (Admin) | Yes | Yes (Admin) | Deactivate (Admin) | Yes | Role/Status | Basic User Management is MVP; cannot deactivate self |
+| Category | Yes | Yes | Yes | Yes | Conditional | Yes | Status | Hard delete blocked if products exist |
+| Supplier | Yes | Yes | Yes | Yes | Conditional / Soft | Yes | Status | Hard delete blocked if referenced |
+| Customer | Yes | Yes | Yes | Yes | Conditional / Soft | Yes | Status | Hard delete blocked if referenced by Stock-Out |
+| Product | Yes | Yes | Yes | Yes | Conditional / Soft | Yes | Category, Supplier, Status | QuantityOnHand is not directly editable; hard delete blocked if transactions exist |
+| Stock-In Transaction | Yes | Yes | Yes | No | No | Yes | Date, Product, Supplier | Append-only; actual supplier recorded |
+| Stock-Out Transaction | Yes | Yes | Yes | No | No | Yes | Date, Product, Customer | Append-only; Customer optional |
+| Inventory Adjustment | Yes (Admin) | Yes | Yes | No | No | Yes | Date, Product | Append-only |
 
 **Legend**
-- **Yes** = Required in Version 1.0
+- **Yes** = Required in MVP
 - **Conditional** = Allowed only when business rules permit
-- **Soft** = Preferred to mark Inactive rather than physical delete
-- **No** = Intentionally not supported (audit integrity)
-
-This matrix guarantees that the finished application demonstrates full CRUD knowledge across multiple related entities plus controlled transaction recording.
+- **Soft / Deactivate** = Preserve historical integrity rather than physical deletion
+- **No** = Intentionally unsupported after creation
