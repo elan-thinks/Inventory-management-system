@@ -1,6 +1,6 @@
 # 10. Data Requirements (Logical)
 
-No SQL is provided. This section defines the logical entities, attributes, and relationships required by the system.
+No SQL is provided. This section defines the logical entities, attributes, relationships, and constraints required by the system.
 
 ## 10.1 Entity: User (DR-USR)
 
@@ -16,6 +16,8 @@ No SQL is provided. This section defines the logical entities, attributes, and r
 | IsActive | Yes | Boolean |
 | CreatedDate | Yes | |
 | LastLoginDate | No | |
+
+MVP User Management allows Administrators to create, edit, deactivate, and assign roles to users.
 
 ## 10.2 Entity: Category (DR-CAT)
 
@@ -48,7 +50,7 @@ Relationship: One Category has many Products.
 | CreatedDate | Yes | |
 | ModifiedDate | No | |
 
-Relationship: One Supplier supplies many Products and may appear on many Stock-In transactions.
+Relationship: One Supplier can be the default/preferred supplier for many Products and may appear on many Stock-In transactions.
 
 ## 10.4 Entity: Customer (DR-CUS)
 
@@ -106,13 +108,14 @@ Derived: Stock Status is calculated from QuantityOnHand and MinimumStockLevel.
 | TransactionID | Yes | Unique |
 | TransactionType | Yes | StockIn / StockOut / Adjustment |
 | ProductID | Yes | FK to Product |
-| Quantity | Yes | Positive for Stock-In/Out; Adjustment stores the approved change according to the adjustment design |
+| Quantity | Yes | Positive for Stock-In/Out; Adjustment records the approved change and resulting quantity |
 | TransactionDate | Yes | Cannot be a future date |
 | UnitPrice | No | Purchase price for Stock-In; selling price for Stock-Out |
 | SupplierID | No | Required for Stock-In; represents actual supplier for that receipt |
 | CustomerID | No | Optional for Stock-Out |
 | PreviousQuantity | No | Used for Adjustment |
 | NewQuantity | No | Used for Adjustment |
+| Difference | No | Used for Adjustment |
 | Reason | No | Mandatory for Adjustment |
 | Notes | No | |
 | UserID | Yes | User who performed the action |
@@ -130,9 +133,9 @@ Important constraint: InventoryTransaction records are append-only and cannot be
 ```text
 User 1 ─── * InventoryTransaction
 Category 1 ─── * Product
-Supplier 1 ─── * Product
-Supplier 1 ─── * InventoryTransaction (StockIn)
-Customer 1 ─── * InventoryTransaction (StockOut, optional)
+Supplier 1 ─── * Product (default/preferred)
+Supplier 1 ─── * InventoryTransaction (actual Stock-In supplier)
+Customer 1 ─── * InventoryTransaction (optional Stock-Out customer)
 Product 1 ─── * InventoryTransaction
 ```
 
@@ -141,6 +144,11 @@ Product 1 ─── * InventoryTransaction
 - Referential integrity shall be maintained.
 - Product.QuantityOnHand is the single source of current stock.
 - QuantityOnHand shall start at zero for every newly created Product.
+- Product creation shall not create an InventoryTransaction.
 - QuantityOnHand shall be changed only through Stock-In, Stock-Out, or authorized Inventory Adjustment operations.
+- Product.SupplierID identifies the default/preferred supplier.
+- InventoryTransaction.SupplierID on Stock-In identifies the actual supplier for that receipt and may differ from the Product default supplier.
+- InventoryTransaction.CustomerID on Stock-Out is optional.
+- InventoryTransaction records are append-only.
 - Historical master data referenced by transactions shall normally be deactivated rather than hard-deleted.
 - User accounts required by historical transaction records shall not be hard-deleted when doing so would break audit history.
