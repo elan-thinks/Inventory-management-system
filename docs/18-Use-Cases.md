@@ -1,190 +1,148 @@
 # 18. Use Case Catalogue
 
 ## UC-001 — User Login
+**Actor:** Registered user  
+**Goal:** Gain access according to role.  
+**Preconditions:** Application is running; account exists and is active.  
+**Trigger:** Application starts or Login is displayed.
 
-- **Actor**: Any registered user
-- **Goal**: Gain access to the system according to role
-- **Preconditions**: Application is running; user has valid credentials
-- **Trigger**: User launches the application or returns to login screen
-- **Main Flow**:
-  1. System displays Login form
-  2. User enters username and password
-  3. User clicks Login
-  4. System validates credentials
-  5. System loads user role and opens Dashboard
-- **Alternative Flows**: None significant
-- **Exception Flows**:
-  - Invalid credentials → show error, remain on Login form
-  - Database unavailable → show friendly error
-- **Postconditions**: User is authenticated; role-based UI is presented
-- **Related Requirements**: FR-AUTH-*, NFR-009, NFR-010
+**Main Flow:**
+1. System displays Login.
+2. User enters username and password.
+3. User selects Login.
+4. System validates credentials and account status.
+5. System loads the role and opens Dashboard.
+
+**Exceptions:** Invalid credentials or database failure → clear error; remain on Login.  
+**Postcondition:** Authenticated session exists.  
+**Requirements:** FR-AUTH-001–008, FR-USR-006.
 
 ---
 
 ## UC-002 — User Logout
-
-- **Actor**: Logged-in user
-- **Goal**: End the current session securely
-- **Preconditions**: User is logged in
-- **Trigger**: User selects Logout
-- **Main Flow**:
-  1. System closes all open functional forms
-  2. System clears session information
-  3. System returns to Login form
-- **Postconditions**: No authenticated session remains
+**Actor:** Logged-in user  
+**Goal:** End the current session.  
+**Main Flow:** Select Logout → close functional forms → clear session → return to Login.  
+**Postcondition:** No authenticated session remains.  
+**Requirements:** FR-AUTH-006.
 
 ---
 
 ## UC-003 — View Dashboard
-
-- **Actor**: Logged-in user
-- **Goal**: See key inventory metrics at a glance
-- **Preconditions**: Successful login
-- **Main Flow**:
-  1. System displays total products, categories, suppliers, total stock quantity, low-stock count, out-of-stock count, and recent transactions
-  2. User may click navigation items to open modules
-- **Related Requirements**: FR-DASH-*
+**Actor:** Logged-in user  
+**Goal:** View key inventory metrics and navigate modules.  
+**Main Flow:** System displays active product/category/supplier counts, inventory quantity, low/out-of-stock counts, and recent transactions.  
+**Requirements:** FR-DASH-001–003.
 
 ---
 
 ## UC-004 — Create Product
-
-- **Actor**: Administrator or authorised Staff
-- **Goal**: Add a new product to the catalogue
-- **Preconditions**: User has permission; at least one Category and one Supplier exist
-- **Trigger**: User selects “Add Product”
-- **Main Flow**:
-  1. System displays Product entry form
-  2. User fills required fields (Name, Category, Supplier, Prices, Min Level, etc.)
-  3. User clicks Save
-  4. System validates all fields
-  5. System creates the product with QuantityOnHand = 0 (or user-specified initial qty if allowed)
-  6. System confirms success and refreshes product list
-- **Exception Flows**: Validation failure → show messages, remain on form
-- **Postconditions**: New product exists and is visible in lists
-- **Related Requirements**: FR-PROD-001 to 004, VAL-*, BR-001 to 006
+**Actor:** Authorized user  
+**Preconditions:** At least one active Category and one active default Supplier exist.  
+**Main Flow:** Open Product form → enter fields → validate → save Product with QuantityOnHand = 0 → refresh list.  
+**Exceptions:** Invalid or duplicate data → block save and show validation.  
+**Postcondition:** Product exists with zero initial stock and no inventory transaction.  
+**Requirements:** FR-PROD-001–003, BR-001–006, BR-026–027.
 
 ---
 
-## UC-005 — Update Product
-
-- **Actor**: Authorised user
-- **Goal**: Modify product details
-- **Main Flow**: Select product → Edit → change fields → Save → validation → update record
-- **Exception Flows**: Validation errors; concurrent modification (simple handling)
-- **Related Requirements**: FR-PROD-007
+## UC-005 — View Products
+**Actor:** Logged-in user  
+**Main Flow:** Open Product List → view list → select product for details.  
+**Requirements:** FR-PROD-004, FR-PROD-008.
 
 ---
 
-## UC-006 — Delete Product
-
-- **Actor**: Administrator
-- **Goal**: Remove a product that is no longer needed
-- **Preconditions**: Product has no related inventory transactions
-- **Main Flow**:
-  1. User selects product and chooses Delete
-  2. System asks for confirmation
-  3. System checks for related transactions
-  4. If none, product is deleted (or marked inactive)
-  5. List is refreshed
-- **Exception Flow**: Related transactions exist → inform user, abort delete
-- **Related Requirements**: FR-PROD-008, FR-PROD-009, BR-018
+## UC-006 — Update Product
+**Actor:** Authorized user  
+**Main Flow:** Select product → Edit → change allowed fields → validate → save. QuantityOnHand is never directly edited here.  
+**Requirements:** FR-PROD-005, FR-PROD-009.
 
 ---
 
-## UC-007 — Search / Filter Products
-
-- **Actor**: Any logged-in user
-- **Goal**: Locate products quickly
-- **Main Flow**: Enter search text and/or select filters → System updates DataGridView in real time or on button click
-- **Related Requirements**: FR-SRCH-001, FR-SRCH-002, FR-PROD-010, FR-PROD-011
+## UC-007 — Delete / Deactivate Product
+**Actor:** Authorized user  
+**Main Flow:** Select Product → Delete → confirm → system checks transactions → hard-delete only if no transactions; otherwise block and offer deactivation.  
+**Requirements:** FR-PROD-006, BR-018.
 
 ---
 
-## UC-008 — Create Category / Supplier / Customer
-
-Similar structure to Create Product.  
-Key differences: uniqueness of Category Name; simpler attribute sets.
-
----
-
-## UC-009 — Record Stock-In
-
-- **Actor**: Authorised user
-- **Goal**: Increase stock of a product after receiving goods
-- **Preconditions**: Product exists and is Active; Supplier exists
-- **Main Flow**:
-  1. User opens Stock-In form
-  2. Selects Product and Supplier
-  3. Enters Quantity, Date, Purchase Price, optional Notes
-  4. Clicks Save
-  5. System validates (quantity > 0, etc.)
-  6. System creates InventoryTransaction (Type = StockIn)
-  7. System increases Product.QuantityOnHand
-  8. System confirms success
-- **Exception Flows**: Validation failure; inactive product
-- **Postconditions**: Stock increased; permanent transaction record exists
-- **Related Requirements**: FR-SIN-*, BR-012, BR-017
+## UC-008 — Search / Filter Products
+**Actor:** Logged-in user  
+**Main Flow:** Enter Product Name/ID and/or select Category, Supplier, or Status → displayed results update → clear filters to restore list.  
+**Requirements:** FR-PROD-007, FR-SRCH-001–002.
 
 ---
 
-## UC-010 — Record Stock-Out
-
-- **Actor**: Authorised user
-- **Goal**: Decrease stock when goods are sold or issued
-- **Preconditions**: Product has sufficient QuantityOnHand
-- **Main Flow**: Similar to Stock-In, with Customer selection and Selling Price
-- **Key Exception**: Insufficient stock → reject with clear message
-- **Related Requirements**: FR-SOUT-*, BR-011, BR-025
+## UC-009 — Manage Categories
+**Actor:** Authorized user  
+**Main Flow:** Create, view, update, search, and conditionally delete/deactivate Category.  
+**Exceptions:** Duplicate name or products linked → block invalid operation.  
+**Requirements:** FR-CAT-001–004, BR-007–008.
 
 ---
 
-## UC-011 — Perform Inventory Adjustment
-
-- **Actor**: Administrator
-- **Goal**: Correct the recorded quantity (e.g., after stock count)
-- **Main Flow**:
-  1. Select Product
-  2. System shows current quantity
-  3. User enters new quantity and mandatory Reason
-  4. System calculates difference
-  5. Creates Adjustment transaction
-  6. Updates Product.QuantityOnHand
-- **Related Requirements**: FR-ADJ-*, BR-013, BR-014
+## UC-010 — Manage Suppliers
+**Actor:** Authorized user  
+**Main Flow:** Create, view, update, search, and conditionally delete/deactivate Supplier.  
+**Requirements:** FR-SUP-001–004, BR-009, BR-028.
 
 ---
 
-## UC-012 — View Low-Stock / Out-of-Stock Products
-
-- **Actor**: Any user
-- **Goal**: Identify products needing attention
-- **Main Flow**: Open dedicated view or apply filter on product list
-- **Related Requirements**: FR-STK-*, FR-DASH-006/007
+## UC-011 — Manage Customers
+**Actor:** Authorized user  
+**Main Flow:** Create, view, update, search, and conditionally delete/deactivate Customer.  
+**Requirements:** FR-CUS-001–004, BR-010, BR-029.
 
 ---
 
-## UC-013 — View Transaction History
-
-- **Actor**: Any user (with possible role limits)
-- **Goal**: Inspect past stock movements
-- **Main Flow**: Open history form → apply optional filters (date, type, product) → view results in grid
-- **Related Requirements**: FR-SRCH-003, FR-RPT-006
-
----
-
-## UC-014 — Generate Inventory Report
-
-- **Actor**: Authorised user
-- **Goal**: Produce a printable/viewable report
-- **Main Flow**: Select report type → optional filters → Generate → view / print
-- **Related Requirements**: FR-RPT-*
+## UC-012 — Record Stock-In
+**Actor:** Authorized user  
+**Preconditions:** Product is active; actual Supplier exists.  
+**Main Flow:** Select Product and actual Supplier → enter positive Quantity, Date, Unit Price, Notes → validate → create append-only Stock-In transaction → increase QuantityOnHand → update status.  
+**Requirements:** FR-SIN-001–006, BR-012, BR-016–017, BR-021, BR-027–030.
 
 ---
 
-## UC-015 — Manage Users (Administrator)
+## UC-013 — Record Stock-Out
+**Actor:** Authorized user  
+**Preconditions:** Product is active.  
+**Main Flow:** Select Product → optionally select Customer → enter Quantity, Date, Selling Price, Notes → validate stock → create append-only transaction → decrease QuantityOnHand → update status.  
+**Exception:** Requested quantity exceeds stock → reject operation.  
+**Requirements:** FR-SOUT-001–007, BR-011–012, BR-016–017, BR-021, BR-025, BR-027, BR-029–030.
 
-- **Actor**: Administrator
-- **Goal**: Create or deactivate user accounts
-- **Main Flow**: Standard CRUD for users with role assignment
-- **Exception**: Cannot deactivate own account
-- **Related Requirements**: FR-USR-*, BR-019, BR-020
+---
+
+## UC-014 — Perform Inventory Adjustment
+**Actor:** Administrator  
+**Main Flow:** Select Product → system shows Previous Quantity → enter New Quantity and Reason → validate → create append-only Adjustment → update QuantityOnHand.  
+**Requirements:** FR-ADJ-001–005, BR-013–014, BR-017, BR-027, BR-030.
+
+---
+
+## UC-015 — View Stock Status
+**Actor:** Logged-in user  
+**Main Flow:** Open Product List/dashboard → system displays calculated In Stock, Low Stock, or Out of Stock status → filter as required.  
+**Requirements:** FR-STK-001–004, BR-015.
+
+---
+
+## UC-016 — View Transaction History
+**Actor:** Logged-in user  
+**Main Flow:** Open History → optionally filter by date, type, and Product → view immutable records → print if required.  
+**Requirements:** FR-SRCH-003, FR-RPT-001–003.
+
+---
+
+## UC-017 — Generate Inventory Report
+**Actor:** Authorized user  
+**Main Flow:** Select report → choose supported filters → Generate → view report → Print. Export is not part of MVP.  
+**Requirements:** FR-RPT-001–003.
+
+---
+
+## UC-018 — Manage Users
+**Actor:** Administrator  
+**Main Flow:** Open User Management → create/edit/deactivate account → assign role → validate → save.  
+**Exceptions:** Duplicate username or self-deactivation → block operation.  
+**Requirements:** FR-USR-001–006, BR-019–020.
