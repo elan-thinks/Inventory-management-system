@@ -1,87 +1,95 @@
 # 19. System Workflows
 
 ## WF-001 — User Login
+1. Application starts and displays Login.
+2. User enters username and password.
+3. User selects Login.
+4. System validates credentials and account status.
+5. On success, system loads role and opens Dashboard.
+6. On failure, system displays an error and remains on Login.
 
-1. Application starts → Login form appears
-2. User enters username + password
-3. User clicks Login
-4. System checks credentials
-5. On success → load role → open Dashboard
-6. On failure → show error → stay on Login
-
-## WF-002 — Add New Product
-
-1. User navigates to Products → Add New
-2. System opens Product form (Category & Supplier ComboBoxes populated)
-3. User completes fields
-4. User clicks Save
-5. Client-side validation runs
-6. If valid → save to database → success message → refresh list / close form
-7. If invalid → show messages → user corrects and retries
+## WF-002 — Create Product
+1. Authorized user opens Products → Add New.
+2. System loads active Categories and default/preferred Suppliers.
+3. User enters required product information.
+4. User selects Save.
+5. Validation runs.
+6. If valid, product is saved with QuantityOnHand = 0; no inventory transaction is created.
+7. List refreshes and success feedback is shown.
 
 ## WF-003 — Edit Product
+1. User selects a product and chooses Edit.
+2. Current editable values are displayed.
+3. User changes allowed fields.
+4. QuantityOnHand remains read-only.
+5. Validation runs and valid changes are saved.
 
-1. User selects product in grid → clicks Edit
-2. Form opens with current values
-3. User changes data → Save
-4. Validation → update → refresh
-
-## WF-004 — Delete Product
-
-1. User selects product → Delete
-2. Confirmation dialog appears
-3. User confirms
-4. System checks for related transactions
-5. If clear → delete (or soft-delete) → refresh
-6. If blocked → informative message
+## WF-004 — Delete / Deactivate Product
+1. User selects a product and chooses Delete.
+2. Confirmation is requested.
+3. System checks related inventory transactions.
+4. If none exist, hard deletion may proceed.
+5. If transactions exist, deletion is blocked and the product may be deactivated.
 
 ## WF-005 — Receive Stock (Stock-In)
-
-1. User opens Stock-In form
-2. Selects Product (and optionally Supplier)
-3. Enters Quantity, Date, Price, Notes
-4. Clicks Save
-5. Validation (quantity > 0, product active, etc.)
-6. Create transaction record
-7. Update Product.QuantityOnHand += Quantity
-8. Success feedback + optional print receipt
+1. User opens Stock-In.
+2. User selects an active Product and the actual Supplier for the receipt.
+3. User enters positive Quantity, valid non-future Date, receipt Unit Price, and optional Notes.
+4. Validation runs.
+5. System creates an append-only transaction.
+6. System increases QuantityOnHand by Quantity.
+7. Stock Status updates automatically.
 
 ## WF-006 — Issue Stock (Stock-Out)
+1. User opens Stock-Out.
+2. User selects an active Product.
+3. User may select a Customer; Customer is optional.
+4. User enters positive Quantity, valid Date, Selling Price, and optional Notes.
+5. System checks available QuantityOnHand.
+6. If sufficient, transaction is created and QuantityOnHand decreases.
+7. If insufficient, operation is rejected and available quantity is shown.
+8. Stock Status updates automatically.
 
-1. User opens Stock-Out form
-2. Selects Product and Customer
-3. Enters Quantity, Date, Selling Price
-4. System (or user) can see current available stock
-5. Save → validation including stock availability
-6. If sufficient → create transaction → decrease QuantityOnHand
-7. If insufficient → reject with available quantity shown
+## WF-007 — Inventory Adjustment
+1. Administrator opens Inventory Adjustment.
+2. Administrator selects an active Product.
+3. System displays Previous Quantity.
+4. Administrator enters approved New Quantity and mandatory Reason.
+5. System validates that New Quantity is >= 0 and Date is not in the future.
+6. System records Previous Quantity, New Quantity, Difference, Reason, User, and Date as an append-only transaction.
+7. Product.QuantityOnHand becomes New Quantity.
 
-## WF-007 — Search Inventory
+## WF-008 — Search Inventory
+1. User opens Product List.
+2. User enters Product Name/ID and/or selects filters.
+3. Grid updates without restarting the application.
+4. User can clear filters.
 
-1. User is on Product List
-2. Types in search box and/or selects filters
-3. Grid updates to show matching products
-4. User can clear filters to see all
+## WF-009 — Identify Low-Stock Items
+1. User opens Low Stock view/filter.
+2. System displays products where 0 < QuantityOnHand <= MinimumStockLevel.
+3. User can view details or open the Low Stock Report.
 
-## WF-008 — Identify Low-Stock Items
+## WF-010 — View Transaction History
+1. User opens Transaction History.
+2. User optionally selects date range, transaction type, and Product.
+3. User applies filters.
+4. System displays matching immutable transaction records.
+5. User may print the results.
 
-1. User opens Low Stock view (or applies filter / uses Dashboard link)
-2. System shows only products where 0 < Qty ≤ Min Level
-3. User can drill into a product or generate Low Stock Report
+## WF-011 — User Management
+1. Administrator opens User Management.
+2. Administrator creates or edits a user, or deactivates an existing user.
+3. Administrator assigns Administrator or Inventory Staff role.
+4. System validates username uniqueness and required fields.
+5. Deactivated users cannot log in.
+6. Administrator cannot deactivate their own currently logged-in account.
 
-## WF-009 — View Transaction History
-
-1. User opens Transaction History form
-2. Optionally sets date range, type, product
-3. Clicks Search / Apply
-4. Grid displays matching transactions
-5. User may export or print
-
-## WF-010 — Generate Inventory Report
-
-1. User opens Reports menu
-2. Selects report type
-3. Sets any filters (dates, category, etc.)
-4. Clicks Generate
-5. Report appears in a viewer form
-6. User may Print
+## WF-012 — Generate Report
+1. User opens Reports.
+2. User selects report type.
+3. User sets supported filters.
+4. System generates the report from current data.
+5. Report is displayed on screen.
+6. User may print it.
+7. Export is not required for MVP.
