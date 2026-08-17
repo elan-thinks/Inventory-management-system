@@ -1,21 +1,22 @@
 # 23. Future Enhancements
 
-Intentionally excluded from Version 1.0:
+The following capabilities are intentionally excluded from MVP and Version 1.0 scope:
 
-- Barcode / QR code scanning for products
-- Automatic purchase order suggestions when stock is low
+- PDF / Excel / CSV report export
+- Barcode / QR code scanning
+- Automatic purchase-order suggestions
 - Multi-branch / multi-warehouse inventory
-- Cloud synchronisation or multi-user concurrent editing with conflict resolution
+- Cloud synchronization or concurrent multi-user editing
 - Mobile companion application
-- Integration with accounting software or e-commerce platforms
+- Accounting or e-commerce integrations
 - Advanced analytics and demand forecasting
 - Customer loyalty / pricing rules engine
-- Batch import of products from Excel/CSV
+- Batch import from Excel/CSV
 - Serial number or lot/batch tracking
-- Email notifications for low stock
-- Role permissions finer than the two-role model
-- Full audit trail of every field change on master data
-- Dark mode / advanced theming
+- Email/SMS low-stock notifications
+- More granular permissions beyond Administrator and Inventory Staff
+- Full field-level audit history for master-data edits
+- Advanced theming / dark mode
 - Multi-language support
 
-These features may be considered in later academic projects or real-world extensions once the core system is solid.
+These features may be considered only after the core WinForms MVP is stable and tested.
