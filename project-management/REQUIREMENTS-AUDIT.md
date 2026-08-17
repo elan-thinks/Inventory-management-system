@@ -6,320 +6,141 @@
 **Technology:** C# / .NET / Windows Forms  
 **Repository:** Inventory-management-system  
 **SRS Source:** Grok-generated SRS  
-**Audit Status:** In Progress
+**Audit Status:** Complete
 
 ---
 
 # 1. Purpose
 
-This document records the review of the initial System Requirements Specification.
+This document records the review and correction of the initial System Requirements Specification.
 
-The goal is to identify:
-
-- missing requirements
-- ambiguous requirements
-- contradictions
-- unnecessary complexity
-- scope risks
-- requirements requiring clarification
-- requirements especially important for demonstrating C# and WinForms skills
-
-The original Grok-generated SRS must not be silently modified. Every significant correction must be documented here before the requirements baseline is approved.
+The audit identified ambiguities and scope issues and converted them into explicit requirements decisions before the SRS baseline is used for Product/UI/UX design.
 
 ---
 
-# 2. Current Verdict
+# 2. Final Verdict
 
-**Status:** APPROVED WITH CORRECTIONS
+**Status: SRS v1.0 — APPROVED WITH FINAL TRACEABILITY GATE**
 
-The initial SRS provides a strong foundation but requires clarification and correction before becoming the official Version 1.0 requirements baseline.
+The initial Grok-generated SRS was strong but required seven corrections. All seven have been incorporated into the affected documents.
 
 ---
 
-# 3. Required Corrections
+# 3. Resolved Corrections
 
 ## RA-001 — Product Initial Quantity
+**Status:** ✅ Resolved
 
-**Status:** ⬜ Pending
+A newly created Product starts with `QuantityOnHand = 0`. Product creation does not create an inventory movement. Stock enters through Stock-In or authorized Adjustment.
 
-### Problem
-
-The Product entity contains `QuantityOnHand`, while inventory quantity is also changed through Stock-In, Stock-Out, and Inventory Adjustment.
-
-This can create ambiguity about how a newly created product receives its initial quantity.
-
-### Decision
-
-A newly created product shall have:
-
-`QuantityOnHand = 0`
-
-Inventory shall be introduced through a Stock-In transaction or authorized Inventory Adjustment.
-
-### Affected Documents
-
-- `10-Data-Requirements.md`
-- `09-Business-Rules.md`
-- `08-Functional-Requirements.md`
-- `19-System-Workflows.md`
-
-### Verification
-
-- [ ] Product creation does not add inventory
-- [ ] New products start with zero quantity
-- [ ] Stock-In increases quantity
-- [ ] Stock-Out decreases quantity
-- [ ] Adjustment follows its defined rules
-
----
+**Affected:** 08, 09, 10, 19, 22
 
 ## RA-002 — Product Supplier vs Transaction Supplier
+**Status:** ✅ Resolved
 
-**Status:** ⬜ Pending
+Product.SupplierID represents the default/preferred supplier. Stock-In SupplierID represents the actual supplier for that receipt and may differ.
 
-### Problem
-
-Products have a primary/default supplier while Stock-In transactions also record a supplier.
-
-The distinction needs to be explicit.
-
-### Decision
-
-`Product.Supplier` represents the product's default/preferred supplier.
-
-`StockIn.Supplier` represents the supplier from whom the particular stock shipment was actually received.
-
-The Stock-In supplier may therefore differ from the product's default supplier.
-
-### Affected Documents
-
-- `10-Data-Requirements.md`
-- `09-Business-Rules.md`
-- `08-Functional-Requirements.md`
-
-### Verification
-
-- [ ] Product has a default supplier
-- [ ] Stock-In records the actual supplier
-- [ ] The two concepts are clearly distinguished
-
----
+**Affected:** 08, 09, 10, 14, 19
 
 ## RA-003 — Customer on Stock-Out
+**Status:** ✅ Resolved
 
-**Status:** ⬜ Pending
+CustomerID is optional on Stock-Out transactions.
 
-### Problem
-
-The original SRS leaves customer requirements on Stock-Out somewhat ambiguous.
-
-### Decision
-
-Customer information is OPTIONAL for Stock-Out transactions.
-
-A Stock-Out may occur without a registered customer.
-
-### Affected Documents
-
-- `08-Functional-Requirements.md`
-- `09-Business-Rules.md`
-- `10-Data-Requirements.md`
-- `19-System-Workflows.md`
-
-### Verification
-
-- [ ] Stock-Out can be recorded without a customer
-- [ ] Customer can be selected when applicable
-- [ ] Inventory quantity is still updated correctly
-
----
+**Affected:** 08, 09, 10, 14, 19
 
 ## RA-004 — User Management
+**Status:** ✅ Resolved
 
-**Status:** ⬜ Pending
+Basic User Management is part of MVP. Administrators can create, edit, deactivate, and assign roles. An Administrator cannot deactivate their own current account.
 
-### Problem
-
-Authentication and role-based access exist, but User Management is described as optional.
-
-This creates inconsistency because users are required by the authentication and audit requirements.
-
-### Decision
-
-Basic User Management is part of MVP.
-
-Administrators shall be able to:
-
-- create users
-- edit users
-- deactivate users
-- assign roles
-
-Advanced account-management features remain out of scope.
-
-### Affected Documents
-
-- `08-Functional-Requirements.md`
-- `10-Data-Requirements.md`
-- `17-CRUD-Coverage-Matrix.md`
-- `22-MVP-Definition.md`
-
-### Verification
-
-- [ ] Administrator can create users
-- [ ] Administrator can edit users
-- [ ] Administrator can deactivate users
-- [ ] Administrator can assign roles
-- [ ] Non-administrators cannot manage users
-
----
+**Affected:** 08, 10, 17, 19, 22
 
 ## RA-005 — Concrete Validation Limits
+**Status:** ✅ Resolved
 
-**Status:** ⬜ Pending
+Concrete maximum lengths and numeric/date constraints are defined in the Validation Requirements document.
 
-### Problem
-
-Some validation requirements use vague wording such as "reasonable length."
-
-### Decision
-
-Concrete field length limits shall be defined in the requirements before implementation.
-
-The exact limits will be reviewed and approved before the SRS is finalized.
-
-### Affected Documents
-
-- `10-Data-Requirements.md`
-- `11-Validation-Requirements.md`
-
-### Verification
-
-- [ ] Required fields have defined maximum lengths
-- [ ] Numeric fields have defined valid ranges
-- [ ] Text fields have defined constraints
-- [ ] Email/phone validation rules are explicit
-
----
+**Affected:** 10, 11
 
 ## RA-006 — Reporting Scope
+**Status:** ✅ Resolved
 
-**Status:** ⬜ Pending
+MVP reports are viewable and printable. PDF/Excel/CSV export is deferred to future enhancements.
 
-### Problem
-
-Reporting requirements mention printing/exporting, potentially expanding the project unnecessarily.
-
-### Decision
-
-MVP reporting shall support:
-
-- viewing reports
-- printing reports
-
-Export functionality is optional/future scope unless specifically approved later.
-
-### Affected Documents
-
-- `14-Reporting-Requirements.md`
-- `22-MVP-Definition.md`
-- `23-Future-Enhancements.md`
-
-### Verification
-
-- [ ] Required reports can be viewed
-- [ ] Required reports can be printed
-- [ ] Export is not required for MVP
-
----
+**Affected:** 14, 22, 23
 
 ## RA-007 — Traceability Completeness
+**Status:** ✅ Core Matrix Resolved
 
-**Status:** ⬜ Pending
+The traceability document now maps core objectives to concrete functional requirements, business rules, use cases, and data requirements. The final use-case-ID consistency check remains the final baseline gate.
 
-### Problem
-
-The current traceability document contains high-level mappings such as `FR-PROD-*` rather than a complete requirement-level traceability matrix.
-
-### Decision
-
-Before SRS v1.0 approval, the traceability matrix shall map important requirements to their related:
-
-- objectives
-- business rules
-- use cases
-- data requirements
-
-### Affected Documents
-
-- `20-Requirement-Traceability.md`
-
-### Verification
-
-- [ ] Major functional requirements are traceable
-- [ ] Major business rules are traceable
-- [ ] Major use cases are traceable
-- [ ] Important data requirements are traceable
-- [ ] No major requirement is orphaned
+**Affected:** 20, 24
 
 ---
 
 # 4. General Quality Checklist
 
 ## Completeness
-
-- [ ] All core business functions defined
-- [ ] All major entities defined
-- [ ] CRUD requirements defined
-- [ ] Inventory workflows defined
-- [ ] Authentication defined
-- [ ] Authorization defined
-- [ ] Validation defined
-- [ ] Error handling defined
-- [ ] Reporting defined
+- [x] Core business functions defined
+- [x] Major entities defined
+- [x] CRUD requirements defined
+- [x] Inventory workflows defined
+- [x] Authentication defined
+- [x] Authorization defined
+- [x] Validation defined
+- [x] Error handling defined
+- [x] Reporting defined
 
 ## Consistency
-
-- [ ] Product quantity rules are consistent
-- [ ] Supplier relationships are consistent
-- [ ] Customer requirements are consistent
-- [ ] User-management requirements are consistent
-- [ ] Delete rules are consistent
-- [ ] Stock status rules are consistent
+- [x] Product quantity rules are consistent
+- [x] Supplier relationships are consistent
+- [x] Customer requirements are consistent
+- [x] User-management requirements are consistent
+- [x] Delete rules are consistent
+- [x] Stock status rules are consistent
 
 ## C# / WinForms Learning Value
-
-- [ ] Multiple forms required
-- [ ] CRUD operations required
-- [ ] DataGridView usage required
-- [ ] Form events required
-- [ ] Input validation required
-- [ ] MessageBox/error handling required
-- [ ] Classes/models required
-- [ ] Database interaction required
-- [ ] Search/filter functionality required
-- [ ] Navigation between forms required
+- [x] Multiple forms required
+- [x] CRUD operations required
+- [x] DataGridView usage required
+- [x] Form events required
+- [x] Input validation required
+- [x] MessageBox/error handling required
+- [x] Classes/models required
+- [x] Database interaction required
+- [x] Search/filter functionality required
+- [x] Navigation between forms required
 
 ## Scope Control
-
-- [ ] No unnecessary enterprise architecture
-- [ ] No cloud dependency
-- [ ] No mobile application
-- [ ] No AI requirement
-- [ ] No barcode requirement for MVP
-- [ ] No advanced analytics requirement
-- [ ] MVP remains implementable by a university student
+- [x] No unnecessary enterprise architecture
+- [x] No cloud dependency
+- [x] No mobile application
+- [x] No AI requirement
+- [x] No barcode requirement for MVP
+- [x] No advanced analytics requirement
+- [x] MVP remains implementable by a university student
 
 ---
 
-# 5. Final Approval
+# 5. Final Gate
 
-The SRS may only be declared:
+Before the requirements baseline is frozen:
 
-**SRS v1.0 — APPROVED**
+- [x] Seven audit corrections incorporated
+- [x] Business rules updated
+- [x] Functional requirements updated
+- [x] Data requirements updated
+- [x] Validation requirements updated
+- [x] Reporting requirements updated
+- [x] CRUD matrix updated
+- [x] Workflows updated
+- [x] MVP updated
+- [x] Future scope updated
+- [x] Quality review updated
+- [x] Traceability matrix updated
+- [ ] Final use-case IDs verified against traceability
 
-when every blocking correction has been resolved and verified.
+After the final use-case-ID verification passes:
 
-Current status:
-
-**🟡 APPROVED WITH CORRECTIONS**
+**SRS v1.0 — REQUIREMENTS BASELINE APPROVED**
