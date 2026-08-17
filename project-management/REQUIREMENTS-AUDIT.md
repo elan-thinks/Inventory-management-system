@@ -6,141 +6,85 @@
 **Technology:** C# / .NET / Windows Forms  
 **Repository:** Inventory-management-system  
 **SRS Source:** Grok-generated SRS  
-**Audit Status:** Complete
+**Audit Status:** COMPLETE
 
----
+## Final Verdict
 
-# 1. Purpose
+**SRS v1.0 — REQUIREMENTS BASELINE APPROVED** ✅
 
-This document records the review and correction of the initial System Requirements Specification.
+The initial Grok-generated SRS was reviewed and corrected. Seven identified issues were resolved and the final use-case traceability check has passed.
 
-The audit identified ambiguities and scope issues and converted them into explicit requirements decisions before the SRS baseline is used for Product/UI/UX design.
+## Resolved Corrections
 
----
+| ID | Decision | Status |
+|---|---|---|
+| RA-001 | New Product starts QuantityOnHand = 0; Product creation does not create inventory movement | ✅ |
+| RA-002 | Product supplier = default/preferred; Stock-In supplier = actual supplier for receipt | ✅ |
+| RA-003 | Stock-Out CustomerID is optional | ✅ |
+| RA-004 | Basic User Management is MVP | ✅ |
+| RA-005 | Concrete validation lengths and ranges defined | ✅ |
+| RA-006 | MVP reports are viewable and printable; export deferred | ✅ |
+| RA-007 | Core requirement-level traceability completed and use-case IDs verified | ✅ |
 
-# 2. Final Verdict
+## Verified Documents
 
-**Status: SRS v1.0 — APPROVED WITH FINAL TRACEABILITY GATE**
+- [x] Business Rules
+- [x] Functional Requirements
+- [x] Data Requirements
+- [x] Validation Requirements
+- [x] Reporting Requirements
+- [x] CRUD Coverage Matrix
+- [x] Use Cases
+- [x] System Workflows
+- [x] Requirement Traceability
+- [x] MVP Definition
+- [x] Future Enhancements
+- [x] Requirement Quality Review
 
-The initial Grok-generated SRS was strong but required seven corrections. All seven have been incorporated into the affected documents.
+## Quality Checklist
 
----
-
-# 3. Resolved Corrections
-
-## RA-001 — Product Initial Quantity
-**Status:** ✅ Resolved
-
-A newly created Product starts with `QuantityOnHand = 0`. Product creation does not create an inventory movement. Stock enters through Stock-In or authorized Adjustment.
-
-**Affected:** 08, 09, 10, 19, 22
-
-## RA-002 — Product Supplier vs Transaction Supplier
-**Status:** ✅ Resolved
-
-Product.SupplierID represents the default/preferred supplier. Stock-In SupplierID represents the actual supplier for that receipt and may differ.
-
-**Affected:** 08, 09, 10, 14, 19
-
-## RA-003 — Customer on Stock-Out
-**Status:** ✅ Resolved
-
-CustomerID is optional on Stock-Out transactions.
-
-**Affected:** 08, 09, 10, 14, 19
-
-## RA-004 — User Management
-**Status:** ✅ Resolved
-
-Basic User Management is part of MVP. Administrators can create, edit, deactivate, and assign roles. An Administrator cannot deactivate their own current account.
-
-**Affected:** 08, 10, 17, 19, 22
-
-## RA-005 — Concrete Validation Limits
-**Status:** ✅ Resolved
-
-Concrete maximum lengths and numeric/date constraints are defined in the Validation Requirements document.
-
-**Affected:** 10, 11
-
-## RA-006 — Reporting Scope
-**Status:** ✅ Resolved
-
-MVP reports are viewable and printable. PDF/Excel/CSV export is deferred to future enhancements.
-
-**Affected:** 14, 22, 23
-
-## RA-007 — Traceability Completeness
-**Status:** ✅ Core Matrix Resolved
-
-The traceability document now maps core objectives to concrete functional requirements, business rules, use cases, and data requirements. The final use-case-ID consistency check remains the final baseline gate.
-
-**Affected:** 20, 24
-
----
-
-# 4. General Quality Checklist
-
-## Completeness
+### Completeness
 - [x] Core business functions defined
 - [x] Major entities defined
 - [x] CRUD requirements defined
 - [x] Inventory workflows defined
-- [x] Authentication defined
-- [x] Authorization defined
-- [x] Validation defined
-- [x] Error handling defined
+- [x] Authentication and authorization defined
+- [x] Validation and error handling defined
 - [x] Reporting defined
 
-## Consistency
-- [x] Product quantity rules are consistent
-- [x] Supplier relationships are consistent
-- [x] Customer requirements are consistent
-- [x] User-management requirements are consistent
-- [x] Delete rules are consistent
-- [x] Stock status rules are consistent
+### Consistency
+- [x] Product quantity rules consistent
+- [x] Supplier relationships consistent
+- [x] Stock-Out customer rule consistent
+- [x] User-management scope consistent
+- [x] Delete/deactivation rules consistent
+- [x] Stock-status rules consistent
+- [x] Transaction history append-only
 
-## C# / WinForms Learning Value
-- [x] Multiple forms required
-- [x] CRUD operations required
-- [x] DataGridView usage required
-- [x] Form events required
-- [x] Input validation required
-- [x] MessageBox/error handling required
-- [x] Classes/models required
-- [x] Database interaction required
-- [x] Search/filter functionality required
-- [x] Navigation between forms required
+### C# / WinForms Learning Value
+- [x] Multiple forms and navigation
+- [x] CRUD operations
+- [x] DataGridView usage
+- [x] Event-driven interactions
+- [x] Input validation
+- [x] MessageBox/error handling
+- [x] Classes and object-oriented modelling
+- [x] Relational database interaction
+- [x] Search/filter functionality
+- [x] Role-based access
 
-## Scope Control
+### Scope Control
 - [x] No unnecessary enterprise architecture
 - [x] No cloud dependency
 - [x] No mobile application
 - [x] No AI requirement
 - [x] No barcode requirement for MVP
 - [x] No advanced analytics requirement
-- [x] MVP remains implementable by a university student
+- [x] MVP remains realistic for a university project
 
----
+## Baseline Rule
 
-# 5. Final Gate
+From this point onward, the requirements in `docs/` are the approved baseline. Any new feature or requirement discovered during Product/UI/UX or implementation must be recorded as a change rather than silently altering the baseline.
 
-Before the requirements baseline is frozen:
-
-- [x] Seven audit corrections incorporated
-- [x] Business rules updated
-- [x] Functional requirements updated
-- [x] Data requirements updated
-- [x] Validation requirements updated
-- [x] Reporting requirements updated
-- [x] CRUD matrix updated
-- [x] Workflows updated
-- [x] MVP updated
-- [x] Future scope updated
-- [x] Quality review updated
-- [x] Traceability matrix updated
-- [ ] Final use-case IDs verified against traceability
-
-After the final use-case-ID verification passes:
-
-**SRS v1.0 — REQUIREMENTS BASELINE APPROVED**
+**Approved:** SRS v1.0  
+**Next Phase:** Product Requirements + UI/UX Design
