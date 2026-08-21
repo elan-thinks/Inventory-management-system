@@ -1,75 +1,89 @@
 # NovaTech Electronics — Inventory Management System
-## Visual Design Package (v1.0)
+## Visual Design Package (v1.1)
 
-**Status:** Derived from approved SRS v1.0 and approved Product Requirements + UX/UI Specification v1.0 (`product-requirements/` package). Both are the source of truth; this package changes nothing they define.
-**Scope of this package:** Visual design only — colors, typography, spacing, component appearance, screen layout, and HTML/CSS visual mockups standing in for the eventual C# WinForms build. No C#, no SQL, no WinForms Designer output, no new functionality, no new screens, no changed business rules or permissions.
-**Audience:** C# WinForms developer implementing the application; NovaTech stakeholders reviewing the visual direction before build.
+**Status:** Approved visual-design baseline derived from SRS v1.1 and Product Requirements + UX/UI Specification v1.1. The v1.0 visual package remains the base design; this v1.1 amendment adds the approved delegation capability without changing the existing visual language.
 
----
+**Scope:** Visual design only — colors, typography, spacing, component appearance, screen layout, interaction states, and HTML/CSS visual mockups for the eventual C# WinForms build. No C#, SQL, WinForms Designer output, or implementation code.
 
-## 1. What This Package Is
+**Source of truth:**
+- `docs/` — approved SRS v1.1 and delegation amendment
+- `product-requirements/` — approved Product/UX v1.1
+- `UI/` — v1.0 visual system plus the v1.1 delegation amendment in this package
 
-This package turns the approved Product Requirements + UX/UI Specification (`product-requirements/01`–`10`) into a complete, reproducible **visual design system** and a full set of **visual mockups** for every screen the specification defines. Every screen, color, spacing value, and component state documented here traces back to an entry in the PRD/UX package, which in turn traces back to the SRS. Nothing here originates a new requirement.
+## 1. Version 1.1 Change
 
-Where the PRD package already specified an exact value (colors, fonts, spacing, component states — see `product-requirements/07-Design-System.md` and `09-Design-Recommendations-and-Claude-Brief.md §10`), this package **implements that specification precisely** rather than re-inventing it. This is a deliberate choice: the brief already made the design decisions; this package's job is to execute them completely and consistently across all 19 screens, and to produce artifacts (tokens, component specs, mockups) a WinForms developer can build directly from.
+SRS v1.1 introduced controlled permission delegation. Product/UX v1.1 added the corresponding Delegation Management capability. This visual-design amendment adds the missing visual layer:
+
+- **SCR-020 — Delegation Management**
+- Administrator-only navigation and screen access
+- Delegation list and status presentation
+- Create Delegation form
+- Delegation details/read-only view
+- Revoke Delegation confirmation
+- Active, Expired, and Revoked states
+- Effective-permission indication without changing the user's permanent role
+- Delegation empty, validation, error, and success states
+- Updated traceability and final audit
+
+No existing screen, business rule, permanent role, or permission is changed by this amendment.
 
 ## 2. Document Map
 
 | # | File | Contents |
-|---|------|----------|
-| 00 | `00-README.md` | This file |
-| 01 | `01-Visual-Design-Overview.md` | Visual personality, design principles, what was avoided and why |
-| 02 | `02-Design-Tokens.md` | Machine-readable color, typography, spacing, radius, border, and shadow tokens |
-| 03 | `03-Component-Library.md` | Every component's visual spec across all interaction states |
-| 04 | `04-Application-Shell.md` | Sidebar, header, StatusStrip, content region — the reusable shell |
-| 05 | `05-Screen-Designs.md` | All 19 screens (SCR-001–019), each traced to SRS → PR → UX → UI → Screen |
-| 06 | `06-Dialogs-and-States.md` | Confirmation dialogs, blocked-delete dialogs, empty/error/success states |
-| 07 | `07-Accessibility.md` | Keyboard navigation, contrast, color-independence, focus, labeling |
-| 08 | `08-WinForms-Implementation-Guidelines.md` | How every visual decision maps to real WinForms controls |
-| 09 | `09-Visual-Design-Traceability.md` | SRS → PR → UX → UI → Screen → Visual Design matrix |
-| 10 | `10-Final-Visual-Design-Audit.md` | Final coverage checklist and verdict |
-| — | `mockups/*.html` | 13 rendered visual mockups (see §4 below) |
+|---|---|---|
+| 00 | `00-README.md` | Package scope, source of truth, version history |
+| 01 | `01-Visual-Design-Overview.md` | Visual personality and design principles |
+| 02 | `02-Design-Tokens.md` | Color, typography, spacing, radius, border, shadow tokens |
+| 03 | `03-Component-Library.md` | Component visual states |
+| 04 | `04-Application-Shell.md` | Sidebar, header, StatusStrip, content region |
+| 05 | `05-Screen-Designs.md` | Base v1.0 screen designs, SCR-001–019 |
+| 06 | `06-Dialogs-and-States.md` | Shared dialogs and states |
+| 07 | `07-Accessibility.md` | Accessibility guidance |
+| 08 | `08-WinForms-Implementation-Guidelines.md` | WinForms implementation mapping |
+| 09 | `09-Visual-Design-Traceability.md` | Base visual traceability |
+| 10 | `10-Final-Visual-Design-Audit.md` | Base v1.0 audit |
+| 11 | `11-Visual-Design-v1.1-Delegation-Amendment.md` | **New v1.1 delegation visual specification** |
+| 12 | `12-Visual-Design-v1.1-Audit.md` | **New v1.1 amendment audit and approval gate** |
+| — | `UI-mock/*.html` | Rendered visual mockups |
 
-## 3. Source of Truth
+## 3. Screen Baseline
 
-- **SRS v1.0** (`docs/01`–`25`) — functional requirements, business rules, data requirements, validation, error handling, use cases.
-- **Product Requirements + UX/UI Specification v1.0** (`product-requirements/00`–`10`) — the direct input to this package. Screen inventory (`03-Screen-Inventory.md`), screen specifications (`05-Screen-Specifications.md`), CRUD/inventory/validation/error UX (`06-CRUD-Inventory-Validation-Error-UX.md`), and the design system (`07-Design-System.md`) are followed exactly.
+The approved Product/UX v1.1 baseline contains **20 screens (SCR-001–020)**. The original 19-screen visual specification remains intact as the base; SCR-020 is supplied by the v1.1 amendment.
 
-No requirement IDs (FR-, BR-, DR-, VAL-, ER-, UC-, WF-, RPT-, NFR-, PR-, UI-, UX-, SCR-) have been invented in this package. Every ID referenced already exists in the approved input documents.
+### Mockup coverage
 
-## 4. Visual Mockups
+The original package contains 13 shared HTML mockups for the 19-screen base. The v1.1 amendment adds:
 
-13 interactive HTML mockups are provided in `mockups/`, covering every screen the brief called out for mockups:
-
-| File | Screen(s) |
+| File | Screen |
 |---|---|
-| `login.html` | SCR-001 Login |
-| `dashboard.html` | SCR-002 Dashboard |
-| `product-list.html` | SCR-003 Product List |
-| `product-form.html` | SCR-005 Product Add/Edit (modal, over Product List) |
-| `category-management.html` | SCR-006/007 Category List + Add/Edit + Blocked-Delete dialog |
-| `supplier-management.html` | SCR-008/009 Supplier List + Add/Edit |
-| `customer-management.html` | SCR-010/011 Customer List |
-| `stock-in.html` | SCR-012 Stock-In (with confirmation dialog) |
-| `stock-out.html` | SCR-013 Stock-Out (insufficient-stock error state) |
-| `inventory-adjustment.html` | SCR-014 Inventory Adjustment (with confirmation dialog) |
-| `inventory-history.html` | SCR-015 Inventory Transaction History (read-only) |
-| `reports.html` | SCR-016/017 Reports Hub + Report Viewer |
-| `user-management.html` | SCR-018/019 User Management |
+| `UI-mock/delegation-management.html` | SCR-020 Delegation Management |
 
-**All 13 mockups share one embedded design-token stylesheet** (Segoe UI, the exact hex palette from `07-Design-System.md`, 4/8/12/16/24/32px spacing, 4px/6px radius) so they read as one consistent application, not 13 separate ones. Product Details (SCR-004), the remaining Add/Edit dialogs (Category, Supplier, Customer, User), and the Blocked-Delete/confirmation dialog pattern are demonstrated inline within the list-screen mockups above rather than as separate files, since they are the same reusable modal pattern applied to different entities (see `03-Component-Library.md §3.9` and `06-Dialogs-and-States.md`).
+The separate `UI/update-ui/` staging area may contain source ZIPs or intermediate artifacts. The canonical visual mockup is the file under `UI/UI-mock/`.
 
-**Role simulation:** every mockup includes a working "Administrator / Inventory Staff" switcher in the top-right header. Selecting "Inventory Staff" hides every Administrator-only control (Add/Edit/Delete buttons, Inventory Adjustment and User Management navigation, the deactivate-self restriction) live in the browser, so the role-based UI difference required by UX-DEC-001 can be inspected directly rather than only read about. This switcher is a mockup convenience only — it is not a feature to build; role visibility in the real application is determined once at login (see `04-Application-Shell.md §4.5`).
+## 4. Role and Permission Rule
 
-## 5. Non-Goals of This Package
+The UI must reflect **effective permissions**, not role mutation:
 
-- No C#, SQL, or WinForms Designer (.designer.cs) code
-- No database schema
-- No new screens, fields, business rules, or permissions beyond `product-requirements/01`–`10`
-- No resolution of open items in `product-requirements/09-Design-Recommendations-and-Claude-Brief.md` — those remain logged as pending requirements decisions, not silently designed in (see `09-Visual-Design-Traceability.md §9.4`)
+`Effective Permission = Permanent Role Permission + Currently Valid Delegation`
 
-## 6. How to Use This Package
+A Staff user receiving a valid delegation does **not** become an Administrator. Delegation Management remains Administrator-only. Administrator-only capabilities such as User Management, Inventory Adjustment, and security/authorization management remain unavailable unless explicitly allowed by the SRS delegation rules.
 
-1. **Stakeholder review:** open the `mockups/*.html` files in a browser to review the visual direction before implementation begins.
-2. **WinForms developer:** start with `02-Design-Tokens.md` (exact values), `03-Component-Library.md` (every control's states), and `08-WinForms-Implementation-Guidelines.md` (how each token/component maps to a real WinForms control). Use `05-Screen-Designs.md` for per-screen layout and `06-Dialogs-and-States.md` for shared dialog/empty/error patterns.
-3. **Traceability check:** `09-Visual-Design-Traceability.md` and `10-Final-Visual-Design-Audit.md` confirm nothing was added, changed, or skipped relative to the approved SRS and PRD.
+Where a user lacks authority, inappropriate destructive/admin controls should not be rendered merely as disabled controls.
+
+## 5. Non-Goals
+
+- No new business rules beyond SRS v1.1
+- No new roles
+- No unrestricted role impersonation
+- No delegation of Administrator privileges
+- No changes to existing color or typography tokens
+- No enterprise workflow engine
+- No implementation code
+
+## 6. Review / Implementation Order
+
+1. Review v1.0 visual system.
+2. Review `11-Visual-Design-v1.1-Delegation-Amendment.md`.
+3. Open `UI-mock/delegation-management.html` in a browser.
+4. Verify `12-Visual-Design-v1.1-Audit.md` is approved.
+5. Only then freeze the UI baseline for C# WinForms implementation.
