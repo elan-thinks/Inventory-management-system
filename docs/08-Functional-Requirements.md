@@ -134,3 +134,19 @@ All functional requirements are written in “The system shall …” form and a
 | FR-USR-004 | An Administrator shall be able to assign Administrator or Inventory/Store Staff roles. |
 | FR-USR-005 | Each user shall have a unique username, password credential, full name, and role. |
 | FR-USR-006 | Deactivated users shall be unable to log in. |
+
+## 8.14 Delegation (FR-DEL)
+
+| ID | Requirement |
+|---|---|
+| FR-DEL-001 | The system shall allow only an Administrator to create a delegation. |
+| FR-DEL-002 | The system shall allow an Administrator to revoke an active delegation. |
+| FR-DEL-003 | A delegation shall assign one approved operational responsibility to one eligible active Inventory/Store Staff user. |
+| FR-DEL-004 | The system shall support delegation of Stock-In, Stock-Out, and approved report access where applicable. |
+| FR-DEL-005 | The system shall not allow delegation of Administrator privileges, User Management, Inventory Adjustment, or master-data deletion/deactivation. |
+| FR-DEL-006 | The system shall require Start Date, End Date, Reason, Delegated To user, Delegated By user, responsibility, and status for a delegation. |
+| FR-DEL-007 | The system shall apply a delegation only during its valid date range and shall stop applying it after expiration or revocation. |
+| FR-DEL-008 | The system shall preserve delegation records as history and shall record creation/revocation attribution. |
+| FR-DEL-009 | The system shall prevent a user from delegating a responsibility they do not themselves possess. |
+| FR-DEL-010 | The system shall prevent invalid or conflicting overlapping delegations for the same recipient and responsibility. |
+| FR-DEL-011 | The system shall display effective delegated permissions to the affected user where relevant to access decisions. |
