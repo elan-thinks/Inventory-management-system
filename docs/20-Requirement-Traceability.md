@@ -16,11 +16,13 @@ This matrix connects major business objectives to concrete functional requiremen
 | OBJ-010 Search and filter information | FR-SRCH-001–005 | — | UC-008, UC-016 | Relevant entities |
 | OBJ-011 Provide reports | FR-RPT-001–003 | — | UC-017 | DR-PROD, DR-TXN, DR-CAT, DR-SUP, DR-CUS |
 | OBJ-012 Demonstrate C# / WinForms skills | WinForms requirements + CRUD/event requirements | Validation and business rules | All UI-driven use cases | All relevant entities |
+| OBJ-013 Provide controlled temporary delegation | FR-DEL-001–011 | BR-031–039 | UC-019 | DR-DEL, DR-USR |
 
 ## Traceability Verification
 
 - [x] Major objectives have concrete functional requirements.
 - [x] Core functional requirements reference relevant business rules.
 - [x] Core workflows are represented by explicit use-case IDs.
+- [x] Delegation requirements are represented by explicit FR-DEL, BR-031–039, UC-019, and DR-DEL references.
 - [x] Core data entities are connected to functionality.
 - [x] Use-case IDs match the finalized Use Case Catalogue.
