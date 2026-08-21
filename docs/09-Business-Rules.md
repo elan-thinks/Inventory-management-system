@@ -32,3 +32,12 @@
 | BR-028 | Product.SupplierID represents the product's default/preferred supplier. The SupplierID recorded on a Stock-In transaction represents the actual supplier for that receipt and may differ from the product's default supplier. |
 | BR-029 | CustomerID on a Stock-Out transaction is optional. A Stock-Out may be recorded without a registered customer. |
 | BR-030 | Inventory Transaction records are append-only. They cannot be edited or deleted after creation; corrections must be made through a new appropriate transaction or adjustment. |
+| BR-031 | Only an Administrator may create or revoke a delegation. |
+| BR-032 | A delegation recipient must be an eligible active Inventory/Store Staff user. |
+| BR-033 | A delegation cannot grant a responsibility beyond the authority of the delegator. |
+| BR-034 | Delegations are valid only from Start Date through End Date and cease to grant permission when expired or revoked. |
+| BR-035 | Delegation does not change the recipient's permanent role. |
+| BR-036 | User Management, Inventory Adjustment, Administrator privileges, and master-data deletion/deactivation are not delegatable. |
+| BR-037 | Delegation records must retain creation and revocation attribution and cannot be silently deleted. |
+| BR-038 | A delegation must specify exactly one approved responsibility and a non-empty reason. |
+| BR-039 | The system shall prevent conflicting overlapping delegations for the same recipient and responsibility. |
