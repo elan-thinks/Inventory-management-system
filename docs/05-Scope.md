@@ -1,14 +1,15 @@
 # 5. System Scope
 
-## 5.1 In Scope (Version 1.0 / MVP)
+## 5.1 In Scope (Version 1.1 / MVP)
 
 The first complete version of the system **shall** support:
 
 ### Master Data
-- Product management (full CRUD + search + filter)
-- Category management (full CRUD)
-- Supplier management (full CRUD)
-- Customer management (full CRUD)
+- Product management (full CRUD + search + filter) for authorised Administrator users
+- Category management (full CRUD) for authorised Administrator users
+- Supplier management (full CRUD) for authorised Administrator users
+- Customer management (full CRUD) for authorised Administrator users
+- Inventory/Store Staff may view/search these master-data areas but may not perform master-data create/edit/delete/deactivate operations
 
 ### Inventory Operations
 - Stock-In transactions (receipt of goods from suppliers)
@@ -16,6 +17,15 @@ The first complete version of the system **shall** support:
 - Inventory adjustments (quantity corrections with reason)
 - Automatic update of current stock quantity
 - Low-stock and out-of-stock detection and display
+- Controlled delegation of selected operational responsibilities by an Administrator
+
+### Delegation
+- Administrator-created delegation of approved operational responsibilities to eligible active Inventory/Store Staff users
+- Delegation of Stock-In and Stock-Out responsibilities
+- Delegation of approved report access where applicable
+- Start/end date, reason, status, creator, and revocation information
+- Expiration and revocation handling
+- Delegation history
 
 ### User Interface & Navigation
 - Login / Logout
@@ -26,6 +36,7 @@ The first complete version of the system **shall** support:
 - Search and filter capabilities on major screens
 - Confirmation dialogs for destructive actions
 - Validation feedback via message boxes / labels
+- Administrator-only Delegation Management screen
 
 ### Reporting
 - Current Inventory Report
@@ -42,10 +53,11 @@ The first complete version of the system **shall** support:
 - Exception handling
 - Event-driven WinForms programming
 - Meaningful relationships between entities
+- Role-based authorization plus controlled temporary delegation
 
 ## 5.2 Out of Scope
 
-The following are **intentionally excluded** from Version 1.0:
+The following are **intentionally excluded** from Version 1.1:
 
 - Multi-branch / multi-warehouse inventory
 - Barcode scanning or RFID
@@ -56,7 +68,9 @@ The following are **intentionally excluded** from Version 1.0:
 - Customer loyalty / points systems
 - Supplier portals or external APIs
 - Mobile applications or web interfaces
-- Complex permission matrices beyond two roles
+- Complex permission matrices beyond Administrator and Inventory Staff
+- Delegation of Administrator privileges or unrestricted role impersonation
+- Delegation of User Management, Inventory Adjustment, or master-data deletion/deactivation
 - Soft-delete with complex recovery workflows (simple delete rules are in scope)
 - Batch import/export of large product lists (beyond basic reporting)
 - Multi-currency support
@@ -65,4 +79,4 @@ The following are **intentionally excluded** from Version 1.0:
 
 ## 5.3 Scope Control Statement
 
-Any feature request that introduces enterprise architecture, distributed systems, cloud infrastructure, or advanced AI capabilities is considered out of scope for this university project and must be deferred to Future Enhancements.
+Any feature request that introduces enterprise architecture, distributed systems, cloud infrastructure, unrestricted authorization delegation, or advanced AI capabilities is considered out of scope for this university project and must be deferred to Future Enhancements.
