@@ -128,7 +128,36 @@ Relationships:
 
 Important constraint: InventoryTransaction records are append-only and cannot be edited or deleted after creation. Corrections are performed through a new appropriate transaction or authorized adjustment.
 
-## 10.7 Key Relationships
+## 10.7 Entity: Delegation (DR-DEL)
+
+**Purpose:** Store a controlled, time-bounded delegation of an approved operational responsibility from an Administrator to an eligible Inventory/Store Staff user.
+
+| Attribute | Required | Notes |
+|---|---|---|
+| DelegationID | Yes | Unique, system-generated |
+| DelegatedByUserID | Yes | FK to User; must be Administrator |
+| DelegatedToUserID | Yes | FK to User; must be eligible active Inventory/Store Staff |
+| Responsibility | Yes | Approved responsibility such as StockIn, StockOut, or approved ReportAccess |
+| StartDate | Yes | Delegation validity start |
+| EndDate | Yes | Must not precede StartDate |
+| Reason | Yes | Explanation for delegation |
+| Status | Yes | Active / Expired / Revoked |
+| CreatedDateTime | Yes | |
+| RevokedByUserID | No | FK to User; Administrator who revoked it |
+| RevokedDateTime | No | Set when revoked |
+
+Relationships:
+- DelegatedByUserID references User.
+- DelegatedToUserID references User.
+- RevokedByUserID optionally references User.
+
+Important constraints:
+- Delegation never changes the recipient's permanent role.
+- Delegation cannot grant Administrator privileges or non-delegatable responsibilities.
+- Delegation is effective only inside its date range and while active.
+- Delegation records are retained as history.
+
+## 10.8 Key Relationships
 
 ```text
 User 1 ─── * InventoryTransaction
@@ -137,9 +166,12 @@ Supplier 1 ─── * Product (default/preferred)
 Supplier 1 ─── * InventoryTransaction (actual Stock-In supplier)
 Customer 1 ─── * InventoryTransaction (optional Stock-Out customer)
 Product 1 ─── * InventoryTransaction
+User 1 ─── * Delegation (delegator)
+User 1 ─── * Delegation (recipient)
+User 1 ─── * Delegation (revoker, optional)
 ```
 
-## 10.8 Important Data Constraints
+## 10.9 Important Data Constraints
 
 - Referential integrity shall be maintained.
 - Product.QuantityOnHand is the single source of current stock.
@@ -151,4 +183,7 @@ Product 1 ─── * InventoryTransaction
 - InventoryTransaction.CustomerID on Stock-Out is optional.
 - InventoryTransaction records are append-only.
 - Historical master data referenced by transactions shall normally be deactivated rather than hard-deleted.
-- User accounts required by historical transaction records shall not be hard-deleted when doing so would break audit history.
+- User accounts required by historical transaction or delegation records shall not be hard-deleted when doing so would break audit history.
+- Delegation EndDate shall not precede StartDate.
+- DelegatedToUserID must reference an eligible active Inventory/Store Staff account when the delegation is created.
+- Delegation responsibility must be from the approved delegatable responsibility set.
