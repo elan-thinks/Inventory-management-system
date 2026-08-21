@@ -7,8 +7,8 @@
 | Document Title          | System Requirements Specification (SRS)            |
 | System Name             | Inventory Management System (IMS)                  |
 | Project Title           | University Windows Programming – Inventory Management System |
-| Version                 | 1.0                                                |
-| Status                  | Final (Requirements Phase)                         |
+| Version                 | 1.1                                                |
+| Status                  | Final (Requirements Phase — Amended)               |
 | Date                    | August 2026                                        |
 | Prepared For            | University Software Engineering / Windows Programming Course |
 | Target Technology Stack | C# · .NET · Windows Forms · Relational Database    |
@@ -16,9 +16,10 @@
 
 ## 1.2 Revision History
 
-| Version | Date       | Description                          | Author                     |
-|---------|------------|--------------------------------------|----------------------------|
-| 1.0     | Aug 2026   | Initial complete SRS                 | Senior Requirements Engineer |
+| Version | Date       | Description | Author |
+|---------|------------|-------------|--------|
+| 1.0 | Aug 2026 | Initial complete SRS baseline | Senior Requirements Engineer |
+| 1.1 | Aug 2026 | Added controlled temporary delegation, including FR-DEL, BR-031–039, DR-DEL, VAL-023–029, UC-019, OBJ-013, scope, and traceability updates | Senior Requirements Engineer |
 
 ## 1.3 Document Purpose
 
