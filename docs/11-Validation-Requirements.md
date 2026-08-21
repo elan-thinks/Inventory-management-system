@@ -24,6 +24,13 @@
 | VAL-020 | Stock-Out quantity | Must not exceed current QuantityOnHand | Block save + clear “Insufficient stock” message |
 | VAL-021 | ComboBox selections | A valid required selection must be made | Block save + message |
 | VAL-022 | Duplicate prevention | System shall check uniqueness where required before insert/update | Block save + message |
+| VAL-023 | Delegation recipient | Must be an eligible active Inventory/Store Staff user | Block save + clear message |
+| VAL-024 | Delegation responsibility | Must be one approved delegatable responsibility | Block save + clear message |
+| VAL-025 | Delegation dates | Start Date and End Date required; End Date must not precede Start Date | Block save + message |
+| VAL-026 | Delegation reason | Required; maximum 250 characters | Block save + message |
+| VAL-027 | Delegation authority | Delegator must be an Administrator and must possess the responsibility being delegated | Block save + clear authorization message |
+| VAL-028 | Delegation overlap | Must not conflict with an existing active delegation for the same recipient and responsibility | Block save + clear conflict message |
+| VAL-029 | Delegation revocation | Only an Administrator may revoke an active delegation | Block action + message |
 
 ## General Behaviour
 
@@ -31,3 +38,4 @@
 - Error messages shall be clear, specific, and understandable to the user.
 - The first invalid field should receive focus where practical.
 - Validation shall be applied consistently to both create and update operations.
+- Delegation validity shall also be checked at authorization time so expired or revoked delegations cannot grant access.
