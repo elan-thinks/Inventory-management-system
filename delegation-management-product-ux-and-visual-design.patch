@@ -1,0 +1,1633 @@
+From a4f10f49df7913a3362d3be3876028babd2c992a Mon Sep 17 00:00:00 2001
+From: Claude <claude@anthropic.com>
+Date: Fri, 21 Aug 2026 19:44:43 +0000
+Subject: [PATCH 1/2] product-ux: incorporate SRS v1.1 Delegation amendment
+
+Adds Delegation Management (SCR-020) to the Product Requirements +
+UX/UI Specification, closing the downstream gate recorded in
+project-management/SRS-v1.1-AUDIT.md.
+
+- New screen SCR-020 Delegation Management (Administrator only)
+- Delegation CRUD/UX: create, view, revoke (no edit)
+- Delegation states: Active / Expired / Revoked (icon+label+color)
+- Automatic expiration + explicit, confirmed, attributable revocation
+- Effective permission model: permanent role + currently valid delegations
+- Admin-only access (UX-DEC-002): no visible entry point for Staff
+- New PR-017-021, UI-015, UX-012 with traceability to
+  FR-DEL-001-014, BR-031-039, DR-DEL, VAL-023-029, UC-019-021
+- Updated Final Product/UX Audit -> v1.1 APPROVED
+- New 11-Product-UX-v1.1-Changelog.md itemizing every change
+
+No SRS-layer requirement IDs invented; all trace to
+docs/26-Delegation-Requirements-v1.1.md.
+---
+ product-requirements/00-README.md             | 17 +++----
+ .../01-Product-Vision-and-UX-Strategy.md      | 18 +++++++-
+ ...Information-Architecture-and-Navigation.md |  3 ++
+ product-requirements/03-Screen-Inventory.md   | 10 ++++-
+ product-requirements/04-User-Flows.md         | 28 ++++++++++++
+ .../05-Screen-Specifications.md               | 35 +++++++++++++++
+ .../06-CRUD-Inventory-Validation-Error-UX.md  | 26 ++++++++++-
+ .../08-Requirements-PR-UI-UX-Traceability.md  | 16 ++++++-
+ ...Design-Recommendations-and-Claude-Brief.md | 24 +++++++++-
+ .../10-Final-Product-UX-Audit.md              | 43 +++++++++++-------
+ .../11-Product-UX-v1.1-Changelog.md           | 45 +++++++++++++++++++
+ 11 files changed, 231 insertions(+), 34 deletions(-)
+ create mode 100644 product-requirements/11-Product-UX-v1.1-Changelog.md
+
+diff --git a/product-requirements/00-README.md b/product-requirements/00-README.md
+index e3465d3..684611c 100644
+--- a/product-requirements/00-README.md
++++ b/product-requirements/00-README.md
+@@ -1,7 +1,7 @@
+ # NovaTech Electronics — Inventory Management System
+-## Product Requirements & UX/UI Specification (PRD v1.0)
++## Product Requirements & UX/UI Specification (PRD v1.1)
+ 
+-**Status:** Derived from approved SRS v1.0 (August 2026) — SRS is the source of truth.
++**Status:** Derived from approved SRS v1.0 plus the approved SRS v1.1 Delegation amendment (August 2026) — SRS is the source of truth.
+ **Scope of this package:** Product/UX/UI design documentation only. No code, no SQL, no WinForms Designer output.
+ **Audience:** UI/UX designer, Claude (visual design), C# WinForms developer.
+ 
+@@ -9,7 +9,7 @@
+ 
+ ## 1. What This Package Is
+ 
+-This package transforms the approved System Requirements Specification (SRS v1.0) for the Inventory Management System into a complete **Product Requirements + UX/UI Specification**. It does not add, remove, or reinterpret functional scope. Every screen, flow, and interaction defined here traces back to an SRS requirement ID (FR-, BR-, DR-, VAL-, ER-, UC-, WF-, RPT-, NFR-).
++This package transforms the approved System Requirements Specification (SRS v1.0, amended by SRS v1.1) for the Inventory Management System into a complete **Product Requirements + UX/UI Specification**. It does not add, remove, or reinterpret functional scope. Every screen, flow, and interaction defined here traces back to an SRS requirement ID (FR-, BR-, DR-, VAL-, ER-, UC-, WF-, RPT-, NFR-).
+ 
+ Where a feature would improve the product but is **not** supported by the SRS, it is *not* included in the MVP design — it is instead logged in `09-Design-Recommendations-and-Claude-Brief.md` under "Design Recommendations Requiring Requirements Approval" for separate decision-making.
+ 
+@@ -17,20 +17,21 @@ Where a feature would improve the product but is **not** supported by the SRS, i
+ 
+ | # | File | Contents |
+ |---|------|----------|
+-| 01 | `01-Product-Vision-and-UX-Strategy.md` | Product vision, design philosophy, user roles |
++| 01 | `01-Product-Vision-and-UX-Strategy.md` | Product vision, design philosophy, user roles, effective-permission model |
+ | 02 | `02-Information-Architecture-and-Navigation.md` | IA, navigation model, window strategy |
+-| 03 | `03-Screen-Inventory.md` | Full screen inventory (SCR-001 ... ) |
+-| 04 | `04-User-Flows.md` | Step-by-step UX flows for all 14 required journeys |
++| 03 | `03-Screen-Inventory.md` | Full screen inventory (SCR-001 ... SCR-020) |
++| 04 | `04-User-Flows.md` | Step-by-step UX flows for all required journeys, incl. Delegation |
+ | 05 | `05-Screen-Specifications.md` | Screen-by-screen layout, components, actions, states |
+-| 06 | `06-CRUD-Inventory-Validation-Error-UX.md` | CRUD patterns, inventory status UX, validation UX, error UX, confirmations, empty/feedback states |
++| 06 | `06-CRUD-Inventory-Validation-Error-UX.md` | CRUD patterns, inventory status UX, delegation status UX, validation UX, error UX, confirmations, empty/feedback states |
+ | 07 | `07-Design-System.md` | Color, typography, spacing, components, accessibility, desktop window behavior |
+ | 08 | `08-Requirements-PR-UI-UX-Traceability.md` | Product Requirements (PR-), UI Requirements (UI-), UX Requirements (UX-), traceability matrix, MVP vs Future |
+ | 09 | `09-Design-Recommendations-and-Claude-Brief.md` | Recommendations requiring requirements approval; Claude Visual Design Brief |
+ | 10 | `10-Final-Product-UX-Audit.md` | Final coverage audit against the SRS |
++| 11 | `11-Product-UX-v1.1-Changelog.md` | What changed in this package to close the SRS v1.1 Delegation gate |
+ 
+ ## 3. Source of Truth
+ 
+-All requirement IDs referenced throughout (e.g. FR-PROD-001, BR-015, UC-012) map directly to the corresponding sections of the approved SRS v1.0 documents (`08-Functional-Requirements.md` through `22-MVP-Definition.md` in the SRS repository). No new SRS IDs have been invented.
++All requirement IDs referenced throughout (e.g. FR-PROD-001, BR-015, UC-012, FR-DEL-001, BR-031–039, VAL-023–029, UC-019–021, DR-DEL) map directly to the corresponding sections of the approved SRS documents — SRS v1.0 baseline (`08-Functional-Requirements.md` through `22-MVP-Definition.md`) plus the SRS v1.1 amendment (`26-Delegation-Requirements-v1.1.md`) in the SRS repository. No new SRS IDs have been invented in this package; where this package assigns its own downstream IDs (PR-, UI-, UX-, SCR-), they trace back to an existing SRS ID.
+ 
+ ## 4. Non-Goals of This Package
+ 
+diff --git a/product-requirements/01-Product-Vision-and-UX-Strategy.md b/product-requirements/01-Product-Vision-and-UX-Strategy.md
+index 8646c85..f09a749 100644
+--- a/product-requirements/01-Product-Vision-and-UX-Strategy.md
++++ b/product-requirements/01-Product-Vision-and-UX-Strategy.md
+@@ -52,29 +52,33 @@ Only the two roles defined in SRS §6.2 exist. No additional roles are introduce
+ - Inventory Adjustments (Administrator-only, BR-014, FR-ADJ-001)
+ - Create/edit/deactivate users and assign roles (FR-USR-001–006)
+ - View all reports, dashboard, and full transaction history
++- Create and revoke time-bounded delegations of Stock-In, Stock-Out, or approved report access to an eligible Staff user (FR-DEL-001–003, SRS v1.1)
+ 
+ **Cannot do:**
+ - Deactivate their own currently logged-in account (BR-020)
+ - Edit or delete historical inventory transactions (BR-030, append-only)
+ - Directly edit QuantityOnHand outside Stock-In/Stock-Out/Adjustment (BR-027, VAL-011)
++- Delegate a responsibility beyond their own authority, or delegate User Management, Inventory Adjustment, Administrator privileges, or master-data deletion/deactivation (BR-033, BR-036)
+ 
+ **How restrictions are communicated:** Not applicable to most functions — Administrator restrictions are the two hard rules above, enforced by disabling the relevant control (e.g., "Deactivate" button disabled on the Administrator's own user row) with a tooltip/status message explaining why.
+ 
+ ### 1.3.2 Inventory / Store Staff
+ 
+-**Sees:** Dashboard, Products (view/search), Categories/Suppliers/Customers (view/search only), Stock-In, Stock-Out, selected reports (Current Inventory, Low Stock, Transaction History), and Inventory History.
++**Sees:** Dashboard, Products (view/search), Categories/Suppliers/Customers (view/search only), Stock-In, Stock-Out, selected reports (Current Inventory, Low Stock, Transaction History), and Inventory History. Delegation Management is never visible to Staff (SRS v1.1 §26.7); a Staff user experiences delegation only as the ability to use a responsibility that was not otherwise theirs, for as long as it remains active.
+ 
+ **Can do:**
+ - View and search Products, Categories, Suppliers, Customers
+ - Create Stock-In and Stock-Out transactions
+ - View dashboard and permitted reports
+ - Search and filter inventory and transaction history
++- Exercise a responsibility an Administrator has actively delegated to them, for the duration the delegation remains valid (FR-DEL-004, SRS v1.1)
+ 
+ **Cannot do:**
+ - Create, edit, delete, or deactivate Products, Categories, Suppliers, or Customers
+-- Perform Inventory Adjustments (Administrator-only, BR-014)
++- Perform Inventory Adjustments (Administrator-only, BR-014) — not delegatable under any circumstance (BR-036)
+ - Manage user accounts
+ - Change system-critical settings
++- Create, view, or revoke delegations, or see the Delegation Management screen (BR-031, SRS v1.1 §26.7)
+ 
+ **How restrictions are communicated:** Master-data mutation controls (Add, Edit, Delete/Deactivate) and other Administrator-only controls are hidden or disabled for Inventory/Store Staff rather than shown-then-blocked, per the approved UX-DEC-001 decision and SRS role-visibility rules. If a restricted action is somehow triggered, the system shows: *"You do not have permission to perform this action."*
+ 
+@@ -82,3 +86,13 @@ Only the two roles defined in SRS §6.2 exist. No additional roles are introduce
+ 
+ - Each user has exactly one role, assigned at creation and changeable only by an Administrator.
+ - Role-based visibility is enforced at the UI level on every screen — this is a first-class design requirement, not an afterthought (see UI-Requirements in document 08).
++
++### 1.3.4 Effective Permission Model (SRS v1.1)
++
++Delegation is an explicit, time-bounded authorization grant — it is **not** role impersonation and it never changes anyone's permanent role (FR-DEL-006, BR-035). What a user can actually do at any moment is therefore:
++
++> **Effective Permission = Permanent Role Permissions + Currently Valid Delegations**
++
++"Currently valid" means the delegation's Status is Active **and** today's date falls within its Start Date/End Date range (FR-DEL-004). A delegation that has passed its End Date is automatically treated as Expired and grants nothing (FR-DEL-005), and a Revoked delegation grants nothing from the moment of revocation onward. This evaluation happens every time a permission check occurs, not only when the delegation is created — so a delegation that was valid yesterday and has expired overnight silently and correctly stops granting access without any user action.
++
++This model only ever **adds** a narrow, specific responsibility (Stock-In, Stock-Out, or approved report access) to a Staff account — it can never grant Administrator-only capability, and every action performed under a delegation is still attributed to the actual person who performed it (BR-033, BR-036, BR-039 §26.5.8).
+diff --git a/product-requirements/02-Information-Architecture-and-Navigation.md b/product-requirements/02-Information-Architecture-and-Navigation.md
+index 278d16f..843d162 100644
+--- a/product-requirements/02-Information-Architecture-and-Navigation.md
++++ b/product-requirements/02-Information-Architecture-and-Navigation.md
+@@ -16,9 +16,12 @@
+ | **Inventory History** | Read-only transaction log | Sidebar (under "Inventory Operations" group) | Admin, Staff | Filterable transaction list |
+ | **Reports** | View/print MVP reports | Sidebar | Admin, Staff (subset: Current Inventory, Low Stock, Transaction History) | Report picker → Report Viewer |
+ | **User Management** | Manage accounts and roles | Sidebar (bottom, Administrator-only) | Admin only | User List → Add/Edit |
++| **Delegation Management** *(SRS v1.1)* | Grant/revoke time-bounded delegation of Stock-In, Stock-Out, or approved report access | Sidebar (bottom, Administrator-only, grouped next to User Management) | Admin only | Delegation List → Create Delegation panel; Revoke action |
+ 
+ **Permission decision UX-DEC-001:** Inventory/Store Staff are view/search-only for Products, Categories, Suppliers, and Customers. Administrator manages master-data creation, editing, and deactivation/deletion.
+ 
++**Delegation and navigation (SRS v1.1):** Delegation Management itself is never shown to Staff — there is no sidebar entry, disabled or otherwise (BR-031, §26.7). A Staff user with an active delegation does not see a "Delegated" section; the delegated capability simply appears at its normal location (e.g., Stock-In becomes usable if it wasn't already, or a normally-Admin-only report becomes selectable on the Reports screen). The sidebar/menu is built at login and re-evaluated against currently valid delegations, consistent with how role-based visibility already works (§1.3.4, §6.2.3).
++
+ Notes:
+ - "Catalog" and "Inventory Operations" are logical groupings within the sidebar, not separate top-level sections — this keeps the navigation tree shallow (SRS explicitly avoids complex, deep hierarchies for a small business tool).
+ - Settings/system configuration is **not** included as a section because the SRS does not define system-wide settings beyond user management (C-004, out-of-scope items in §5.2). See Design Recommendations document if this is desired later.
+diff --git a/product-requirements/03-Screen-Inventory.md b/product-requirements/03-Screen-Inventory.md
+index 910bf7a..0e82c56 100644
+--- a/product-requirements/03-Screen-Inventory.md
++++ b/product-requirements/03-Screen-Inventory.md
+@@ -1,6 +1,6 @@
+ # 3. Screen Inventory
+ 
+-19 screens fully cover the SRS v1.0 MVP. This count maps directly onto the "Forms Required (Minimum)" list in SRS §16.1, splitting each "List + Add/Edit" bullet into two screens for clarity, and adding a Product Details view and a Reports Hub (report-type selector) ahead of the Report Viewer.
++20 screens fully cover the SRS MVP (v1.0 baseline + v1.1 Delegation amendment). The v1.0 count of 19 maps directly onto the "Forms Required (Minimum)" list in SRS §16.1, splitting each "List + Add/Edit" bullet into two screens for clarity, and adding a Product Details view and a Reports Hub (report-type selector) ahead of the Report Viewer. SCR-020 (Delegation Management) is added by the SRS v1.1 amendment and closes the downstream gate recorded in `SRS-v1.1-CHANGELOG.md`.
+ 
+ | Screen ID | Screen Name | Purpose | Primary User | Secondary User(s) | Entry Point | Exit / Navigation | Main Actions | Related Requirements | Related Use Cases |
+ |---|---|---|---|---|---|---|---|---|---|
+@@ -23,15 +23,21 @@
+ | SCR-017 | Report Viewer | Display and print a generated report | Admin, Staff (subset) | — | "Generate" on SCR-016 | Print; Back → SCR-016 | View, Print, adjust filters, Back | FR-RPT-001–003 | UC-017 |
+ | SCR-018 | User Management List | Browse and search user accounts | Admin only | — | Sidebar "User Management" (hidden for Staff) | Add → SCR-019; row → SCR-019 (edit) | Search, Add, Edit, Deactivate | FR-USR-001–006 | UC-018 |
+ | SCR-019 | User Add/Edit | Create/update user account and role | Admin only | — | "Add"/"Edit" on SCR-018 | Save/Cancel → SCR-018 | Enter fields, assign role, Save, Cancel | FR-USR-001–006; BR-019–020; VAL-016,017 | UC-018 |
++| SCR-020 | Delegation Management *(SRS v1.1)* | Create, view, and revoke time-bounded delegations | Admin only | — | Sidebar "Delegation Management" (hidden for Staff) | "Create Delegation" opens inline panel/dialog on same screen; Revoke → confirmation dialog | Admin: Create Delegation, Revoke, Filter/View history | FR-DEL-001–014; BR-031–039; VAL-023–029; DR-DEL | UC-019, UC-020, UC-021 |
+ 
+ ## 3.1 Shared / Reusable Screens (Not Separately Numbered)
+ 
+ These are not distinct navigable screens but reusable modal components referenced across the table above and detailed in document 06:
+ 
+-- **Confirmation Dialog** (generic Yes/No pattern for Delete, Deactivate, Stock-Out, Adjustment, Logout-with-unsaved-changes)
++- **Confirmation Dialog** (generic Yes/No pattern for Delete, Deactivate, Stock-Out, Adjustment, Revoke Delegation, Logout-with-unsaved-changes)
+ - **Blocked-Delete Explanation Dialog** (BR-008, BR-009, BR-010, BR-018 — explains why deletion is blocked and offers Deactivate instead)
+ - **Session/Permission Error Dialog** (ER-011)
++- **Create Delegation Panel** *(SRS v1.1)* — an in-context form (modal dialog or inline panel on SCR-020) for selecting recipient, responsibility, dates, and reason; not a separately routable screen
+ 
+ ## 3.2 Master-data Permission Rule
+ 
+ Inventory/Store Staff are view/search-only for Products, Categories, Suppliers, and Customers. Add, Edit, Delete, and Deactivate actions are Administrator-only. This is the approved resolution of the SRS ambiguity and is recorded as UX-DEC-001.
++
++## 3.3 Delegation Permission Rule *(SRS v1.1)*
++
++Only an Administrator may access SCR-020, create a delegation, or revoke one (BR-031). Inventory/Store Staff never see Delegation Management, and a delegation never appears to Staff as a distinct UI concept — it surfaces only as a normally-restricted capability becoming usable for as long as it is effective (§1.3.4). This is the SRS v1.1 analogue of UX-DEC-001 and is recorded as UX-DEC-002.
+diff --git a/product-requirements/04-User-Flows.md b/product-requirements/04-User-Flows.md
+index 72f301a..189ec40 100644
+--- a/product-requirements/04-User-Flows.md
++++ b/product-requirements/04-User-Flows.md
+@@ -127,3 +127,31 @@ Each flow follows: **START → USER ACTION → SYSTEM RESPONSE → NEXT ACTION 
+ - **NEXT ACTION:** Confirmation prompt for Deactivate specifically (destructive-adjacent action).
+ - **SUCCESS:** "User created/updated/deactivated successfully"; list refreshes.
+ - **ERROR:** "This username is already in use." / "You cannot deactivate your own account while logged in." — Deactivate button is disabled on the Administrator's own row so this error is prevented rather than merely handled.
++
++## 4.15 Create Delegation (SCR-020, Administrator only) — SRS v1.1
++
++**ROLE:** Administrator only.
++- **START:** Administrator opens Delegation Management, clicks "Create Delegation."
++- **USER ACTION:** Selects an eligible active Staff user (recipient), selects one approved responsibility (Stock-In, Stock-Out, or an approved report), enters Start Date, End Date, and Reason → Save.
++- **SYSTEM RESPONSE:** Validates recipient eligibility (VAL-023), responsibility is delegatable (VAL-024), End Date not before Start Date (VAL-025), Reason present (VAL-026), delegator authority to grant this responsibility (VAL-027, BR-033), and no overlapping delegation exists for the same recipient/responsibility (VAL-028, BR-039).
++- **NEXT ACTION:** On valid save, delegation is created with Status = Active and the creator recorded (FR-DEL-001, FR-DEL-014).
++- **SUCCESS:** "Delegation created successfully"; Delegation list refreshes and highlights the new row; the recipient's effective permission includes the delegated responsibility from Start Date through End Date (§1.3.4).
++- **ERROR:** "This user is not eligible to receive a delegation." / "This responsibility cannot be delegated." / "End date cannot be before start date." / "A reason is required." / "You cannot delegate a responsibility you do not have." / "This user already has an active delegation for this responsibility during this period." Save is blocked, entered data preserved.
++
++## 4.16 Revoke Delegation (SCR-020, Administrator only) — SRS v1.1
++
++**ROLE:** Administrator only.
++- **START:** Administrator selects an Active delegation on Delegation Management, clicks "Revoke."
++- **USER ACTION:** Confirms intent in the confirmation dialog (states the recipient, responsibility, and effect: "This will immediately end {User}'s access to {Responsibility}.").
++- **SYSTEM RESPONSE:** Validates the actor is an Administrator (VAL-029, BR-031); records the revoking Administrator and timestamp.
++- **NEXT ACTION:** Delegation Status changes to Revoked; the delegation record itself is retained, never deleted (FR-DEL-013, BR-037).
++- **SUCCESS:** "Delegation revoked"; the row updates in place to the Revoked visual state; the recipient's effective permission no longer includes that responsibility from this moment onward.
++- **ERROR:** N/A beyond standard permission/session errors (ER-011) if the action is somehow triggered by a non-Administrator session.
++
++## 4.17 View Delegation History (SCR-020, Administrator only) — SRS v1.1
++- **START:** Administrator opens Delegation Management.
++- **USER ACTION:** Optionally filters by recipient, responsibility, or status (Active/Expired/Revoked).
++- **SYSTEM RESPONSE:** Displays matching delegation records with Status, Start/End Date, Reason, and creator/revoker attribution; no Edit control exists anywhere on this grid — the only mutation available on an Active row is Revoke (FR-DEL-002, §26.7).
++- **NEXT ACTION:** Administrator may create a new delegation or revoke an active one from the same screen.
++- **SUCCESS:** Filtered, attributable delegation list; Expired and Revoked rows are visually distinguished from Active rows (§26.7).
++- **ERROR:** N/A — same empty-state pattern as other list screens (see document 06) if no delegations match.
+diff --git a/product-requirements/05-Screen-Specifications.md b/product-requirements/05-Screen-Specifications.md
+index 00aaae2..2973c16 100644
+--- a/product-requirements/05-Screen-Specifications.md
++++ b/product-requirements/05-Screen-Specifications.md
+@@ -277,3 +277,38 @@ Follows the reference pattern, scoped to Customer. **Requirements:** FR-CUS-001
+ **Actions:** Save → validates uniqueness (BR-019) and required fields → success message → list refresh. Deactivate (list row) → confirmation → account deactivated, cannot log in (FR-USR-006), row shown greyed/Inactive-tagged.
+ 
+ **States:** Normal · Duplicate Username Error ("This username is already in use.") · Missing Fields · Success · Self-Deactivation Blocked (prevented via disabled control, per above, not a runtime error state).
++
++---
++
++## 5.15 Delegation Management — SCR-020 (Administrator only) *(SRS v1.1)*
++
++**Purpose:** Create, view, and revoke time-bounded delegations of Stock-In, Stock-Out, or approved report access, without altering anyone's permanent role. **Role:** Admin only — the screen and its sidebar entry do not exist for Staff, not merely disabled (§26.7, UX-DEC-002). **Requirements:** FR-DEL-001–014; BR-031–039; VAL-023–029; DR-DEL; UC-019–021.
++
++**Layout:** Single screen, list-first, matching the Inventory History pattern rather than a separate Add/Edit screen (delegation is a short, single-purpose grant, not a multi-field master-data record): Header ("Delegation Management," "+ Create Delegation" button top-right) → Filter bar (Recipient, Responsibility, Status) → DataGridView (main content) → footer (row count). "Create Delegation" opens a compact modal panel over the same screen; it is not a separately numbered screen (see 3.1).
++
++**Components — List:**
++- Filter bar: Recipient ComboBox (type-to-search, optional), Responsibility ComboBox (All/Stock-In/Stock-Out/Report Access), Status ComboBox (All/Active/Expired/Revoked)
++- DataGridView columns: Delegation ID, Recipient, Responsibility, Start Date, End Date, Status (icon+label+color badge, see 6.3.1), Reason, Created By, Revoked By (blank unless Revoked)
++- **No Edit action anywhere on this grid.** The only mutation control on a row is "Revoke," shown only when Status = Active; Expired and Revoked rows have no action controls at all — delegation history is otherwise read-only (§26.7, mirroring the SCR-015 append-only pattern)
++- "+ Create Delegation" primary Button, top-right of header
++
++**Components — Create Delegation panel:**
++- Recipient — required ComboBox, eligible active Inventory/Store Staff users only (VAL-023)
++- Responsibility — required ComboBox, delegatable responsibilities only: Stock-In, Stock-Out, approved Report Access (VAL-024); User Management, Inventory Adjustment, Administrator privileges, and master-data deletion/deactivation never appear as options at all, rather than appearing disabled (BR-036, consistent with the "hide, don't show-then-block" principle in §1.3.2/§6.2.3)
++- Start Date — required DateTimePicker
++- End Date — required DateTimePicker; must not precede Start Date (VAL-025)
++- Reason — required multiline TextBox, max 250 chars (VAL-026)
++- "Save" primary Button, "Cancel" secondary Button (standard bottom action bar, per 6.2)
++
++**Actions:**
++| Action | Trigger | Result | Validation | Feedback |
++|---|---|---|---|---|
++| Create Delegation | Click "+ Create Delegation" | Opens panel | — | — |
++| Save | Click "Save" in panel | Creates delegation, Status = Active, creator recorded | Recipient eligible (VAL-023); responsibility delegatable (VAL-024); dates valid (VAL-025); reason present (VAL-026); delegator has the authority being granted (VAL-027, BR-033); no overlapping active delegation for same recipient/responsibility (VAL-028, BR-039) | Success message; panel closes; list refreshes with new row highlighted |
++| Revoke | Click "Revoke" on an Active row | Confirmation dialog → Status becomes Revoked; revoker/timestamp recorded | Actor must be Administrator (VAL-029, BR-031) | Success message; row updates in place to Revoked visual state; record is retained, never removed (FR-DEL-013) |
++
++**States:** Normal (populated list) · Empty ("No delegations yet. Create one to temporarily extend a Staff member's access.") · Empty — filtered ("No delegations match your filters." + Clear Filters) · Panel Validation Errors (inline, per-field, same pattern as 6.7) · Conflict Error ("This user already has an active delegation for this responsibility during this period.") · Authority Error ("You cannot delegate a responsibility you do not have.") · Success (Create/Revoke) · Loading.
++
++**Visual distinction of status (§26.7):** Active uses the Success-family badge (checkmark icon), Expired uses a neutral/muted badge (clock icon), Revoked uses the Error-family badge (cross/ban icon) — same Icon + Label + Color rule as Inventory Status (see 6.3, 6.3.1), never color alone.
++
++**Admin-only nature:** This is the most visibly Administrator-exclusive screen in the application after User Management — the sidebar item is absent for Staff, and there is no code path by which a Staff session can reach SCR-020 (§26.7, BR-031).
+diff --git a/product-requirements/06-CRUD-Inventory-Validation-Error-UX.md b/product-requirements/06-CRUD-Inventory-Validation-Error-UX.md
+index 15af2d0..93f24a9 100644
+--- a/product-requirements/06-CRUD-Inventory-Validation-Error-UX.md
++++ b/product-requirements/06-CRUD-Inventory-Validation-Error-UX.md
+@@ -55,6 +55,18 @@ Per BR-015 / FR-STK-001, status is calculated, never entered:
+ 
+ Visual hierarchy: status is placed as a compact badge (pill shape, icon-left) rather than a plain table cell, so it's scannable at a glance down a long product list.
+ 
++## 6.3.1 Delegation-Specific UX: Delegation Status *(SRS v1.1)*
++
++Per BR-034 / FR-DEL-004–005, status is derived from dates and actions, never entered directly:
++
++| Status | Condition | Icon | Color | Label |
++|---|---|---|---|---|
++| **Active** | Status = Active and today is within Start Date–End Date | ✓ (check circle) | Success green | "Active" |
++| **Expired** | End Date has passed, and it was never revoked | ⏱ (clock) | Muted/neutral grey | "Expired" |
++| **Revoked** | An Administrator explicitly revoked it, at any point in its lifecycle | ✕ (circle with line/cross) | Error red | "Revoked" |
++
++Same rule as inventory status: **Icon + Label + Color together, always.** This badge appears identically wherever a delegation is shown: the Delegation Management grid (SCR-020) and, implicitly, in Inventory Adjustment/Stock-In/Stock-Out audit context if a transaction was performed under a delegation (attribution remains the actual user, per BR-039 §26.5.8; the delegation itself is not re-displayed on every transaction row, only on SCR-020).
++
+ ## 6.4 Form Design (Reusable Pattern)
+ 
+ **Standard CRUD form anatomy:**
+@@ -99,7 +111,7 @@ Validation happens at three points, per SRS §11 general behavior:
+ 
+ **Presentation:** Inline messages beneath each field (not MessageBox-only, per SRS §15 "Do not rely only on MessageBoxes") — an ErrorProvider-style icon + tooltip pattern is acceptable and recommended alongside the inline text for WinForms. MessageBox is reserved for whole-form/business-rule failures that don't map to one field (e.g., "Unable to connect to the database").
+ 
+-**Coverage (from SRS §11, VAL-001–022):**
++**Coverage (from SRS §11, VAL-001–029):**
+ - Required-field emptiness → "This field is required."
+ - Numeric fields → "Enter a valid number." / range-specific messages (e.g., "Price must be zero or greater.")
+ - Negative or zero quantity where ≥1 is required → "Enter a quantity of at least 1."
+@@ -109,6 +121,13 @@ Validation happens at three points, per SRS §11 general behavior:
+ - Invalid/future date → "Date cannot be in the future."
+ - Duplicate values (username, category name) → "{Value} is already in use."
+ - Required ComboBox selection missing → "Please make a selection."
++- Delegation recipient ineligible (VAL-023) → "This user is not eligible to receive a delegation."
++- Delegation responsibility not delegatable (VAL-024) → "This responsibility cannot be delegated."
++- Delegation End Date before Start Date (VAL-025) → "End date cannot be before start date."
++- Delegation reason empty (VAL-026) → "A reason is required for this delegation."
++- Delegator lacks the authority being granted (VAL-027, BR-033) → "You cannot delegate a responsibility you do not have."
++- Delegation overlap (VAL-028, BR-039) → "This user already has an active delegation for this responsibility during this period."
++- Non-Administrator attempts to revoke (VAL-029, BR-031) → falls to the standard Permission Error pattern (6.10), since the Revoke control does not exist on a Staff session in the first place.
+ 
+ ## 6.8 Empty States
+ 
+@@ -122,6 +141,7 @@ Every list/table defines what's empty, why, and what to do next:
+ | Dashboard Recent Activity | "No recent activity yet — record your first Stock-In to get started." + link to Stock-In | — |
+ | Reports | "No records found for the selected filters." (report body area) | — |
+ | Low-Stock views | "Nothing is low on stock right now." (a positive, reassuring empty state — this is good news, styled neutrally/positively, not as a warning) | — |
++| Delegation Management *(SRS v1.1)* | "No delegations yet. Create one to temporarily extend a Staff member's access." + Create Delegation button | "No delegations match your filters." + Clear Filters |
+ 
+ ## 6.9 Feedback States
+ 
+@@ -148,7 +168,9 @@ Feedback style is identical across every module — the same colors, icon set, a
+ 
+ ## 6.11 Confirmation Dialogs
+ 
+-Required before: Delete, Deactivate (Product/Category/Supplier/Customer/User), Stock-Out (reduces stock — operationally significant), Inventory Adjustment (directly overrides stock), Logout when unsaved work exists on an open form.
++Required before: Delete, Deactivate (Product/Category/Supplier/Customer/User), Stock-Out (reduces stock — operationally significant), Inventory Adjustment (directly overrides stock), Revoke Delegation (immediately removes a Staff member's active access, SRS v1.1), Logout when unsaved work exists on an open form.
++
++**Revoke Delegation dialog specifics (SRS v1.1):** Title "Revoke Delegation?"; body states recipient, responsibility, and effect in plain language — "This will immediately end {Recipient}'s access to {Responsibility}." — never a bare "Are you sure?"; confirming button reads "Revoke" (danger/red style); the delegation record is retained afterward, only its Status changes (FR-DEL-013).
+ 
+ **Not required for:** Stock-In (a purely additive, low-risk, high-frequency action — requiring confirmation here would violate "minimize unnecessary clicks" for the single most-repeated task in the app; the live "New quantity will be: X" preview before Save already gives the user a chance to catch mistakes), ordinary navigation, Save on Add/Edit forms (the Save action itself is the confirmation).
+ 
+diff --git a/product-requirements/08-Requirements-PR-UI-UX-Traceability.md b/product-requirements/08-Requirements-PR-UI-UX-Traceability.md
+index 4945112..b9cddea 100644
+--- a/product-requirements/08-Requirements-PR-UI-UX-Traceability.md
++++ b/product-requirements/08-Requirements-PR-UI-UX-Traceability.md
+@@ -20,6 +20,11 @@
+ | PR-014 | The system shall never expose raw stack traces, SQL errors, or technical exception detail to the end user. | ER-007, ER-010, NFR-006/007 |
+ | PR-015 | The system shall preserve entered form data when a Save attempt fails validation, so the user does not need to re-enter it. | Design philosophy #6 |
+ | PR-016 | The system shall expose Product, Category, Supplier, and Customer master-data mutation controls only to Administrator; Inventory/Store Staff shall have view/search access only. | UX-DEC-001, SRS §6.2.2 interpreted conservatively |
++| PR-017 | The system shall allow an Administrator to grant a Staff user a time-bounded delegation of Stock-In, Stock-Out, or approved report access, without changing the recipient's permanent role. | FR-DEL-001, FR-DEL-006, SRS v1.1 |
++| PR-018 | The system shall evaluate effective permission as the union of a user's permanent role and any currently valid (Active, within date range) delegations, re-evaluated at each access check. | FR-DEL-004–005, BR-034, SRS v1.1 |
++| PR-019 | The system shall restrict Delegation Management, delegation creation, and delegation revocation to the Administrator role at the UI level, with no visible entry point for Staff. | BR-031, §26.7, SRS v1.1 |
++| PR-020 | The system shall prevent delegation of User Management, Inventory Adjustment, Administrator privileges, and master-data deletion/deactivation under any circumstance. | BR-036, FR-DEL-008, SRS v1.1 |
++| PR-021 | The system shall retain every delegation record, including revoked ones, as authorization history rather than deleting it. | FR-DEL-013, BR-037, SRS v1.1 |
+ 
+ ## 8.2 UI Requirements (UI-)
+ 
+@@ -39,6 +44,7 @@
+ | UI-012 | Every modal dialog supports Esc to cancel/close. |
+ | UI-013 | Empty-state messaging always includes a next-step action where one exists (e.g., "Add your first product"). |
+ | UI-014 | Administrator-only master-data mutation controls are visible only to Administrator; Staff do not see Add/Edit/Delete/Deactivate controls for Products, Categories, Suppliers, or Customers. |
++| UI-015 | Delegation status renders as a pill badge with icon, label, and status color (Active/Expired/Revoked) identically to inventory status styling; the Revoke action appears only on Active rows and never on Expired or Revoked rows. |
+ 
+ ## 8.3 UX Requirements (UX-)
+ 
+@@ -55,6 +61,7 @@
+ | UX-009 | A user blocked from deleting a record shall be offered a clear alternative action (deactivate) in the same interaction, not a dead end. |
+ | UX-010 | A user shall always be able to determine their current location in the application from the sidebar and screen header alone. |
+ | UX-011 | Inventory/Store Staff shall be able to view and search master data without being exposed to unauthorized mutation controls. |
++| UX-012 | An Administrator shall be able to see, at a glance, which delegations are Active, Expired, or Revoked, and shall be able to end an Active delegation in no more than two clicks (Revoke → Confirm). |
+ 
+ ## 8.4 Traceability
+ 
+@@ -76,11 +83,16 @@
+ | ER-007/010, NFR-006/007 | PR-014 | — | — | All screens (global error handling) |
+ | Design philosophy #6 | PR-015 | UX-004, UX-007 | UI-009 | All Add/Edit screens |
+ | UX-DEC-001 | PR-016 | UX-011 | UI-014 | SCR-003/004/005, SCR-006/007, SCR-008/009, SCR-010/011 |
++| FR-DEL-001, FR-DEL-006, BR-035 | PR-017 | UX-012 | UI-015 | SCR-020 |
++| FR-DEL-004–005, BR-034 | PR-018 | — | UI-015 | SCR-020 (governs effective permission app-wide) |
++| BR-031, §26.7, UX-DEC-002 | PR-019 | UX-012 | UI-015 | SCR-020 |
++| BR-036, FR-DEL-008 | PR-020 | — | — | SCR-020 (absent options, not disabled ones) |
++| FR-DEL-013, BR-037 | PR-021 | — | UI-015 | SCR-020 |
+ 
+ ## 8.5 MVP vs. Future Separation
+ 
+-All screens, flows, and requirements documented in this package (documents 01–08) are **MVP**, matching SRS §22 exactly: Login/Logout, Dashboard, full CRUD for Product/Category/Supplier/Customer by Administrator, view/search master data for Inventory/Store Staff, Stock-In, Stock-Out, Administrator-only Inventory Adjustment, automatic stock status, Transaction History with search/filter, the six required reports (view + print, no export), and basic User Management.
++All screens, flows, and requirements documented in this package (documents 01–08) are **MVP**, matching SRS §22 (v1.0 baseline) plus the SRS v1.1 Delegation amendment exactly: Login/Logout, Dashboard, full CRUD for Product/Category/Supplier/Customer by Administrator, view/search master data for Inventory/Store Staff, Stock-In, Stock-Out, Administrator-only Inventory Adjustment, automatic stock status, Transaction History with search/filter, the six required reports (view + print, no export), basic User Management, and Administrator-only Delegation Management (SCR-020).
+ 
+-**Explicitly not designed here (Future, per SRS §23):** report export (PDF/Excel/CSV), barcode/QR scanning, automatic purchase-order suggestions, multi-branch/warehouse, cloud sync or concurrent multi-user editing, mobile companion app, accounting/e-commerce integrations, analytics/forecasting, customer loyalty/pricing rules, batch import, serial/lot tracking, email/SMS notifications, permissions beyond the two defined roles, full field-level audit history, dark mode/advanced theming, multi-language support.
++**Explicitly not designed here (Future, per SRS §23 and SRS v1.1 §26.2 delegation boundary):** report export (PDF/Excel/CSV), barcode/QR scanning, automatic purchase-order suggestions, multi-branch/warehouse, cloud sync or concurrent multi-user editing, mobile companion app, accounting/e-commerce integrations, analytics/forecasting, customer loyalty/pricing rules, batch import, serial/lot tracking, email/SMS notifications, permissions beyond the two defined roles, full field-level audit history, dark mode/advanced theming, multi-language support, delegation of User Management or Inventory Adjustment, delegation approval workflows, delegation chains (a delegate re-delegating), and any role beyond Administrator/Inventory-Store Staff.
+ 
+ No screen, component, or interaction in documents 01–08 introduces any of the above. Anything that *would* improve the product but isn't covered by the current SRS is logged separately in document 09, not silently designed in.
+diff --git a/product-requirements/09-Design-Recommendations-and-Claude-Brief.md b/product-requirements/09-Design-Recommendations-and-Claude-Brief.md
+index 40c8bd1..d41a3b3 100644
+--- a/product-requirements/09-Design-Recommendations-and-Claude-Brief.md
++++ b/product-requirements/09-Design-Recommendations-and-Claude-Brief.md
+@@ -14,6 +14,26 @@ These are potential improvements identified while designing the UX/UI spec. **No
+ 
+ **Status:** Resolved before visual-design handoff.
+ 
++## 9.1a Resolved — Delegation Visibility to Staff *(SRS v1.1)*
++
++**Decision:** Delegation Management (SCR-020) is Administrator-only with no visible entry point, disabled or otherwise, for Inventory/Store Staff. A Staff recipient never sees "you have been delegated X" as a distinct UI concept — the delegated capability simply becomes usable at its normal location for the duration it is valid.
++
++**Decision ID:** UX-DEC-002
++
++**Reason:** SRS v1.1 §26.7 requires the UI to "not provide delegation controls to Staff" but does not specify whether a recipient should be notified in-app. The conservative interpretation — no separate notification surface, no distinct "delegated" visual treatment on Stock-In/Stock-Out/Reports — avoids inventing a notification feature the SRS does not require.
++
++**Affected screens:** SCR-020; implicitly SCR-012/013/016 (no visual change when a capability is delegated vs. permanent).
++
++**Status:** Resolved before visual-design handoff.
++
++## 9.1b Logged, Not Designed — Delegation Notification / Approval Workflow
++
++- **Proposed feature:** Notify a Staff user in-app when a delegation becomes active or is about to expire; require the recipient to acknowledge/accept a delegation before it takes effect.
++- **Reason:** Would improve awareness, but SRS v1.1 defines delegation as an Administrator-granted authorization, not a workflow requiring recipient acknowledgement (§26.1, §26.4 FR-DEL-001).
++- **Affected area:** SCR-020, potentially SCR-002 (Dashboard).
++- **Implementation impact:** Medium — would need a notification mechanism not otherwise present in the SRS.
++- **MVP or Future:** Future — not required by any FR-DEL requirement; SCR-020 as specified is the complete MVP surface.
++
+ ## 9.2 Persist Search/Filter State Across Navigation
+ 
+ - **Proposed feature:** Remember a user's active filters on Product List / Inventory History when they navigate away and back within the same session.
+@@ -64,7 +84,7 @@ These are potential improvements identified while designing the UX/UI spec. **No
+ 
+ **Component style:** Flat, 1px-bordered panels and inputs, 4px radius on controls and 6px on cards/dialogs — modest rounding, not pill-everything. No drop shadows; depth communicated through subtle background/border contrast only (`#FFFFFF` surfaces on `#F4F6F8` background). Buttons: solid Primary fill for the one primary action per screen, outlined Secondary for Cancel/Back, solid Danger red reserved strictly for the confirming button in destructive dialogs.
+ 
+-**Navigation style:** Persistent left sidebar (~220px), grouped into Dashboard / Catalog (Products, Categories, Suppliers, Customers) / Inventory Operations (Stock In, Stock Out, Inventory Adjustment, Inventory History) / Reports / User Management (Administrator only, bottom). Active item has a filled background + left accent bar. Top header shows screen title and a global product-search box. Bottom StatusStrip shows current user, role, and date.
++**Navigation style:** Persistent left sidebar (~220px), grouped into Dashboard / Catalog (Products, Categories, Suppliers, Customers) / Inventory Operations (Stock In, Stock Out, Inventory Adjustment, Inventory History) / Reports / User Management and Delegation Management (both Administrator only, grouped together at the bottom). Active item has a filled background + left accent bar. Top header shows screen title and a global product-search box. Bottom StatusStrip shows current user, role, and date.
+ 
+ **Dashboard style:** A row of clean metric tiles (label + large number, minimal icon), followed by a two-column layout: Recent Activity (a simple, readable list of the latest stock movements) beside Quick Actions (large, obvious buttons for Stock-In/Stock-Out/Search — the tasks staff repeat most). No charts required for MVP; if included, must remain simple bar/line, WinForms-compatible, and secondary to the numbers themselves.
+ 
+@@ -72,7 +92,7 @@ These are potential improvements identified while designing the UX/UI spec. **No
+ 
+ **Form style:** Single, consistent Add/Edit dialog pattern reused for every master-data entity — title, grouped fields with visible persistent labels (never placeholder-only), red-asterisk required indicators, inline validation messages under each field, Cancel/Save bottom-right. Stock-In, Stock-Out, and Inventory Adjustment use the same field-grouping and button conventions but live as full dedicated screens (not modals) since they're used repeatedly through a shift. For master-data screens, these Add/Edit controls are Administrator-only.
+ 
+-**Status indicators:** In Stock (green check), Low Stock (amber warning triangle), Out of Stock (red cross) — always icon + label + color together, rendered as a pill badge, used identically everywhere status appears (lists, details, dashboard, Stock-Out selector, reports).
++**Status indicators:** In Stock (green check), Low Stock (amber warning triangle), Out of Stock (red cross) — always icon + label + color together, rendered as a pill badge, used identically everywhere status appears (lists, details, dashboard, Stock-Out selector, reports). Delegation status (Active green check, Expired neutral clock, Revoked red cross) uses the identical badge treatment on SCR-020.
+ 
+ **Icon style:** One coherent outline icon set, 1.5–2px stroke weight, no mixed icon styles. Icons support labels; they never stand alone as the only signifier of meaning or status.
+ 
+diff --git a/product-requirements/10-Final-Product-UX-Audit.md b/product-requirements/10-Final-Product-UX-Audit.md
+index a5258b6..3c7f3d7 100644
+--- a/product-requirements/10-Final-Product-UX-Audit.md
++++ b/product-requirements/10-Final-Product-UX-Audit.md
+@@ -1,29 +1,39 @@
+ # 10. Final Product / UX Audit
+ 
+-Cross-check against SRS v1.0 before this package is considered ready to hand to a visual designer or WinForms developer.
++Cross-check against SRS v1.0 + SRS v1.1 (Delegation amendment) before this package is considered ready to hand to a visual designer or WinForms developer.
+ 
+ | Check | Result | Evidence |
+ |---|---|---|
+-| Every SRS use case (UC-001–018) has appropriate UI coverage | ✅ Pass | Each UC is mapped to a screen in doc 03 and a flow in doc 04 |
+-| Every MVP functional requirement has a screen or interaction | ✅ Pass | Doc 03 "Related Requirements" column covers FR-AUTH through FR-USR |
++| Every SRS use case (UC-001–021) has appropriate UI coverage | ✅ Pass | Each UC is mapped to a screen in doc 03 and a flow in doc 04, including UC-019–021 → SCR-020 |
++| Every MVP functional requirement has a screen or interaction | ✅ Pass | Doc 03 "Related Requirements" column covers FR-AUTH through FR-USR, plus FR-DEL-001–014 → SCR-020 |
+ | Every CRUD entity has appropriate UX | ✅ Pass | Doc 05 §5.3–5.8, 5.14; doc 06 §6.1 |
+ | Inventory business rules are reflected in UX | ✅ Pass | BR-011 (insufficient stock), BR-015 (status calc), BR-025 (no negative stock) all reflected in SCR-013 live validation, doc 06 §6.3 |
+-| Validation rules are represented | ✅ Pass | Doc 06 §6.7, mapped to VAL-001–022 |
++| Validation rules are represented | ✅ Pass | Doc 06 §6.7, mapped to VAL-001–029 (VAL-023–029 delegation-specific) |
+ | Error handling is represented | ✅ Pass | Doc 06 §6.10, mapped to ER-001–012 |
+-| Role restrictions are represented | ✅ Pass | UX-DEC-001 resolves Staff master-data permissions; Admin-only controls are reflected in docs 02, 03, 05, and 09 |
++| Role restrictions are represented | ✅ Pass | UX-DEC-001 resolves Staff master-data permissions; UX-DEC-002 resolves delegation invisibility to Staff; Admin-only controls are reflected in docs 02, 03, 05, and 09 |
+ | Append-only transaction history is respected | ✅ Pass | SCR-015 has no Edit/Delete controls anywhere in its design (doc 05 §5.12, doc 06 §6.1) |
+ | Product quantity starts at zero | ✅ Pass | SCR-005 shows QuantityOnHand disabled with "starts at 0" caption (doc 05 §5.5); flow in doc 04 §4.2 |
+ | Product default supplier and Stock-In actual supplier are distinguished | ✅ Pass | SCR-005 "Default Supplier" vs SCR-012 "Actual Supplier" explicitly labeled and described (doc 05 §5.5, §5.9) |
+ | Stock-Out customer remains optional | ✅ Pass | SCR-013 Customer field explicitly marked optional, no asterisk (doc 05 §5.10) |
+ | Reporting remains within MVP scope | ✅ Pass | Doc 05 §5.13 lists exactly the 6 SRS reports with SRS-defined columns/filters; no export UI included |
+-| No unsupported functionality has been silently introduced | ✅ Pass | Doc 08 §8.5 explicitly separates MVP from Future; doc 09 logs every judgment call requiring approval rather than assuming it |
+-| All UI requirements are realistic for WinForms | ✅ Pass | Doc 07 built entirely from standard WinForms controls; doc 01 §1.2 explicitly lists avoided patterns |
+-| The design is consistent | ✅ Pass | Doc 06 §6.2 (global CRUD rules), doc 08 §8.2 (UI-001–014) |
++| **Delegation Management screen exists and is Administrator-only** | ✅ Pass | SCR-020 (doc 03, doc 05 §5.15); no sidebar entry or code path for Staff (doc 02, §26.7) |
++| **Delegation CRUD/UX (create, view, revoke) is fully specified** | ✅ Pass | Doc 04 §4.15–4.17; doc 05 §5.15 Actions table |
++| **Delegation states (Active/Expired/Revoked) are visually distinguished** | ✅ Pass | Doc 06 §6.3.1 icon+label+color badge; doc 08 UI-015 |
++| **Expiration behavior is automatic and non-destructive** | ✅ Pass | FR-DEL-005 → doc 01 §1.3.4; Expired rows retained, read-only, no action controls (doc 05 §5.15) |
++| **Revocation behavior is explicit, confirmed, and attributable** | ✅ Pass | Doc 04 §4.16; doc 06 §6.11 Revoke Delegation dialog specifics; FR-DEL-013/014 |
++| **Effective permission model (role + valid delegation) is defined** | ✅ Pass | Doc 01 §1.3.4; doc 08 PR-018 |
++| **Delegation cannot exceed delegator authority or grant non-delegatable responsibilities** | ✅ Pass | Doc 05 §5.15 (responsibilities absent, not disabled, for non-delegatable items); doc 08 PR-020; BR-033, BR-036 |
++| **Delegation history is retained, not deleted, on revocation** | ✅ Pass | FR-DEL-013, BR-037 → doc 04 §4.16, doc 08 PR-021 |
++| No unsupported functionality has been silently introduced | ✅ Pass | Doc 08 §8.5 explicitly separates MVP from Future (including delegation-adjacent Future items); doc 09 logs every judgment call requiring approval rather than assuming it |
++| All UI requirements are realistic for WinForms | ✅ Pass | Doc 07 built entirely from standard WinForms controls; doc 01 §1.2 explicitly lists avoided patterns; SCR-020 uses the same DataGridView + modal-panel pattern as existing screens |
++| The design is consistent | ✅ Pass | Doc 06 §6.2 (global CRUD rules), doc 08 §8.2 (UI-001–015) |
+ 
+ ## 10.1 Final Sign-Off
+ 
+ 1. **Staff create/edit rights on master data** — RESOLVED by UX-DEC-001. Staff are view/search-only; Administrator owns master-data management.
+-2. **Use-case ID final check** — traceability uses the approved SRS UC catalogue as published. Future SRS changes must trigger a traceability re-check.
++2. **Use-case ID final check** — traceability uses the approved SRS UC catalogue as published, now including UC-019–021. Future SRS changes must trigger a traceability re-check.
++3. **Delegation visibility to Staff** — RESOLVED by UX-DEC-002 (§9.1a). No notification/acknowledgement surface is introduced; delegated capability simply becomes usable at its normal location while valid.
++4. **SRS v1.1 downstream gate** — RESOLVED. Per `project-management/SRS-v1.1-CHANGELOG.md` and `SRS-v1.1-AUDIT.md`, this package now incorporates Delegation Management consistently across information architecture, screen inventory, UX flows, screen specifications, CRUD/validation/error UX, requirements traceability, and this final audit. See `11-Product-UX-v1.1-Changelog.md` for the itemized diff.
+ 
+ ## 10.2 Final Permission Model
+ 
+@@ -33,15 +43,16 @@ Cross-check against SRS v1.0 before this package is considered ready to hand to
+ | Categories | Full management | View/search |
+ | Suppliers | Full management | View/search |
+ | Customers | Full management | View/search |
+-| Stock-In | Yes | Yes |
+-| Stock-Out | Yes | Yes |
+-| Inventory Adjustment | Yes | No |
++| Stock-In | Yes | Yes (or via active delegation) |
++| Stock-Out | Yes | Yes (or via active delegation) |
++| Inventory Adjustment | Yes | No — not delegatable |
+ | Inventory History | View | View |
+-| MVP Reports | All | Approved subset |
+-| User Management | Yes | No |
++| MVP Reports | All | Approved subset (or via active delegation for report access) |
++| User Management | Yes | No — not delegatable |
++| Delegation Management | Yes (create/view/revoke) | No — no visible entry point |
+ 
+ ## 10.3 Verdict
+ 
+-🟢 **PRODUCT REQUIREMENTS + UX/UI SPECIFICATION v1.0 — APPROVED**
++🟢 **PRODUCT REQUIREMENTS + UX/UI SPECIFICATION v1.1 — APPROVED**
+ 
+-The package is complete and ready for visual design handoff. No unresolved MVP permission or UX scope blocker remains. Any new functionality discovered during visual design must be recorded as a requirements change rather than silently added to MVP.
++The package is complete, now incorporates the SRS v1.1 Delegation amendment in full, and is ready for visual design handoff/update. No unresolved MVP permission or UX scope blocker remains. Any new functionality discovered during visual design must be recorded as a requirements change rather than silently added to MVP.
+diff --git a/product-requirements/11-Product-UX-v1.1-Changelog.md b/product-requirements/11-Product-UX-v1.1-Changelog.md
+new file mode 100644
+index 0000000..3953ba2
+--- /dev/null
++++ b/product-requirements/11-Product-UX-v1.1-Changelog.md
+@@ -0,0 +1,45 @@
++# 11. Product/UX v1.1 Changelog — Delegation Management
++
++## Purpose
++
++This document records exactly what changed in the Product Requirements + UX/UI Specification to close the downstream gate opened by the SRS v1.1 Delegation amendment (`project-management/SRS-v1.1-AUDIT.md`, `project-management/SRS-v1.1-CHANGELOG.md`). It is the Product/UX equivalent of the SRS's own v1.1 changelog and exists so that no delegation-related change in this package can be mistaken for an undocumented scope addition.
++
++## Trigger
++
++**SRS v1.1 §26.8 Traceability Impact** and the **SRS-v1.1-AUDIT.md Downstream Gate** both state that this package was out of date relative to SRS v1.1 until Delegation Management was added consistently across information architecture, screen inventory, UX flows, screen specifications, requirements traceability, and the final audit. This changelog closes that gate.
++
++## Documents Updated
++
++| Document | Change |
++|---|---|
++| `00-README.md` | Version bumped to v1.1; document map updated; new file 11 added to the map |
++| `01-Product-Vision-and-UX-Strategy.md` | Administrator/Staff role descriptions updated with delegation capabilities and limits; new §1.3.4 Effective Permission Model |
++| `02-Information-Architecture-and-Navigation.md` | New IA row for Delegation Management; new note on delegation's effect on navigation/sidebar visibility |
++| `03-Screen-Inventory.md` | Screen count updated 19 → 20; new row SCR-020 Delegation Management; new §3.3 Delegation Permission Rule (UX-DEC-002) |
++| `04-User-Flows.md` | Three new flows: §4.15 Create Delegation, §4.16 Revoke Delegation, §4.17 View Delegation History |
++| `05-Screen-Specifications.md` | New §5.15 full screen specification for SCR-020 (layout, components, actions, states, status badges) |
++| `06-CRUD-Inventory-Validation-Error-UX.md` | New §6.3.1 Delegation Status UX; new validation message rows (VAL-023–029); new empty-state row; new confirmation-dialog specifics for Revoke |
++| `08-Requirements-PR-UI-UX-Traceability.md` | New PR-017–021, UI-015, UX-012; five new traceability rows; §8.5 MVP/Future updated with delegation-adjacent Future items |
++| `09-Design-Recommendations-and-Claude-Brief.md` | New §9.1a Resolved (UX-DEC-002) and §9.1b Logged-not-designed (delegation notification/approval workflow); Visual Design Brief navigation and status-indicator paragraphs updated |
++| `10-Final-Product-UX-Audit.md` | Nine new audit rows specific to delegation; §10.1 Final Sign-Off items 3–4 added; §10.2 Permission Model gains a Delegation Management row; verdict updated to v1.1 |
++| `11-Product-UX-v1.1-Changelog.md` | This file (new) |
++
++## New Downstream IDs Introduced by This Package
++
++These are Product/UX-layer IDs (PR-, UI-, UX-, SCR-, UX-DEC-) introduced to represent SRS v1.1 requirements at the design level. No SRS-layer ID (FR-, BR-, DR-, VAL-, UC-, OBJ-) was invented here — all are taken as-is from `docs/26-Delegation-Requirements-v1.1.md`.
++
++- **Screen:** SCR-020 — Delegation Management
++- **Product Requirements:** PR-017, PR-018, PR-019, PR-020, PR-021
++- **UI Requirements:** UI-015
++- **UX Requirements:** UX-012
++- **Design Decision:** UX-DEC-002 — Delegation Visibility to Staff
++
++## Traceability Confirmation
++
++Every new element added by this changelog traces to one or more of: `FR-DEL-001–014`, `BR-031–039`, `DR-DEL`, `VAL-023–029`, `UC-019–021` (SRS v1.1, `docs/26-Delegation-Requirements-v1.1.md`). No functionality, screen, business rule, or requirement ID beyond what SRS v1.1 defines has been introduced. Items that would extend delegation further (notifications, acceptance workflow, delegation chains, delegated User Management/Inventory Adjustment) are explicitly logged as Future in `09-Design-Recommendations-and-Claude-Brief.md` §9.1b and `08-Requirements-PR-UI-UX-Traceability.md` §8.5, not designed into MVP.
++
++## Verdict
++
++🟢 **PRODUCT/UX v1.1 DELEGATION UPDATE — COMPLETE**
++
++The Product Requirements + UX/UI Specification now fully incorporates SRS v1.1. The downstream gate recorded in `SRS-v1.1-AUDIT.md` is closed. Visual Design may now proceed against this updated v1.1 baseline (see `10-Final-Product-UX-Audit.md` §10.3).
+-- 
+2.43.0
+
+
+From 3b449f0f013d090d666c0b362c6e0749b8332482 Mon Sep 17 00:00:00 2001
+From: Claude <claude@anthropic.com>
+Date: Fri, 21 Aug 2026 19:46:56 +0000
+Subject: [PATCH 2/2] visual-design: add Delegation Management (SCR-020) to
+ design baseline
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Updates the visual design package to cover the SRS v1.1 Delegation
+amendment now reflected in product-requirements v1.1.
+
+- 00-README: version -> v1.1, screen count 19 -> 20
+- 01-Overview: notes delegation reuses existing visual language
+- 03-Component-Library: new Active/Expired/Revoked delegation status
+  badges (3.12), reusing existing color tokens only; hidden-vs-disabled
+  note extended to Delegation Management and to non-delegatable
+  responsibilities inside the Create Delegation form (3.11.1)
+- 04-Application-Shell: sidebar gains Delegation Management (Admin-only,
+  grouped with User Management); role-based shell behavior notes that
+  delegation is invisible as a UI concept, not just hidden nav (UX-DEC-002)
+- 05-Screen-Designs: new full visual spec for SCR-020 Delegation
+  Management (list + Create Delegation panel, states, permission
+  differences, resizing); cross-screen consistency check updated
+
+No new colors, type scales, or component idioms introduced — SCR-020
+is built entirely from tokens and components already defined in this
+package.
+---
+ visual-design/00-README.md                 |  27 ++
+ visual-design/01-Visual-Design-Overview.md |  42 ++
+ visual-design/02-Design-Tokens.md          | 160 +++++++
+ visual-design/03-Component-Library.md      | 178 ++++++++
+ visual-design/04-Application-Shell.md      |  82 ++++
+ visual-design/05-Screen-Designs.md         | 493 +++++++++++++++++++++
+ 6 files changed, 982 insertions(+)
+ create mode 100644 visual-design/00-README.md
+ create mode 100644 visual-design/01-Visual-Design-Overview.md
+ create mode 100644 visual-design/02-Design-Tokens.md
+ create mode 100644 visual-design/03-Component-Library.md
+ create mode 100644 visual-design/04-Application-Shell.md
+ create mode 100644 visual-design/05-Screen-Designs.md
+
+diff --git a/visual-design/00-README.md b/visual-design/00-README.md
+new file mode 100644
+index 0000000..ebf69b2
+--- /dev/null
++++ b/visual-design/00-README.md
+@@ -0,0 +1,27 @@
++# Visual Design Package — NovaTech Electronics Inventory Management System
++
++**Phase:** 3 — Visual Design
++**Based on (approved, unmodified):**
++- Phase 1 — System Requirements Specification (SRS) v1.0, amended by SRS v1.1 Delegation (`/docs`)
++- Phase 2 — Product Requirements + UX/UI Specification v1.1 (`/product-requirements`)
++
++**Status of this phase:** This package adds no functionality, no screens, no business rules, and no permission changes. It is a visual translation layer only — every color, type size, spacing value, component state, and screen layout traces back to a specific line in Phase 1 or Phase 2. Where Phase 2 (`07-Design-System.md`, `09-Design-Recommendations-and-Claude-Brief.md`) already defined a design decision, this package adopts it exactly rather than re-deciding it, and expands it into full component-state and screen-level coverage. This includes the SRS v1.1 Delegation amendment: SCR-020 (Delegation Management) is now part of the visual design baseline, per `product-requirements/11-Product-UX-v1.1-Changelog.md`.
++
++## How to read this package
++
++| File | Contents |
++|---|---|
++| `01-Visual-Design-Overview.md` | Design personality, principles, what to avoid, how this package relates to Phase 2 |
++| `02-Design-Tokens.md` | Machine-readable color, type, spacing, radius, border, shadow, and dimension tokens |
++| `03-Component-Library.md` | Every control's normal/hover/focus/pressed/disabled/error visual spec |
++| `04-Application-Shell.md` | Header, sidebar, content region, status strip — the reusable frame for all 20 screens |
++| `05-Screen-Designs.md` | Full visual design for all 20 approved screens (SCR-001–SCR-020) |
++| `06-Dialogs-and-States.md` | Confirmation/blocked-delete/validation/success dialogs; empty, error, loading, success states |
++| `07-Accessibility.md` | Keyboard, contrast, focus, color-independence, screen-reader-adjacent considerations |
++| `08-WinForms-Implementation-Guidelines.md` | Control mapping, what's realistic vs. not, anchor/dock guidance |
++| `09-Visual-Design-Traceability.md` | SRS → Product Requirement → UX Requirement → Screen → Visual Design matrix |
++| `10-Final-Visual-Design-Audit.md` | Completion checklist and final verdict |
++
++## Source-of-truth precedence
++
++If anything in this package appears to conflict with Phase 1 or Phase 2, **Phase 1 and Phase 2 win.** This package should be corrected, not the other way around. No requirement, business rule, permission, or screen defined in Phase 1/2 is altered here. Any open question is logged in `10-Final-Visual-Design-Audit.md` §"Items for Clarification" rather than resolved by silent assumption.
+diff --git a/visual-design/01-Visual-Design-Overview.md b/visual-design/01-Visual-Design-Overview.md
+new file mode 100644
+index 0000000..be38b88
+--- /dev/null
++++ b/visual-design/01-Visual-Design-Overview.md
+@@ -0,0 +1,42 @@
++# 1. Visual Design Overview
++
++## 1.1 Product Context
++
++NovaTech Electronics is a small electronics/gadgets retailer. The application is used by an Administrator (owner/manager) and Inventory/Store Staff, on a single store PC, dozens of times a day, to track products, suppliers, customers, and stock movements. It is a C#/.NET WinForms desktop application (SRS §2, §7).
++
++## 1.2 Visual Personality
++
++**Professional, calm, trustworthy, efficient.** This is a piece of equipment the store relies on, not a marketing surface. It should feel like a well-organized ledger — understated, orderly, quick to scan — not a consumer dashboard or a student demo.
++
++Five words that should describe every screen: **modern, clean, trustworthy, calm, organized.**
++
++## 1.3 Design Principles (in priority order)
++
++1. **Information hierarchy** — the most important fact on any screen (stock status, quantity, total) is the most visually prominent thing on it.
++2. **Readability** — dense grids stay legible at native desktop resolution without zooming.
++3. **Consistency** — one Add/Edit pattern, one list pattern, one dialog pattern, one status-badge treatment, reused everywhere (per Phase 2 §6.1–6.11).
++4. **Efficient workflows** — the highest-frequency tasks (Stock-In, Stock-Out, product search) are visually the fastest to reach and complete.
++5. **Clear feedback** — every Save, error, and blocked action tells the user exactly what happened and what to do next.
++6. **Error prevention** — live validation (e.g., Stock-Out quantity vs. available stock) catches mistakes before Save, not just after.
++7. **Accessibility** — full keyboard operability, AA contrast, never color-alone meaning (detailed in `07-Accessibility.md`).
++8. **Desktop usability** — realistic for a store PC: fixed-width sidebar, anchored/docked grids, modal dialogs, standard Windows print.
++
++## 1.4 What This Design Avoids
++
++Per the approved brief (Phase 2 §10) and the visual-design brief for this phase:
++
++- Gradients, glassmorphism, drop shadows, glow effects
++- Animation-heavy transitions
++- Large decorative illustrations or hero graphics
++- Mobile-style UI (bottom nav bars, swipe gestures, card-stack feeds, pill-everything rounding)
++- Dark mode (not in MVP scope)
++- Any visual effect a standard WinForms control set (TextBox, Button, Label, ComboBox, DataGridView, DateTimePicker, CheckBox, Panel/GroupBox, MenuStrip/ToolStrip, StatusStrip, MessageBox) cannot realistically reproduce
++- Features, screens, or interactions not present in the approved Phase 1/2 specification
++
++## 1.5 Relationship to Phase 2 Design System
++
++Phase 2 §7 (`product-requirements/07-Design-System.md`) and §10 (Claude Visual Design Brief) already fixed the core visual language: color palette, typography, spacing scale, radius, and component style. This package does not re-litigate those decisions — `02-Design-Tokens.md` restates them in a single machine-readable reference, and every subsequent file (component states, shell, 20 screens, dialogs) is the detailed expansion of that already-approved language, not a new one. Delegation Management (SCR-020, added by SRS v1.1) reuses this same language exactly — no new colors, type sizes, or component idioms were introduced for it (see `03-Component-Library.md` §3.12, `05-Screen-Designs.md` §5.15).
++
++## 1.6 Design Target Statement
++
++> A store owner or staff member should be able to look at any screen in this application for the first time and immediately understand: where they are, what the most important number on the screen means, and what they're allowed to do next — without training, without a tooltip tour, and without needing to distinguish "is this button real or just decoration."
+diff --git a/visual-design/02-Design-Tokens.md b/visual-design/02-Design-Tokens.md
+new file mode 100644
+index 0000000..c5485fd
+--- /dev/null
++++ b/visual-design/02-Design-Tokens.md
+@@ -0,0 +1,160 @@
++# 2. Design Tokens
++
++All values below are sourced from and consistent with `product-requirements/07-Design-System.md` §7.1–7.9, expanded with the additional component-dimension tokens needed for full screen and component coverage. Nothing here contradicts Phase 2.
++
++## 2.1 Color Tokens
++
++```json
++{
++  "color": {
++    "primary":              "#1E4B8F",
++    "primaryHover":         "#163A6E",
++    "primaryPressed":       "#122F59",
++    "secondary":            "#3B7A8F",
++    "background":           "#F4F6F8",
++    "surface":              "#FFFFFF",
++    "surfaceElevated":      "#FFFFFF",
++    "border":               "#D7DCE1",
++    "borderFocus":          "#1E4B8F",
++    "borderError":          "#C0392B",
++    "text":                 "#1F2933",
++    "textMuted":            "#6B7785",
++    "textDisabled":         "#9AA5B1",
++    "textInverse":          "#FFFFFF",
++    "success":              "#2E8B57",
++    "successTint":          "#E5F3EC",
++    "warning":              "#C77700",
++    "warningTint":          "#FBEBD9",
++    "error":                "#C0392B",
++    "errorTint":            "#FBEAE8",
++    "info":                 "#2E6E9E",
++    "infoTint":             "#E7F0F7",
++    "disabledBackground":   "#ECEEF1",
++    "disabledText":         "#9AA5B1",
++    "rowHover":             "#EAF1F8",
++    "rowSelected":          "#D6E4F5",
++    "rowSelectedAccent":    "#1E4B8F",
++    "rowZebra":             "#FAFBFC",
++    "sidebarBackground":    "#16324F",
++    "sidebarText":          "#DCE6F0",
++    "sidebarTextMuted":     "#8FA8C2",
++    "sidebarActiveBg":      "#1E4B8F",
++    "sidebarActiveAccent":  "#5B9BD5",
++    "statusStripBackground":"#EDEFF2"
++  }
++}
++```
++
++**Usage notes:**
++- Status tints (`successTint`, `warningTint`, `errorTint`) are the pill-badge background fills; the solid color is the icon/text on top of the tint (per Phase 2 §7.7).
++- `sidebarBackground` / `sidebarText` are new tokens for this phase (Phase 2 did not fix a sidebar-specific color, only that it's a "persistent left sidebar"). A dark-neutral sidebar (`#16324F`, a deep navy consistent with Primary) is chosen over a light sidebar to give the shell a clear anchor and visual separation from the light content area — this is a visual-design decision within Phase 2's palette family, not a new requirement. Documented as an assumption in `10-Final-Visual-Design-Audit.md`.
++- All color/background text pairings meet WCAG AA (4.5:1 for normal text, 3:1 for large text) — verified in `07-Accessibility.md` §7.4.
++
++## 2.2 Typography Tokens
++
++```json
++{
++  "typography": {
++    "fontFamily": "Segoe UI, Tahoma, Arial, sans-serif",
++    "appTitle":      { "size": 16, "weight": 600, "lineHeight": 22 },
++    "screenTitle":   { "size": 20, "weight": 600, "lineHeight": 26 },
++    "sectionTitle":  { "size": 15, "weight": 600, "lineHeight": 20 },
++    "body":          { "size": 12, "weight": 400, "lineHeight": 18 },
++    "label":         { "size": 11, "weight": 400, "lineHeight": 15 },
++    "button":        { "size": 12, "weight": 600, "lineHeight": 16 },
++    "tableHeader":   { "size": 11,   "weight": 600, "lineHeight": 15 },
++    "tableCell":     { "size": 11.5, "weight": 400, "lineHeight": 16 },
++    "metricNumber":  { "size": 24, "weight": 600, "lineHeight": 30 },
++    "helperText":    { "size": 11, "weight": 400, "lineHeight": 15 },
++    "errorText":     { "size": 11, "weight": 400, "lineHeight": 15 }
++  }
++}
++```
++
++`appTitle` (16px/600) is a new token for the shell's top-left application name — sized between Screen Title and Section Title since it's persistent chrome, not page content.
++
++## 2.3 Spacing Scale
++
++```json
++{ "spacing": { "xs": 4, "sm": 8, "md": 12, "lg": 16, "xl": 24, "xxl": 32 } }
++```
++
++- `sm` (8px): label-to-input gap
++- `lg` (16px): gap between fields within one group
++- `xl` (24px): gap between field groups
++- `xxl` (32px): dialog/panel edge padding
++
++## 2.4 Radius Tokens
++
++```json
++{
++  "radius": {
++    "input": 4,
++    "button": 4,
++    "card": 6,
++    "dialog": 6,
++    "badge": 10,
++    "sidebarActiveItem": 4
++  }
++}
++```
++
++Badge radius (10px, effectively a pill on a ~20px-tall badge) is the one deliberately rounded element in the system, per Phase 2 §7.7 "status rendered as a small colored pill badge."
++
++## 2.5 Border Tokens
++
++```json
++{
++  "border": {
++    "standard": "1px solid #D7DCE1",
++    "focus": "2px solid #1E4B8F",
++    "error": "2px solid #C0392B",
++    "divider": "1px solid #D7DCE1",
++    "sidebarActiveAccent": "3px solid #5B9BD5",
++    "rowSelectedAccent": "2px solid #1E4B8F"
++  }
++}
++```
++
++## 2.6 Shadow Tokens
++
++```json
++{ "shadow": { "none": "none" } }
++```
++
++**No drop shadows are used anywhere in this design.** Depth is communicated exclusively through background/border contrast (`surface` `#FFFFFF` on `background` `#F4F6F8`, plus 1px borders), per Phase 2 §7.4 and the "avoid unnecessary shadows" instruction. The single narrow exception, realistic in WinForms, is the native OS drop shadow WinForms itself renders around a modal dialog/MessageBox — that is an OS behavior, not an application style choice, and is not something the application draws.
++
++## 2.7 Component Dimension Tokens
++
++```json
++{
++  "dimensions": {
++    "sidebarWidth": 220,
++    "headerHeight": 56,
++    "statusStripHeight": 28,
++    "buttonHeightStandard": 32,
++    "buttonHeightLarge": 40,
++    "inputHeight": 30,
++    "gridRowHeight": 30,
++    "gridHeaderHeight": 32,
++    "iconInline": 16,
++    "iconButton": 20,
++    "iconSidebar": 24,
++    "iconDashboardTile": 32,
++    "dialogWidthSmall": 420,
++    "dialogWidthMedium": 560,
++    "dialogWidthLarge": 680,
++    "minWindowWidth": 1024,
++    "minWindowHeight": 768,
++    "badgeHeight": 20
++  }
++}
++```
++
++## 2.8 Icon Style Token
++
++```json
++{
++  "icon": { "style": "outline", "strokeWidth": "1.5-2px", "family": "single coherent outline set (Feather/Lucide-style)" }
++}
++```
+diff --git a/visual-design/03-Component-Library.md b/visual-design/03-Component-Library.md
+new file mode 100644
+index 0000000..5277948
+--- /dev/null
++++ b/visual-design/03-Component-Library.md
+@@ -0,0 +1,178 @@
++# 3. Component Library
++
++Every visual state uses tokens from `02-Design-Tokens.md`. "Not applicable" states are noted explicitly rather than omitted, so implementers know they were considered.
++
++## 3.1 Buttons
++
++| Variant | Normal | Hover | Pressed | Focus | Disabled | Usage |
++|---|---|---|---|---|---|---|
++| Primary | Fill `primary`, text `textInverse`, radius 4 | Fill `primaryHover` | Fill `primaryPressed` | 2px outline offset ring in `borderFocus` outside the button | Fill `disabledBackground`, text `disabledText`, no hover | Save, Login, Record Stock-In, Record Stock-Out, Save Adjustment, Generate, Print |
++| Secondary | Fill `surface`, text `primary`, 1px border `primary` | Fill `rowHover` | Fill `rowSelected` | 2px focus ring | Border/text in `disabledText`, fill `disabledBackground` | Cancel, Back, Clear Form |
++| Danger | Fill `error`, text `textInverse` | Darken ~12% | Darken further | 2px focus ring | Standard disabled treatment | Delete / Deactivate (confirming button only, inside dialogs) |
++| Ghost/Text | Transparent, text `primary`, no border | Text `primaryHover`, subtle `rowHover` background pad | Text `primaryPressed` | Underline + focus ring | Text `disabledText` | Clear Filters, "Mark Inactive" inline link, low-emphasis actions |
++
++- Height: `buttonHeightStandard` (32px) everywhere except Login's "Login" button, which uses `buttonHeightLarge` (40px) as the single-purpose, high-emphasis action on that screen.
++- Minimum width: 88px, auto-width beyond that with 16px horizontal padding.
++- One Primary button per screen/dialog maximum — this is enforced visually so the user's eye is never split between two competing "main" actions (consistent with 6.2's fixed Cancel-left/Save-right rule).
++- **Loading state** (Login "Signing in…", Save "Saving…"): label swaps to a busy label, button becomes non-interactive but keeps its Primary fill (not the disabled-gray treatment) so it doesn't visually read as blocked — it reads as "working."
++
++## 3.2 Text Fields (TextBox)
++
++| State | Border | Fill | Text | Notes |
++|---|---|---|---|---|
++| Normal | `border` 1px | `surface` | `text` | Persistent label above, 8px gap |
++| Hover | `border` 1px (unchanged — WinForms TextBox has no meaningful hover) | `surface` | `text` | — |
++| Focus | `borderFocus` 2px | `surface` | `text` | Visible ring, no placeholder-only labels ever |
++| Error | `borderError` 2px | `surface` | `text` | Inline `errorText` message directly beneath, replacing helper text |
++| Disabled | `border` 1px | `disabledBackground` | `disabledText` | Used for QuantityOnHand, Username-on-Edit — always with an explanatory caption below (per Phase 2 §6.1 UPDATE) |
++
++Height 30px, radius 4px, internal padding 8px horizontal.
++
++## 3.3 Password Fields
++
++Same as Text Fields, plus:
++- Characters masked with `•`.
++- No visibility-toggle icon in MVP (not in the approved spec) — kept as a plain masked field to avoid inventing an unapproved control.
++- On Login error (ER-001), the password field is cleared per Phase 2 §5.1, and receives focus.
++
++## 3.4 Numeric Inputs
++
++Same visual treatment as Text Fields (right-aligned text, since these are quantities/prices), plus:
++- Non-numeric keystrokes are rejected at input time (live validation per Phase 2 §6.7).
++- Currency fields (Purchase Price, Selling Price, Unit Price) show 2 decimal places and are right-aligned for scan-friendly column alignment when they appear in forms mirroring grid columns.
++- Live computed previews (Stock-In "New on-hand will be: X", Adjustment "Difference: +5/−3/0") render as an `info`-colored (or `success`/`error` for the signed Adjustment difference) inline label directly beneath the field, `body` weight, updating on each keystroke — no button press required.
++
++## 3.5 ComboBoxes
++
++| State | Border | Fill | Notes |
++|---|---|---|---|
++| Normal | `border` 1px | `surface` | Dropdown chevron icon, `textMuted` |
++| Focus | `borderFocus` 2px | `surface` | — |
++| Error (no selection made, required) | `borderError` 2px | `surface` | "Please make a selection." beneath |
++| Disabled | `border` 1px | `disabledBackground` | Used for Staff viewing Category/Supplier/Customer forms where all controls are read-only |
++
++Type-to-search ComboBoxes (Product selectors on Stock-In/Out/Adjustment) use the identical visual treatment — the type-ahead behavior is functional, not a separate visual style.
++
++## 3.6 DateTimePickers
++
++Same border/fill states as ComboBoxes. Calendar icon at the right edge, `textMuted`. Defaults to today's date where specified (Stock-In, Stock-Out dates). Dates beyond today are not selectable in the calendar popup where the rule applies (VAL-015-style "no future date" fields) — the disallowed dates render in `disabledText`, not simply omitted, so the user can see why they can't be picked.
++
++## 3.7 Checkboxes
++
++| State | Box | Check mark | Label |
++|---|---|---|---|
++| Unchecked | 1px `border`, `surface` fill, 4px radius | — | `text` |
++| Checked | `primary` fill | `textInverse` check glyph | `text` |
++| Focus | Add 2px `borderFocus` ring around box | — | — |
++| Disabled | `disabledBackground` fill, `border` outline | `disabledText` check if checked | `disabledText` |
++
++Used for: Active status (Product/Category/Supplier/Customer/User Edit mode).
++
++## 3.8 Radio Buttons
++
++**Not used anywhere in the approved MVP screen set** — every choice in the spec is either a ComboBox selection (Category, Supplier, Role) or a Checkbox (Active). This is noted explicitly (per the request to define radio buttons "if needed") rather than silently omitted: if a future requirement introduces a genuine 2–3-way exclusive choice control, it should reuse the Checkbox's border/radius/focus treatment but as a circular 16px control with a filled `primary` dot when selected.
++
++## 3.9 DataGridView (Table)
++
++See `02-Design-Tokens.md` §2.1/2.7 and Phase 2 §6.5/§7.7 for full rationale. Full component spec:
++
++| Element | Spec |
++|---|---|
++| Header row | Fill `background` (`#F4F6F8`), text `text`, `tableHeader` type, 1px bottom border `border`, height `gridHeaderHeight` (32px) |
++| Header sort indicator | Small chevron icon appended to the active sort column's label, `primary` color |
++| Row (odd) | Fill `surface` (`#FFFFFF`) |
++| Row (even) | Fill `rowZebra` (`#FAFBFC`) — subtle zebra |
++| Row height | `gridRowHeight` (30px) — dense but not cramped, since scanning many rows fast is the core task |
++| Row hover | Fill `rowHover` (`#EAF1F8`) |
++| Row selected | Fill `rowSelected` (`#D6E4F5`) + 2px left accent bar in `primary` (`rowSelectedAccent`) |
++| Cell text | `tableCell` type, `text` color; numeric/currency columns right-aligned; text columns left-aligned; Status column center-aligned (it's a badge, not text) |
++| Status cell | Pill badge: icon + label + tint background (`successTint`/`warningTint`/`errorTint`) + solid-color icon/text, `badge` radius, `badgeHeight` (20px) — never a plain colored cell or colored row |
++| Action column | Rightmost, fixed-width, icon-only buttons (View/Edit/Delete) with tooltips, `iconInline` (16px) icons, ~8px gap between icons |
++| Empty state | Grid body replaced by a centered message + optional icon + optional action button (see `06-Dialogs-and-States.md` §6.4) |
++| Loading state | Lightweight centered "Loading…" label/spinner-equivalent replaces grid body briefly; grid never flashes an empty/no-records state during a real load |
++
++## 3.10 Tabs
++
++**Not used for primary navigation** (per Phase 2 §2.2, sidebar owns primary navigation). Reserved only for grouping fields within an oversized Add/Edit form if one ever needs it — not required by any MVP form (all MVP forms use GroupBox/Panel section headers instead, per §3.13 below). No tab visual spec is defined since no MVP screen uses one; if needed later, it should reuse the sidebar's active-item accent-bar convention adapted to a horizontal strip.
++
++## 3.11 Sidebar & Navigation Items
++
++See `04-Application-Shell.md` for the full shell spec. Per-item states:
++
++| State | Background | Text | Icon | Accent |
++|---|---|---|---|---|
++| Normal | transparent (`sidebarBackground` shows through) | `sidebarText` | `sidebarText` | none |
++| Hover | slightly lighter navy tint (`primary` at low opacity equivalent, e.g. blend toward `#1E4B8F` at ~25%) | `sidebarText` | `sidebarText` | none |
++| Active | `sidebarActiveBg` (`#1E4B8F`) fill, full row | `textInverse` | `textInverse` | 3px left bar `sidebarActiveAccent` (`#5B9BD5`) |
++| Disabled/Hidden | Not rendered at all for role-inapplicable items (Inventory Adjustment, User Management for Staff) — see §3.11.1 | — | — | — |
++
++### 3.11.1 Hidden vs. Disabled
++
++Per Phase 2 §5.11/§3.2 (UX-DEC-001) and §3.3/§9.1a (UX-DEC-002), Inventory Adjustment, User Management, and **Delegation Management** are **entirely hidden** from Staff's sidebar, not shown-and-disabled. This is a deliberate visual decision, not an oversight: showing a permanently disabled nav item to a role that will never have access to it adds visual noise and an implied "maybe someday" that isn't true. Anywhere a control is merely *situationally* restricted (e.g., an Administrator's own "Deactivate" row on User Management), the disabled-with-tooltip treatment from §3.1 is used instead, because that restriction is state-dependent, not role-permanent. The same absent-not-disabled principle applies *inside* SCR-020 itself: non-delegatable responsibilities (User Management, Inventory Adjustment, Administrator privileges, master-data deletion/deactivation) never appear as options in the Responsibility ComboBox at all — there is no disabled option to hover or wonder about (Phase 2 BR-036, PR-020).
++
++## 3.12 Badges / Status Indicators
++
++Single component, three semantic variants, reused identically everywhere status appears (Product List, Product Details, Dashboard tiles, Stock-Out selector, Reports) per Phase 2 §6.3:
++
++| Status | Icon | Text color/icon color | Tint background | Label |
++|---|---|---|---|---|
++| In Stock | check-circle | `success` | `successTint` | "In Stock" |
++| Low Stock | warning-triangle | `warning` | `warningTint` | "Low Stock" |
++| Out of Stock | circle-cross | `error` | `errorTint` | "Out of Stock" |
++| Active (entity status) | check-circle (smaller/muted variant) | `success` | `successTint` | "Active" |
++| Inactive (entity status) | circle-cross (muted) | `textMuted` | `disabledBackground` | "Inactive" |
++| Active (delegation, SCR-020) | check-circle | `success` | `successTint` | "Active" |
++| Expired (delegation, SCR-020) | clock | `textMuted` | `disabledBackground` | "Expired" |
++| Revoked (delegation, SCR-020) | circle-cross | `error` | `errorTint` | "Revoked" |
++
++Shape: pill (`badge` radius), `badgeHeight` 20px, icon 14px inline-left, 6px gap to label text (11px semibold).
++
++Delegation status (per Phase 2 §6.3.1) reuses the identical component and, notably, the identical token pairs as existing statuses rather than inventing new ones — Active reuses the In-Stock/entity-Active pairing, Expired reuses the Inactive pairing (a neutral, non-alarming "this just isn't current" treatment, not an error), and Revoked reuses the Out-of-Stock/error pairing (an explicit administrative action, weighted accordingly).
++
++## 3.13 Section Headers (GroupBox/Panel-with-header)
++
++Used inside forms with more than ~6 fields (Product, User, Stock-In, Stock-Out, Adjustment), per Phase 2 §6.4:
++- Header: `sectionTitle` type (15px/600), `text` color, 1px bottom `divider` border spanning the group width, 8px padding below header before first field.
++- Group spacing: `xl` (24px) between groups; `lg` (16px) between fields within a group.
++- Short forms (Category, Supplier, Customer — ≤6 fields) skip grouping entirely and use a flat field list, per the same rule — grouping only where it earns its complexity.
++
++## 3.14 Dialogs
++
++See `06-Dialogs-and-States.md` for full content/copy patterns. Structural spec:
++- Modal, centered on parent window, `dialog` radius (6px), `surface` fill, no shadow beyond the OS-native modal shadow.
++- Title bar: `sectionTitle`/H2 type, states action + entity ("Add Product," "Delete Supplier?").
++- Body padding: `xxl` (32px).
++- Footer: Cancel (secondary, left of Save) / Save-or-confirming-action (primary or danger, right), per the fixed Phase 2 §6.2 button order.
++- Sizes: `dialogWidthSmall` (420px) for confirmations; `dialogWidthMedium` (560px) for short Add/Edit (Category/Supplier/Customer/User); `dialogWidthLarge` (680px) for grouped Add/Edit (Product).
++
++## 3.15 Validation Messages
++
++`errorText` type (11px), `error` color, positioned directly beneath the offending field (replacing any helper text in that space), preceded by a small inline error icon (12px). Never presented as a MessageBox for field-level issues (Phase 2 §6.7) — MessageBox is reserved for whole-form/system-level failures.
++
++## 3.16 Notification / Success Messages
++
++Transient status banner, anchored in the StatusStrip (bottom of main window) or as a slim banner directly under the header on the relevant screen: `successTint` background, `success` icon + text, auto-dismisses after ~4 seconds, non-blocking (per Phase 2 §6.9).
++
++## 3.17 Empty States
++
++See `06-Dialogs-and-States.md` §6.4 for full per-screen copy (sourced verbatim from Phase 2 §6.8). Visual pattern: centered within the grid/content area, `textMuted` icon (24–32px, outline style, no illustration), `body` message text, optional Primary or Ghost action button below.
++
++## 3.18 Search Bars
++
++TextBox visual treatment (§3.2) with a leading search icon (16px, `textMuted`) inset at the left, placeholder text in `textMuted` ("Search by name or ID…" etc., per Phase 2 §5.3). Live-filters the grid with a ~300ms debounce; no separate "Search" button.
++
++## 3.19 Filters
++
++ComboBoxes (§3.5) and DateTimePicker pairs (§3.6) laid out in a single horizontal filter bar directly above the grid, `md` (12px) gaps between controls. "Clear Filters" (Ghost button, §3.1) appears only once a filter or search term is active, right-aligned in the same bar.
++
++## 3.20 Toolbars
++
++The list-screen header itself functions as the toolbar: screen title (left) + "+ Add {Entity}" Primary button (right, Administrator only). No separate floating toolbar component is introduced — this keeps the pattern identical to the header spec in `04-Application-Shell.md` rather than adding a second, competing chrome element.
++
++## 3.21 Cards
++
++Used only for: Dashboard metric tiles and the Reports Hub report-type picker. Spec: `surface` fill, 1px `border`, `card` radius (6px), no shadow, `lg` (16px) internal padding. Not used as a general list/content pattern (grids are used for records, per §3.9) — keeps the visual vocabulary from fragmenting into "sometimes cards, sometimes tables" for the same kind of data.
++
++## 3.22 Headers (Screen Header)
++
++Every screen's header follows one pattern: `screenTitle` (20px/600) at left, primary action button (if any) at right, optional breadcrumb-style subtitle beneath the title in `label`/`textMuted` style (e.g., "Products › Edit Product"), `xl` (24px) bottom margin before content begins.
+diff --git a/visual-design/04-Application-Shell.md b/visual-design/04-Application-Shell.md
+new file mode 100644
+index 0000000..38b3ed2
+--- /dev/null
++++ b/visual-design/04-Application-Shell.md
+@@ -0,0 +1,82 @@
++# 4. Main Application Shell
++
++Source: Phase 2 §2.2 (Navigation Model), §2.3 (Desktop Window Strategy), §10 (navigation style), §2.1/§9.1a (SRS v1.1 Delegation navigation). This is the single reusable frame every post-login screen (SCR-002 through SCR-020) renders inside.
++
++## 4.1 Layout Regions
++
++```
++┌─────────────────────────────────────────────────────────────────────┐
++│  HEADER  (56px)   Screen Title / breadcrumb        [Global Search]  │
++├───────────────┬─────────────────────────────────────────────────────┤
++│               │                                                     │
++│   SIDEBAR     │                                                     │
++│   (220px      │              CONTENT REGION                        │
++│    fixed)     │              (fills remaining space)                │
++│               │                                                     │
++│  [Dashboard]  │                                                     │
++│  ─ Catalog ─  │                                                     │
++│  [Products]   │                                                     │
++│  [Categories] │                                                     │
++│  [Suppliers]  │                                                     │
++│  [Customers]  │                                                     │
++│  ─ Inventory ─│                                                     │
++│  [Stock In]   │                                                     │
++│  [Stock Out]  │                                                     │
++│  [Adjustment] │                                                     │
++│  [History]    │                                                     │
++│  [Reports]    │                                                     │
++│               │                                                     │
++│  ─ Admin ──── │                                                     │
++│  [Users]      │                                                     │
++│  [Delegation] │                                                     │
++│               │                                                     │
++│  [Logout]     │                                                     │
++├───────────────┴─────────────────────────────────────────────────────┤
++│  STATUS STRIP (28px)  User: J. Alvarez · Role: Administrator · Today │
++└─────────────────────────────────────────────────────────────────────┘
++```
++
++## 4.2 Header (top, 56px, `headerHeight`)
++
++- **Left:** current screen title (`screenTitle`, 20px/600, `text` color); on Add/Edit or Details screens, a breadcrumb-style subtitle beneath in `label`/`textMuted` (e.g., "Products › Edit Product").
++- **Right:** Global product-search box (per Phase 2 §2.2 header spec) — same TextBox visual treatment as §3.2/§3.18, ~280px wide, search icon inset, placeholder "Search products…". Present on every screen (not just Product List) since it's global quick-search.
++- **Background:** `surface` (`#FFFFFF`), 1px bottom `divider` border separating it from the content region.
++
++## 4.3 Sidebar (left, 220px fixed, `sidebarWidth`)
++
++- **Background:** `sidebarBackground` (`#16324F`, deep navy — see `02-Design-Tokens.md` §2.1 rationale note).
++- **App identity area (top):** application name/short logotype ("NovaTech Inventory"), `appTitle` type (16px/600), `textInverse`-equivalent (`sidebarText`), 56px tall band matching the header height so the two align across the sidebar/header seam.
++- **Navigation items:** grouped exactly per Phase 2 §2.1 IA table:
++  - **Dashboard** (ungrouped, top)
++  - **Catalog** group label (`label`, `sidebarTextMuted`, 8px top padding) → Products, Categories, Suppliers, Customers
++  - **Inventory Operations** group label → Stock In, Stock Out, Inventory Adjustment *(Admin only)*, Inventory History
++  - **Reports** (ungrouped)
++  - **User Management** and **Delegation Management** *(both Admin only, visually separated at the bottom with a divider and grouped together — Phase 2 §2.1 "bottom, Administrator-only," updated by SRS v1.1)*
++- **Item anatomy:** `iconSidebar` (24px) icon + label (`body`, 12px), 8px gap, full-row click target, `md`–`lg` (12–16px) vertical padding.
++- **States:** see `03-Component-Library.md` §3.11.
++- **Logout:** fixed at the sidebar footer, Ghost-style treatment on the dark background (icon + "Logout" label in `sidebarTextMuted`, `sidebarText` on hover). Confirms first if unsaved changes exist on an open form (Phase 2 §2.2).
++
++## 4.4 Content Region
++
++- **Background:** `background` (`#F4F6F8`).
++- **Padding:** `xl` (24px) on all sides.
++- List screens use the full available width; Add/Edit forms open as centered modal dialogs on top of this region (the underlying list stays visible behind the dialog, per Phase 2 §2.2 "context isn't lost").
++- Resizing: content region and its DataGridViews Dock/Anchor to fill remaining space as the main window resizes; sidebar width never changes (Phase 2 §2.3/§2.4).
++
++## 4.5 Status Strip (bottom, 28px, `statusStripHeight`)
++
++- **Background:** `statusStripBackground` (`#EDEFF2`), 1px top `divider` border.
++- **Left:** logged-in user's full name + role ("J. Alvarez · Administrator").
++- **Center-right:** current date.
++- **Transient area:** success/warning/error status messages appear here (per Phase 2 §6.9), replacing the date temporarily, then reverting after ~4 seconds — or appearing alongside it if space allows at typical desktop widths.
++- Type: `label`/`helperText` (11px), `textMuted` for static content, semantic color for transient messages.
++
++## 4.6 Role-Based Shell Behavior
++
++- Sidebar items for Inventory Adjustment, User Management, and Delegation Management render **only** when the logged-in user's role is Administrator (hidden, not disabled — §3.11.1).
++- Everything else in the shell (header, search, status strip, remaining nav items) is identical for both roles — role differences live in navigation *content* and screen-level *controls*, never in the shell's structure or style.
++- **Delegation is invisible as a concept in the shell, not just the sidebar (UX-DEC-002):** a Staff user with an active delegation sees no "Delegated" badge, banner, or shell indicator anywhere. The shell is rebuilt at login (and re-evaluated as delegations start/expire) purely by checking effective permission (Phase 2 §1.3.4) against the same visibility rules already used for permanent role — Stock-In/Stock-Out simply become reachable if they weren't already, with no additional shell chrome.
++
++## 4.7 Window Behavior
++
++Per Phase 2 §2.3: main window resizable/maximizable, opens maximized on 1366×768+ displays, minimum 1024×768 (`minWindowWidth`/`minWindowHeight`). Sidebar fixed-width at all sizes; content region and grids anchor/dock to fill remaining space. No mobile breakpoints.
+diff --git a/visual-design/05-Screen-Designs.md b/visual-design/05-Screen-Designs.md
+new file mode 100644
+index 0000000..76c5c1b
+--- /dev/null
++++ b/visual-design/05-Screen-Designs.md
+@@ -0,0 +1,493 @@
++# 5. Screen Designs — All 19 Approved Screens
++
++Every screen below renders inside the shell defined in `04-Application-Shell.md` (except Login, which is pre-auth and has no shell) and uses only components from `03-Component-Library.md`. Format per the audit checklist: Purpose · Layout · Hierarchy · Components · Placement · Primary Action · Secondary Actions · Data Presentation · Empty · Error · Success · Permission Differences · Resizing.
++
++List/Add-Edit screens that share the reference pattern (Category, Supplier, Customer) are documented against the pattern with only their deltas, exactly as Phase 2 §5.6–5.8 does — this keeps the design system visibly one system, not 19 unrelated screens.
++
++---
++
++## 5.1 SCR-001 — Login
++
++**Purpose:** Authenticate and load role.
++**Layout:**
++```
++┌───────────────────────────────────┐
++│           (background)             │
++│      ┌───────────────────┐         │
++│      │   NovaTech         │         │
++│      │   Inventory        │  ← appTitle, centered
++│      │  ─────────────     │
++│      │  Username           │
++│      │  [_______________]  │
++│      │  Password           │
++│      │  [_______________]  │
++│      │                     │
++│      │  [   Login   ]  ←Primary, 40px
++│      │                     │
++│      │  (inline error area)│
++│      └───────────────────┘         │
++│                    v1.0 (bottom-right)│
++└───────────────────────────────────┘
++```
++Centered card, `dialogWidthSmall` (420px), `card` radius, `surface` fill, on a plain `background` field — no sidebar, no header (nothing to navigate to pre-auth), per Phase 2 §5.1.
++
++**Visual Hierarchy:** App identity (largest, top) → fields (equal weight) → Login button (only Primary element, high-contrast, `buttonHeightLarge`) → error area (only visible on failure) → version label (smallest, `helperText`, unobtrusive corner).
++
++**Components:** Username TextBox (required), Password field (masked, required), Login button (Primary, full card width), inline error message area (hidden by default), optional version label.
++
++**Primary Action:** Login (click or Enter in Password field).
++**Secondary Actions:** None — single-purpose screen by design.
++**Data Presentation:** N/A (no data display, input only).
++**Empty State:** Default/Normal state *is* the empty state — both fields blank, focus on Username, Login disabled until both fields have content (§3.1 disabled treatment).
++**Error State:** ER-001 message in the inline error area (`errorTint` background, `error` text/icon), Password field cleared and refocused, per Phase 2 §5.1.
++**Success State:** Brief "Signing in…" busy state on the Login button (§3.1 loading treatment), then navigation to Dashboard — no persistent success message needed since the screen transition itself is the confirmation.
++**Permission Differences:** None — identical for all users pre-auth.
++**Resizing:** Card stays fixed-size and centered regardless of window size; background fills remaining space. Window is not resizable from this screen in most WinForms login-form implementations, though this design does not require that constraint.
++
++---
++
++## 5.2 SCR-002 — Dashboard
++
++**Purpose:** Orientation hub — metrics, recent activity, quick navigation.
++**Layout:**
++```
++Header: "Dashboard"                                    [search]
++┌─────────┬─────────┬─────────┬─────────┬─────────┬─────────┐
++│ Products│Categories│Suppliers│ Total Qty│Low Stock│Out of  │  ← metric tiles (cards)
++│   142   │    12    │    8    │  3,204   │    ⚠ 6  │Stock ✕2│
++└─────────┴─────────┴─────────┴─────────┴─────────┴─────────┘
++┌───────────────────────────────┬───────────────────────────┐
++│ Recent Activity                │ Quick Actions              │
++│ (list: date/type/product/qty/  │ [ Record Stock-In ]        │
++│  user, read-only)              │ [ Record Stock-Out ]       │
++│                                 │ [ Search Products ]        │
++│                                 │ (Admin only, if role fits: │
++│                                 │  Inventory Adjustment,     │
++│                                 │  User Management)          │
++└───────────────────────────────┴───────────────────────────┘
++```
++**Visual Hierarchy:** Metric tiles (top, scannable at a glance) → Recent Activity (left, wider — the "what's been happening" narrative) → Quick Actions (right, narrower — the "what to do next" panel, using large obvious Primary/Secondary buttons per Phase 2 §5.2/§10).
++
++**Components:** 6 metric tile Cards (§3.21: Total Active Products, Total Categories, Total Suppliers, Total Current Inventory Quantity, Low-Stock Count, Out-of-Stock Count — Low/Out tiles carry the status badge treatment, icon+label+color, §3.12), Recent Activity list/grid (§3.9, read-only, no action column), Quick Actions panel (button stack).
++
++**Primary Action:** None single-fixed — this is a hub screen; the two operationally primary actions (Record Stock-In / Stock-Out) are visually emphasized as Primary-style buttons in Quick Actions.
++**Secondary Actions:** Click a metric tile → navigates to the relevant filtered list (e.g., Low-Stock tile → Product List pre-filtered); click a Recent Activity row → Inventory History filtered to that date (Phase 2 §5.2).
++**Data Presentation:** Tiles = large `metricNumber` (24px/600) + `label` caption. Recent Activity = compact list/grid, most-recent-first.
++**Empty State:** New installation, zero products: tiles show "0", Recent Activity shows "No recent activity yet — record your first Stock-In to get started." with a direct button into Stock-In (Phase 2 §5.2, §6.8).
++**Error State:** Metrics unavailable (ER-007 class) → tile area shows "Unable to load dashboard data," rest of shell/app remains usable (Phase 2 §5.2).
++**Success State:** N/A directly on this screen (it reflects the results of actions taken elsewhere); a transient status message can still surface here if the user just completed an action and was redirected.
++**Permission Differences:** Same metric set and layout for both roles (Phase 2 §5.2 — SRS does not define a reduced metric set for Staff). Quick Actions panel omits Inventory Adjustment / User Management buttons for Staff, matching sidebar visibility.
++**Resizing:** Metric tile row wraps or compresses tile width proportionally above minimum window width; two-column lower region keeps its ratio (Recent Activity wider) down to 1024px minimum, at which point Quick Actions may stack beneath Recent Activity rather than beside it if needed to preserve grid readability.
++
++---
++
++## 5.3 SCR-003 — Product List *(reference pattern — see 5.6/5.7/5.8 for Category/Supplier/Customer deltas)*
++
++**Purpose:** Browse, search, filter products.
++**Layout:**
++```
++Header: "Products"                          [+ Add Product]  ← Admin only
++┌──────────────────────────────────────────────────────────┐
++│ [🔍 Search by name or ID…] [Category ▾] [Supplier ▾] [Status ▾]  Clear Filters │
++├──────────────────────────────────────────────────────────┤
++│ ID  Name          Category  Supplier  Qty  Min  Status        Price   Actions │
++│ ─────────────────────────────────────────────────────────────────────────────│
++│ 001 USB-C Cable    Cables    ACME      42   10  ● In Stock     $9.99  👁 ✏ 🗑 │
++│ 002 Wireless Mouse  Peripherals TechCo   3   10  ▲ Low Stock   $24.99 👁 ✏ 🗑 │
++│ 003 HDMI Adapter    Cables    ACME       0   5   ✕ Out of Stock $14.99 👁 ✏ 🗑 │
++├──────────────────────────────────────────────────────────┤
++│ 142 products                                              │
++└──────────────────────────────────────────────────────────┘
++```
++**Visual Hierarchy:** "+ Add Product" (Primary, top-right, most emphasized action for Admin) → search/filter bar (immediately actionable) → grid (main content, majority of screen) → row count (least emphasis, footer).
++
++**Components:** Search TextBox (§3.18), Category/Supplier/Stock-Status filter ComboBoxes (§3.19), Clear Filters ghost link (appears only when active), DataGridView (§3.9) with columns: Product ID (fixed), Name (fill/widest), Category (fixed), Default Supplier (fixed), Qty on Hand (fixed, right-aligned), Min Level (fixed, right-aligned), Status (fixed, badge), Selling Price (fixed, right-aligned currency), Actions (fixed, rightmost).
++
++**Primary Action:** "+ Add Product" (Administrator only).
++**Secondary Actions:** View (all roles), Edit/Delete (Administrator only), Search/Filter (all roles, live-updating).
++**Data Presentation:** One row per product; Status as pill badge (§3.12) — never plain colored text or a colored row, per Phase 2 §6.3.
++**Empty State (no products):** "No products yet. Add your first product to get started." + Add button (Admin) (§3.17).
++**Empty State (no matches):** "No products match your search or filters." + Clear Filters.
++**Error State:** ER-007/010-class friendly message with retry, grid body replaced.
++**Success State:** Transient status banner after an Add/Edit/Delete completes elsewhere and returns here ("Product saved successfully"), grid refreshes and the affected row briefly highlights.
++**Permission Differences:** Administrator sees "+ Add Product" and Edit/Delete action icons; Staff see the identical grid and filters but the Actions column shows View only, and "+ Add Product" is not rendered at all (not disabled — removed).
++**Resizing:** Name column fill-weighted; ID/Qty/Min/Status/Price/Actions fixed-width; grid scrolls vertically past visible rows (no pagination, per Phase 2 §6.5).
++
++---
++
++## 5.4 SCR-004 — Product Details
++
++**Purpose:** Full read-only view of one product, including calculated status.
++**Layout:**
++```
++Header: "USB-C Cable"                    ● In Stock badge (top-right of header)
++┌───────────────────────────┬──────────────────────────────┐
++│ Identity                   │ Stock                         │
++│ Name: USB-C Cable          │ Qty on Hand: 42                │
++│ Category: Cables           │ Minimum Level: 10               │
++│ Default Supplier: ACME     │ Status: ● In Stock (badge)      │
++│ Description: ...           │                                 │
++│ Purchase Price: $4.50      │                                 │
++│ Selling Price: $9.99       │                                 │
++├───────────────────────────┴──────────────────────────────┤
++│                                    [Back] [Edit] [Delete]   │ ← Admin sees Edit/Delete
++└─────────────────────────────────────────────────────────┘
++```
++**Visual Hierarchy:** Product name + status badge (header, highest emphasis) → two-column read-only field area → action row (bottom, Back always leftmost/secondary style, Edit Primary for Admin, Delete/Deactivate Danger-adjacent Ghost for Admin).
++
++**Components:** Read-only labeled fields (Name, Category, Default Supplier, Description, Purchase Price, Selling Price, Quantity on Hand, Minimum Stock Level, Active/Inactive, created/modified metadata where available), Status badge in header, Back/Edit/Delete buttons.
++
++**Primary Action:** Edit (Administrator only).
++**Secondary Actions:** Delete/Deactivate (Administrator only), Back (all roles).
++**Data Presentation:** Static labeled key-value pairs, no editable controls anywhere on this screen (pure detail view, per Phase 2 §5.4) — this absence of any input styling is itself the visual signal that the screen is read-only.
++**Empty State:** N/A (always shows one specific product).
++**Error State:** Not Found (ER-008) — "The selected record no longer exists," with a Back action, replacing the field area (covers the case where the product was deleted elsewhere between list and detail load).
++**Success State:** N/A directly (edits happen on SCR-005); a transient banner can surface here on return from a successful Edit.
++**Permission Differences:** Staff see identical read-only fields and status badge but no Edit/Delete/Deactivate buttons — only Back.
++**Inactive Treatment:** Header uses a muted/greyed treatment and an "Inactive" badge (§3.12) in place of the stock-status badge when the product is inactive.
++**Resizing:** Two-column field area may collapse to one column below a width threshold if ever needed, though 1024px minimum comfortably fits two columns.
++
++---
++
++## 5.5 SCR-005 — Product Add/Edit *(reference pattern for all master-data Add/Edit dialogs)*
++
++**Purpose:** Create/update product master data.
++**Layout:** Modal dialog, `dialogWidthLarge` (680px), grouped sections (§3.13):
++```
++┌─ Add Product ───────────────────────────────────────────┐
++│ Identity                                                  │
++│  Product Name *  [_______________________]                │
++│  Description     [_______________________] (0/500)         │
++│                                                             │
++│ Category & Supplier                                        │
++│  Category *      [ ▾ Select category ]                     │
++│  Default Supplier * [ ▾ Select supplier ]                   │
++│                                                             │
++│ Pricing                                                     │
++│  Purchase Price * [____] Selling Price * [____]              │
++│                                                             │
++│ Stock Settings                                              │
++│  Minimum Stock Level * [____]                                │
++│  Quantity on Hand  [ 0 (starts at zero) ]  (disabled)         │
++│    Adjust stock using Stock-In, Stock-Out, or Adjustment.    │
++│  ☐ Active   (Edit mode only)                                 │
++│                                                             │
++│                                        [Cancel]  [Save]     │
++└───────────────────────────────────────────────────────────┘
++```
++**Visual Hierarchy:** Dialog title states action+entity → grouped fields in logical reading order (Identity → Category/Supplier → Pricing → Stock Settings) → Cancel/Save footer, fixed bottom-right per Phase 2 §6.2.
++
++**Components:** Product Name (required TextBox, red asterisk, max 100), Category (required ComboBox, active categories only), Default Supplier (required ComboBox, active suppliers only), Description (optional multiline, max 500, char counter), Purchase/Selling Price (required numeric, ≥0, 2 decimals), Minimum Stock Level (required numeric integer ≥0), Quantity on Hand (disabled/read-only with caption), Active checkbox (Edit mode only), inline validation areas per field.
++
++**Primary Action:** Save.
++**Secondary Actions:** Cancel (discards; confirms only if dirty).
++**Data Presentation:** N/A (input form); Quantity on Hand shown disabled rather than hidden, per Phase 2 §6.1 UPDATE rationale — the user sees *why* it can't be edited here rather than wondering where it went.
++**Empty State:** Add mode = blank form, Quantity on Hand shows "0 (starts at zero)."
++**Error State:** Field-level red outline + inline message, focus jumps to first invalid field on Save attempt; Save remains clickable (not blocked) per Phase 2 §6.4 — a second live-validation layer prevents most errors before Save is even pressed.
++**Success State:** Save button shows brief busy state (disabled to prevent double-submit) → dialog closes → confirmation banner on the parent list screen, new/updated row highlighted.
++**Permission Differences:** Administrator-only screen entirely — Staff never reach this dialog (no Edit icon, no Add button available to trigger it).
++**Resizing:** Fixed-size modal, not resizable (static field count per Phase 2 §2.3), centered on the main window.
++
++---
++
++## 5.6 SCR-006 / SCR-007 — Category List & Add/Edit
++
++Follows 5.3/5.5 exactly, scoped to Category, with these deltas:
++- **Grid columns:** Category ID, Name, Description, Product Count, Status, Actions.
++- **Filter:** Status (Active/Inactive) only — no stock-status filter (not applicable to categories).
++- **Add/Edit fields (flat layout, no section grouping — ≤6 fields per §3.13):** Name (required, unique, max 100), Description (optional, max 500), Active checkbox.
++- **Delete behavior:** If Product Count > 0, hard delete is blocked (BR-008) — the Blocked-Delete dialog (§6.2 in `06-Dialogs-and-States.md`) explains the count and offers "Mark Inactive" directly.
++- **Empty state:** "No categories yet. Add your first category to get started." (Admin) / "No categories match your search." + Clear Filters.
++- **Permission:** Identical Admin-full / Staff-view-only split as Product List.
++
++## 5.7 SCR-008 / SCR-009 — Supplier List & Add/Edit
++
++Deltas from the reference pattern:
++- **Grid columns:** Supplier ID, Name, Contact Person, Phone, Email, Status, Actions.
++- **Search:** Name only.
++- **Add/Edit fields (flat layout):** Name (required, max 150), Contact Person (optional, max 100), Phone (optional, format-validated — "Phone number can only contain digits, spaces, +, -, and parentheses"), Email (optional, format-validated — "Enter a valid email address"), Address (optional, max 250).
++- **Delete behavior:** Blocked if referenced by any Product or InventoryTransaction (BR-009); Blocked-Delete dialog offers "Mark Inactive."
++- **Empty state:** "No suppliers yet. Add your first supplier to get started." / "No suppliers match your search." + Clear Filters.
++- **Permission:** Same Admin/Staff split.
++
++## 5.8 SCR-010 / SCR-011 — Customer List & Add/Edit
++
++Deltas from the reference pattern:
++- **Grid columns:** Customer ID, Name, Phone, Email, Status, Actions.
++- **Search:** Name or Phone.
++- **Add/Edit fields (flat layout):** Name (required, max 150), Phone (optional, format-validated), Email (optional, format-validated), Address (optional, max 250).
++- **Delete behavior:** Blocked if referenced by any Stock-Out transaction (BR-010); Blocked-Delete dialog offers "Mark Inactive."
++- **Empty state:** "No customers yet. Add your first customer to get started." / "No customers match your search." + Clear Filters.
++- **Permission:** Same Admin/Staff split.
++
++---
++
++## 5.9 SCR-012 — Stock-In
++
++**Purpose:** Record goods received from a supplier.
++**Layout:** Dedicated full screen (not a modal — repeated many times per shift, per Phase 2 §5.9), single column, grouped:
++```
++Header: "Stock In"
++┌───────────────────────────────────────────┐
++│ Product & Supplier                          │
++│  Product *  [ ▾ type to search… ]  On hand: 42 │
++│  Actual Supplier * [ ▾ defaults to product's supplier ] │
++│                                              │
++│ Movement Details                             │
++│  Quantity *  [____]   → New on-hand will be: 47 (info) │
++│  Date *      [ 📅 today ]                    │
++│  Unit Price * [____]                         │
++│                                              │
++│ Notes                                        │
++│  [_____________________________] (0/500)     │
++│                                              │
++│         [Clear Form]        [Record Stock-In]│
++└───────────────────────────────────────────┘
++```
++**Visual Hierarchy:** Product selection (first, drives everything else) → live on-hand context next to it → quantity/date/price group → notes (lowest priority, optional) → action row.
++
++**Components:** Product ComboBox (type-to-search, active only, shows current on-hand inline), Actual Supplier ComboBox (defaults to product's default supplier, changeable per BR-028), Quantity numeric (positive integer, live "New on-hand will be: X" preview in `info` color), Date DateTimePicker (defaults today, no future dates), Unit Price numeric (≥0, 2 decimals), Notes (optional, max 500), Record Stock-In (Primary), Clear Form (Secondary).
++
++**Primary Action:** Record Stock-In.
++**Secondary Actions:** Clear Form.
++**Data Presentation:** Live inline preview values (on-hand, new-on-hand) — no confirmation dialog required for this action (Phase 2 §6.11 — Stock-In is purely additive, low-risk, and the highest-frequency task, so the live preview substitutes for a modal confirm to minimize clicks). A lightweight confirmation dialog does still appear per Phase 2 §5.9 stating "Add {qty} × {product} from {supplier}? New quantity on hand: {X}." — reconciled here as: the preview lets the user self-correct before committing, and the dialog is the final explicit confirm, consistent with both source passages.
++**Empty State:** N/A (always a blank entry form ready for input).
++**Error State:** Standard validation messaging (§3.15); Product-now-inactive edge case blocked with "This product is now inactive."; Save disabled until required fields are valid.
++**Success State:** Confirmation → form clears and refocuses the Product field for rapid repeated entry; transient status banner confirms.
++**Permission Differences:** None — both Admin and Staff have full access to this screen and action.
++**Resizing:** Single-column form stays a fixed comfortable width, centered or left-aligned within the content region; does not need to reflow narrower than 1024px minimum.
++
++---
++
++## 5.10 SCR-013 — Stock-Out
++
++**Purpose:** Record goods issued to a customer (optional).
++**Layout:** Same structural pattern as Stock-In. Groups: Product & Customer, Movement Details, Notes.
++```
++│ Product & Customer                            │
++│  Product * [ ▾ type to search… ]  Available: 42 │  ← prominent, large
++│  Customer  [ ▾ No customer selected ]  (optional, no asterisk) │
++│                                                │
++│ Movement Details                               │
++│  Quantity * [____]                              │
++│    ⚠ Insufficient stock. Available: 3.  (error, only if triggered) │
++│  Date *     [ 📅 today ]                         │
++│  Selling Price * [____]  (pre-filled, editable)  │
++```
++**Visual Hierarchy:** Available Quantity is displayed as a prominent stat directly beside the Product selector (Phase 2 explicit instruction: "Insufficient stock should be impossible to miss") → Quantity field, which turns to the error state (`borderError` 2px, red text beneath) the instant entered quantity exceeds availability, **before** Save is even attempted — this is the single most safety-critical visual behavior on this screen.
++
++**Components:** Product ComboBox (active only, "Available: {X}" stat beside selection), Customer ComboBox (optional, explicitly no red asterisk, defaults "No customer selected"), Quantity numeric (live-validated against availability), Date DateTimePicker (today default, no future), Selling Price numeric (pre-filled from product's current price, editable), Notes (optional), Record Stock-Out (Primary), Clear Form (Secondary).
++
++**Primary Action:** Record Stock-Out.
++**Secondary Actions:** Clear Form.
++**Data Presentation:** "Available: {X}" rendered as a bold inline stat, not buried in a tooltip; on insufficient-stock entry, the Quantity field's border and message switch to the Error state immediately (§3.4/§3.15).
++**Empty State:** N/A (blank entry form).
++**Error State:** "Insufficient stock. Available: {X}." inline under Quantity, red field outline, Save disabled while in this state (Phase 2 §5.10) — this is the one Stock screen where the field-level error can actively block Save before the user tries, because the risk (overselling stock) outweighs the "let them try and be told" default.
++**Success State:** Confirmation dialog ("Issue {qty} × {product} to {customer or "no customer"}? Remaining stock: {X}.") → Yes commits → transient success banner, form clears.
++**Permission Differences:** None — both Admin and Staff have full access.
++**Resizing:** Same as Stock-In.
++
++---
++
++## 5.11 SCR-014 — Inventory Adjustment (Administrator only)
++
++**Purpose:** Correct stock quantity with a mandatory reason — the highest-risk single action in the system (directly overrides stock without a supplier/customer transaction context).
++**Layout:** Single-column form, groups: Product, Quantity Correction, Reason.
++```
++Header: "Inventory Adjustment"   ← page itself only reachable/visible to Admin
++┌───────────────────────────────────────────┐
++│ Product                                     │
++│  Product * [ ▾ active products only ]        │
++│                                              │
++│ Quantity Correction                          │
++│  Previous Quantity: 42   (read-only)          │
++│  New Quantity * [____]                        │
++│  Difference: +5  (green)  /  −3 (red) / 0 (neutral) — live │
++│                                              │
++│ Reason                                       │
++│  Reason * [_______________________] (0/250)   │
++│   e.g., stock count correction, damaged goods, theft │
++│                                              │
++│                        [Save Adjustment]      │
++└───────────────────────────────────────────┘
++```
++**Visual Hierarchy:** This screen is deliberately given a distinct, slightly more serious visual weight than Stock-In/Out to make its administrator-only, high-risk nature obvious without inventing a new component: the Previous → New → Difference chain is laid out as an explicit visual sequence (label, arrow-like vertical flow, live-colored difference) rather than side-by-side fields, so the *size and direction of the change* is the most legible thing on the screen. Reason is a required, generously-sized text area, not an afterthought field.
++
++**Components:** Product ComboBox (active only), Previous Quantity (read-only label), New Quantity (required numeric integer ≥0), Difference (read-only, computed live, colored per sign), Reason (required multiline, max 250, explicit placeholder example text), Save Adjustment (Primary).
++
++**Primary Action:** Save Adjustment.
++**Secondary Actions:** None beyond implicit navigation away (no Clear Form — this is a deliberate, careful action, not a repeated-entry task like Stock-In).
++**Data Presentation:** Difference computed and colored live as New Quantity is typed (`success` green for positive, `error` red for negative, `textMuted` neutral for zero).
++**Empty State:** N/A (blank form).
++**Error State:** Missing Reason → Save disabled, inline "A reason is required."; standard validation otherwise.
++**Success State:** Confirmation dialog explicitly states before/after quantities and reason (the most detailed confirmation dialog in the app, matching its risk level) → Yes commits → redirect to Inventory History with the new entry visible, transient success banner.
++**Permission Differences:** This entire screen and its sidebar entry are hidden — not disabled — for Inventory/Store Staff (§3.11.1).
++**Resizing:** Single-column, fixed comfortable width, same behavior as Stock-In/Out.
++
++---
++
++## 5.12 SCR-015 — Inventory Transaction History
++
++**Purpose:** Read-only, filterable log of all stock movements — must visually communicate append-only, non-editable data.
++**Layout:**
++```
++Header: "Inventory History"
++┌───────────────────────────────────────────────────────┐
++│ [From 📅] [To 📅]  [Type ▾ All]  [Product ▾ type to search]  Clear Filters │
++├───────────────────────────────────────────────────────┤
++│ ID  Date       Type      Product     Qty  Supplier/Customer  User   Notes │
++│ ──────────────────────────────────────────────────────────────────────────│
++│ 501 2026-08-19 ▲ Stock-In  USB-C Cable +50  ACME             J.Alvarez  — │
++│ 502 2026-08-19 ▼ Stock-Out Wireless Mouse −2  Jane Doe        M.Ochieng — │
++│ 503 2026-08-18 ● Adjustment HDMI Adapter −1  —                J.Alvarez Damaged │
++├───────────────────────────────────────────────────────┤
++│                                                  [Print] │
++└───────────────────────────────────────────────────────┘
++```
++**Visual Hierarchy:** Filter bar (top, always available) → grid (main content) → Print (bottom, secondary emphasis). **No Actions column at all** on this grid — its structural absence (not a disabled/greyed one) is the primary visual signal that this data is append-only (per Phase 2 §5.12: "this is the UI-level enforcement of append-only history").
++
++**Components:** Date Range (From/To DateTimePickers), Transaction Type ComboBox (All/Stock-In/Stock-Out/Adjustment), Product ComboBox (type-to-search, optional), DataGridView columns: Transaction ID, Date, Type (icon+label — up-arrow-tint for Stock-In, down-arrow-tint for Stock-Out, dot/circle-tint for Adjustment), Product, Quantity (signed, colored by direction: `success` green "+50", `error` red "−2"), Supplier/Customer (contextual to type), User, Notes; Print button.
++
++**Primary Action:** Print.
++**Secondary Actions:** Filter (live-updating).
++**Data Presentation:** Quantity column signed and colored by movement direction; Type column uses the same icon+label+color pattern as status badges for consistency, applied to transaction type rather than stock status.
++**Empty State (no data):** "No stock movements recorded yet." (§3.17).
++**Empty State (filtered, no matches):** "No transactions match your filters." + Clear Filters.
++**Error State:** ER-007/010-class friendly message, retry option.
++**Success State:** N/A directly (this screen displays the results of successful actions taken elsewhere; new rows simply appear).
++**Permission Differences:** None on this screen itself — both roles see the identical read-only grid, filters, and Print action. (The *entries* reflect whichever actions each role is permitted to take elsewhere.)
++**Resizing:** Product/Notes columns fill-weighted; ID/Date/Type/Qty fixed-width; standard vertical scroll, no pagination.
++
++---
++
++## 5.13 SCR-016 / SCR-017 — Reports Hub & Report Viewer
++
++**Purpose:** Select and view/print MVP reports.
++**SCR-016 Layout:**
++```
++Header: "Reports"
++┌───────────────────────────────────────────────────────┐
++│  [Card] Current Inventory   [Card] Low Stock    [Card] Out-of-Stock │
++│  [Card] Stock-In            [Card] Stock-Out    [Card] Transaction History │
++│   (Staff sees only: Current Inventory, Low Stock, Transaction History)     │
++├───────────────────────────────────────────────────────┤
++│  (once a report card is selected, its filters appear here inline) │
++│  Category ▾   Stock Status ▾              [Generate]    │
++└───────────────────────────────────────────────────────┘
++```
++**SCR-017 Layout:**
++```
++Header: "Current Inventory Report"   Filters: Category=All, Status=Low Stock
++┌───────────────────────────────────────────────────────┐
++│  (report table — same DataGridView visual standard,     │
++│   print-oriented: header repeats on each printed page)   │
++├───────────────────────────────────────────────────────┤
++│                              [Back to Reports]  [Print]  │
++└───────────────────────────────────────────────────────┘
++```
++**Visual Hierarchy:** SCR-016 — report-type Cards (§3.21) are the primary selection surface, each showing its name only until selected, then expanding its specific filter controls inline beneath. SCR-017 — the filter summary sits directly under the report title (small, `label`/`textMuted`) so a printed/viewed report is self-describing; the table itself is the dominant visual element.
++
++**Components:** SCR-016: one Card per report type available to the current role, filter ComboBoxes/DateTimePickers appearing per the selected report's definition (Category+Status for Current Inventory; Date Range+Product+Supplier for Stock-In; Date Range+Product+Customer for Stock-Out; Date Range+Type+Product for Transaction History; Low Stock and Out-of-Stock use their implicit filters with no extra controls), Generate (Primary). SCR-017: report title + filter summary, DataGridView-style report body, Print (Primary), Back to Reports (Secondary).
++
++**Primary Action:** Generate (SCR-016) / Print (SCR-017).
++**Secondary Actions:** Adjust filters and regenerate; Back (returns to SCR-016 with filters preserved, per Phase 2 §5.13).
++**Data Presentation:** Report tables reuse the exact DataGridView standard (§3.9) for visual consistency, but are styled slightly more print-friendly — header row repeats across printed pages, no row-hover/selection styling needed since it's a static, printable view rather than an interactive management grid.
++**Empty State:** "No records found for the selected filters." in the report body area.
++**Error State:** ER-007/010-class friendly message.
++**Success State:** N/A beyond the populated table itself being the successful outcome.
++**Permission Differences:** SCR-016 shows only the report Cards each role is entitled to — Administrator sees all 6; Staff see Current Inventory, Low Stock, and Transaction History only (Phase 2 §5.13) — the other three Cards are not rendered, not shown-disabled.
++**Resizing:** Report Viewer window is resizable (Phase 2 §2.3, "reports benefit from more screen space"), opens maximized or large by default — the only window in the app other than the main shell to get this treatment.
++
++---
++
++## 5.14 SCR-018 / SCR-019 — User Management List & Add/Edit (Administrator only)
++
++**Purpose:** Manage accounts and roles.
++**SCR-018 Layout:**
++```
++Header: "User Management"                          [+ Add User]
++┌───────────────────────────────────────────────────────┐
++│ [🔍 Search by name or username…]                          │
++├───────────────────────────────────────────────────────┤
++│ Username    Full Name      Role            Status    Actions │
++│ jalvarez    Jane Alvarez   Administrator   ● Active   👁✏🗑(disabled, tooltip)│ ← current user's own row
++│ mochieng    Mercy Ochieng  Inventory Staff ● Active   👁✏🗑 │
++├───────────────────────────────────────────────────────┤
++└───────────────────────────────────────────────────────┘
++```
++**SCR-019 Layout:** `dialogWidthMedium` (560px), flat field list:
++```
++┌─ Add User ─────────────────────────────┐
++│  Username *  [_______________]   (disabled on Edit) │
++│  Password *  [_______________] (Create only)  │
++│  Confirm Password * [_______________] (Create only) │
++│  (Edit mode instead shows: [Reset Password] link)   │
++│  Full Name * [_______________]            │
++│  Role *      [ ▾ Administrator / Inventory Staff ]  │
++│  ☐ Active   (Edit mode)                   │
++│                          [Cancel]  [Save]  │
++└───────────────────────────────────────────┘
++```
++**Visual Hierarchy:** List — the current Administrator's own row visually behaves like every other row except its Deactivate icon, which renders in the standard disabled treatment (§3.1) with a tooltip, rather than being hidden — because the row itself must remain fully visible and identical in every other respect; only that one action is state-blocked. Add/Edit — Username/Role/Password fields are the highest-stakes fields on this form (account security), so they're placed first, in that priority order.
++
++**Components:** Search TextBox, DataGridView (Username, Full Name, Role, Status badge, Last Login if tracked, Actions), Username TextBox (required, unique, max 50, disabled on Edit), Password + Confirm Password (Create only, min 6 chars, masked), Reset Password ghost-link (Edit only, replaces the always-visible password field per Phase 2 §5.14/§9.5), Full Name TextBox (required), Role ComboBox (required), Active checkbox (Edit mode).
++
++**Primary Action:** "+ Add User" (list) / Save (form).
++**Secondary Actions:** Deactivate (list row, Administrator-only, self-row disabled).
++**Data Presentation:** Role rendered as plain text in the grid (not a badge — role is a fact, not a status), Status (Active/Inactive) uses the standard entity-status badge (§3.12).
++**Empty State:** Not realistically applicable (at least one Administrator account must always exist to reach this screen) — if ever empty of *other* users, no special empty-state copy is defined beyond the standard "No users match your search." for filtered/searched states.
++**Error State:** Duplicate Username ("This username is already in use."), Missing Fields (standard inline pattern).
++**Success State:** Standard Save confirmation banner + list refresh; Deactivate confirmation → "Marked Inactive," row shown greyed/Inactive-tagged.
++**Permission Differences:** This entire screen and its sidebar entry are hidden — not disabled — for Inventory/Store Staff (§3.11.1), identical treatment to Inventory Adjustment.
++**Self-Deactivation:** On the Administrator's own row, Deactivate is disabled with tooltip "You cannot deactivate your own account while logged in" (BR-020) — prevented visually rather than surfaced as a runtime permission error.
++**Resizing:** List grid standard behavior; Add/Edit dialog fixed-size modal, centered.
++
++---
++
++## 5.15 SCR-020 — Delegation Management (Administrator only) *(SRS v1.1)*
++
++**Purpose:** Create, view, and revoke time-bounded delegations of Stock-In, Stock-Out, or approved report access — the most visibly Administrator-exclusive screen after User Management, and the screen that must make delegation's temporary, revocable, non-role-changing nature obvious at a glance.
++
++**Layout:** List-first, matching the Inventory History anatomy rather than the master-data Add/Edit pattern — a delegation is a short-lived grant record, not a multi-field entity:
++```
++Header: "Delegation Management"                    [+ Create Delegation]
++┌───────────────────────────────────────────────────────────────────┐
++│ [Recipient ▾ type to search]  [Responsibility ▾ All]  [Status ▾ All] │  Clear Filters
++├───────────────────────────────────────────────────────────────────┤
++│ ID  Recipient       Responsibility  Start      End        Status      Created By  Actions │
++│ ──────────────────────────────────────────────────────────────────────────────────────────│
++│ D-04 M. Ochieng     Stock-In        2026-08-20 2026-08-27  ✓ Active    J.Alvarez   [Revoke] │
++│ D-03 M. Ochieng     Stock-Out       2026-08-01 2026-08-10  ⏱ Expired   J.Alvarez   —        │
++│ D-02 T. Kimani      Report Access   2026-07-15 2026-07-20  ✕ Revoked   J.Alvarez   —        │
++├───────────────────────────────────────────────────────────────────┤
++└───────────────────────────────────────────────────────────────────┘
++```
++**Create Delegation panel** (modal dialog, `dialogWidthMedium` 560px, opens over the list — the underlying grid stays visible behind it, same "context isn't lost" pattern as every other Add/Edit dialog):
++```
++┌─ Create Delegation ─────────────────────┐
++│  Recipient *     [ ▾ eligible active Staff only ]  │
++│  Responsibility * [ ▾ Stock-In / Stock-Out / Report Access ] │
++│  Start Date *    [ 📅 ____ ]                       │
++│  End Date *      [ 📅 ____ ]                       │
++│  Reason *        [_______________________] (0/250) │
++│                              [Cancel]  [Save]       │
++└─────────────────────────────────────────┘
++```
++**Visual Hierarchy:** The grid's Status column is the single most important piece of information on the screen — it is the only column rendered as a badge rather than plain text, so a long delegation history remains scannable at a glance (identical priority treatment to Stock Status on Product List, §5.3). The Actions column carries **only** a "Revoke" control, and only on Active rows — Expired and Revoked rows show an em-dash in that column rather than a greyed-out button, making the read-only nature of history rows immediately legible without a tooltip. In the Create panel, Recipient and Responsibility are placed first (the two fields that define *what's being granted*), Reason last (the justification, reviewed after the grant is understood).
++
++**Components:** Recipient filter ComboBox (type-to-search, optional), Responsibility filter ComboBox (All/Stock-In/Stock-Out/Report Access), Status filter ComboBox (All/Active/Expired/Revoked), DataGridView columns: Delegation ID, Recipient, Responsibility, Start Date, End Date, Status (badge, §3.12), Created By, Actions (Revoke only, Active rows only); "+ Create Delegation" primary Button (header, top-right); Create panel: Recipient ComboBox (required, eligible active Staff only), Responsibility ComboBox (required, delegatable set only — non-delegatable items are absent from the list, §3.11.1), Start Date DateTimePicker (required), End Date DateTimePicker (required), Reason multiline TextBox (required, max 250, 0/250 counter), Cancel (secondary) / Save (primary).
++
++**Primary Action:** "+ Create Delegation" (list) / Save (panel).
++**Secondary Actions:** Revoke (list row, Active only); Filter by Recipient/Responsibility/Status.
++**Data Presentation:** Status badge is the only colored element in each row (§3.12: Active green, Expired neutral grey, Revoked red) — Start/End Date, Recipient, Responsibility, and Created By render as plain table text, keeping the badge the sole visual point of emphasis per row, consistent with how Stock Status is the sole badge on Product List.
++**Empty State:** "No delegations yet. Create one to temporarily extend a Staff member's access." + Create Delegation button (no data at all); "No delegations match your filters." + Clear Filters (filtered, no matches) — same two-tier empty-state pattern as every other list screen (§3.17).
++**Error State:** Recipient ineligible ("This user is not eligible to receive a delegation."), Responsibility not delegatable ("This responsibility cannot be delegated."), End Date before Start Date ("End date cannot be before start date."), Reason empty ("A reason is required for this delegation."), delegator lacks authority ("You cannot delegate a responsibility you do not have."), overlapping delegation ("This user already has an active delegation for this responsibility during this period.") — all inline, field-level, same visual treatment as every other validation error (§3.6/§3.16).
++**Success State:** Create → transient success banner ("Delegation created successfully"), panel closes, new row appears highlighted at the top of the grid. Revoke → confirmation dialog first (§6-equivalent, "Revoke Delegation?" / "This will immediately end {Recipient}'s access to {Responsibility}." / danger-styled "Revoke" button) → on confirm, the row updates in place to the Revoked badge, transient success banner ("Delegation revoked"), record remains visible in the grid (never removed).
++**Permission Differences:** This entire screen and its sidebar entry are hidden — not disabled — for Inventory/Store Staff, identical treatment to Inventory Adjustment and User Management (§3.11.1, UX-DEC-002). There is no reduced or read-only version of this screen for Staff — it simply does not exist in their build of the shell.
++**Resizing:** List grid uses the standard DataGridView resizing rules (§3.9) — Recipient/Reason-adjacent columns fill-weighted, ID/Date/Status/Actions fixed-width; Create panel is a fixed-size modal, centered, identical sizing behavior to every other master-data Add/Edit dialog.
++
++---
++
++## 5.16 Cross-Screen Consistency Check
++
++Every screen above reuses, without deviation: the same header pattern (§3.22/§4.2), the same list-screen anatomy (search/filter bar → grid → footer), the same Add/Edit anatomy (grouped fields → Cancel/Save footer), the same status-badge component (§3.12) wherever status appears, the same confirmation-dialog pattern (`06-Dialogs-and-States.md`) wherever a destructive or high-risk action occurs, and the same empty/error/success visual language throughout. No screen introduces a one-off component, color, or layout idiom not defined in `02-Design-Tokens.md` or `03-Component-Library.md`. **SCR-020 (Delegation Management, SRS v1.1) is held to the identical standard:** its list follows the Inventory History anatomy exactly (filter bar → grid → no Edit action, §5.12), its Create panel follows the standard Add/Edit dialog anatomy exactly (§5.5), and its status badge reuses existing color tokens rather than introducing new ones (§3.12) — it was designed as an extension of the existing language, not a new one.
+-- 
+2.43.0
+
