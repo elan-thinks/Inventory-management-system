@@ -37,7 +37,7 @@
 ---
 
 ## UC-004 — Create Product
-**Actor:** Authorized user  
+**Actor:** Authorized Administrator  
 **Preconditions:** At least one active Category and one active default Supplier exist.  
 **Main Flow:** Open Product form → enter fields → validate → save Product with QuantityOnHand = 0 → refresh list.  
 **Exceptions:** Invalid or duplicate data → block save and show validation.  
@@ -54,14 +54,14 @@
 ---
 
 ## UC-006 — Update Product
-**Actor:** Authorized user  
+**Actor:** Authorized Administrator  
 **Main Flow:** Select product → Edit → change allowed fields → validate → save. QuantityOnHand is never directly edited here.  
 **Requirements:** FR-PROD-005, FR-PROD-009.
 
 ---
 
 ## UC-007 — Delete / Deactivate Product
-**Actor:** Authorized user  
+**Actor:** Authorized Administrator  
 **Main Flow:** Select Product → Delete → confirm → system checks transactions → hard-delete only if no transactions; otherwise block and offer deactivation.  
 **Requirements:** FR-PROD-006, BR-018.
 
@@ -75,7 +75,7 @@
 ---
 
 ## UC-009 — Manage Categories
-**Actor:** Authorized user  
+**Actor:** Authorized Administrator  
 **Main Flow:** Create, view, update, search, and conditionally delete/deactivate Category.  
 **Exceptions:** Duplicate name or products linked → block invalid operation.  
 **Requirements:** FR-CAT-001–004, BR-007–008.
@@ -83,14 +83,14 @@
 ---
 
 ## UC-010 — Manage Suppliers
-**Actor:** Authorized user  
+**Actor:** Authorized Administrator  
 **Main Flow:** Create, view, update, search, and conditionally delete/deactivate Supplier.  
 **Requirements:** FR-SUP-001–004, BR-009, BR-028.
 
 ---
 
 ## UC-011 — Manage Customers
-**Actor:** Authorized user  
+**Actor:** Authorized Administrator  
 **Main Flow:** Create, view, update, search, and conditionally delete/deactivate Customer.  
 **Requirements:** FR-CUS-001–004, BR-010, BR-029.
 
@@ -146,3 +146,16 @@
 **Main Flow:** Open User Management → create/edit/deactivate account → assign role → validate → save.  
 **Exceptions:** Duplicate username or self-deactivation → block operation.  
 **Requirements:** FR-USR-001–006, BR-019–020.
+
+---
+
+## UC-019 — Manage Delegations
+**Actor:** Administrator  
+**Goal:** Temporarily delegate an approved operational responsibility to an eligible Inventory/Store Staff user.  
+**Preconditions:** Administrator is authenticated; recipient account is active and eligible.  
+**Main Flow:** Open Delegation Management → select eligible Staff user → select one approved responsibility → set Start Date and End Date → enter Reason → validate authority and overlap rules → create delegation → display active delegation.  
+**Revoke Flow:** Select active delegation → choose Revoke → confirm → record revocation attribution → delegation immediately stops granting permission.  
+**Expiration:** System treats a delegation as expired after End Date and no longer applies it during authorization checks.  
+**Exceptions:** Invalid recipient, non-delegatable responsibility, invalid date range, insufficient delegator authority, or conflicting overlap → block operation and show clear error.  
+**Postcondition:** Valid delegation exists as time-bounded authorization without changing the recipient's permanent role.  
+**Requirements:** FR-DEL-001–011, BR-031–039.
