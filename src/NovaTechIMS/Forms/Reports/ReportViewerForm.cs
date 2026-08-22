@@ -1,7 +1,7 @@
 using System;
-using System.Collections;
 using System.Drawing;
 using System.Drawing.Printing;
+using System.Linq;
 using System.Windows.Forms;
 using NovaTechIMS.Utilities;
 
@@ -115,7 +115,6 @@ public class ReportViewerForm : Form
     {
         grid.DataSource = _data;
 
-        // Prefer readable headers for common properties
         foreach (DataGridViewColumn col in grid.Columns)
         {
             col.HeaderText = col.DataPropertyName switch
@@ -184,7 +183,6 @@ public class ReportViewerForm : Form
             cellFont, Brushes.Gray, left, y);
         y += cellFont.GetHeight(e.Graphics) + 12;
 
-        // Simple tabular print of visible columns (first 6 to fit page)
         var cols = grid.Columns.Cast<DataGridViewColumn>()
             .Where(c => c.Visible)
             .Take(6)
