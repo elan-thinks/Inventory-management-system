@@ -8,10 +8,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Products;
 
-/// <summary>
-/// SCR-003 Product List (Milestone 8).
-/// Hosted inside MainForm content area.
-/// </summary>
+/// <summary>SCR-003 Product List — M19 grid styling + badges + Clear filters.</summary>
 public class ProductListForm : Form
 {
     private readonly ProductService _service = new();
@@ -139,8 +136,6 @@ public class ProductListForm : Form
         grid = new DataGridView
         {
             Dock = DockStyle.Fill,
-            BackgroundColor = UiTheme.Surface,
-            BorderStyle = BorderStyle.FixedSingle,
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
             AllowUserToResizeRows = false,
@@ -148,16 +143,9 @@ public class ProductListForm : Form
             MultiSelect = false,
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
             AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-            RowHeadersVisible = false,
-            Font = UiTheme.Body,
-            ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-            {
-                Font = UiTheme.Label,
-                BackColor = UiTheme.StatusStripBackground,
-                ForeColor = UiTheme.Text
-            },
-            EnableHeadersVisualStyles = false
+            RowHeadersVisible = false
         };
+        GridStyles.Apply(grid);
         grid.CellContentClick += Grid_CellContentClick;
 
         lblEmpty = new Label
@@ -252,7 +240,7 @@ public class ProductListForm : Form
                 grid.Visible = false;
                 lblEmpty.Visible = true;
                 lblEmpty.Text = filtersOn
-                    ? "No products match your search/filters."
+                    ? "No products match your search or filters."
                     : "No products yet. Add your first product to get started.";
                 lblCount.Text = "0 products";
                 return;
@@ -268,7 +256,7 @@ public class ProductListForm : Form
         {
             grid.Visible = false;
             lblEmpty.Visible = true;
-            lblEmpty.Text = "Unable to load products. Check the database connection.\n" + ex.Message;
+            lblEmpty.Text = "Unable to load products.\n" + ErrorPresenter.ToUserMessage(DbExceptionMapper.Map(ex));
             lblCount.Text = "";
         }
     }
@@ -299,22 +287,12 @@ public class ProductListForm : Form
         if (grid.Columns.Contains("colEdit")) grid.Columns.Remove("colEdit");
         if (grid.Columns.Contains("colDelete")) grid.Columns.Remove("colDelete");
 
-        grid.Columns.Add(new DataGridViewButtonColumn
-        {
-            Name = "colEdit",
-            Text = "Edit",
-            UseColumnTextForButtonValue = true,
-            FillWeight = 0.45f,
-            FlatStyle = FlatStyle.Flat
-        });
-        grid.Columns.Add(new DataGridViewButtonColumn
-        {
-            Name = "colDelete",
-            Text = "Delete",
-            UseColumnTextForButtonValue = true,
-            FillWeight = 0.5f,
-            FlatStyle = FlatStyle.Flat
-        });
+        grid.Columns.Add(GridStyles.ActionButton("colEdit", "Edit", 0.45f));
+        grid.Columns.Add(GridStyles.ActionButton("colDelete", "Delete", 0.5f));
+
+        GridStyles.ApplyStatusFormatting(grid,
+            nameof(ProductListRow.StockStatusLabel),
+            nameof(ProductListRow.StatusLabel));
     }
 
     private void BtnAdd_Click(object? sender, EventArgs e)
@@ -380,20 +358,13 @@ public class ProductListForm : Form
                 }
                 catch (Exception de)
                 {
-                    MessageBox.Show(FindForm(), de.Message, "Products",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ErrorPresenter.Show(FindForm(), de);
                 }
             }
         }
-        catch (AppException ex)
-        {
-            MessageBox.Show(FindForm(), ex.Message, "Products",
-                MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        }
         catch (Exception ex)
         {
-            MessageBox.Show(FindForm(), "Delete failed: " + ex.Message, "Products",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            ErrorPresenter.Show(FindForm(), DbExceptionMapper.Map(ex));
         }
     }
 
