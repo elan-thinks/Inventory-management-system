@@ -5,35 +5,72 @@ using Npgsql;
 namespace NovaTechIMS.Data;
 
 /// <summary>
-/// Creates PostgreSQL connections (Milestone 4 skeleton).
-/// Does not open the connection — caller opens/closes with using.
+/// Creates PostgreSQL connections (Milestone 4).
+/// Password from environment variable NOVATECH_PG_PASSWORD
+/// (or full string from NOVATECH_IMS_CONNECTION).
 /// </summary>
 public static class DbConnectionFactory
 {
     public const string ConnectionStringName = "NovaTechIMS";
+    public const string PasswordEnvironmentVariable = "NOVATECH_PG_PASSWORD";
+    public const string FullConnectionEnvironmentVariable = "NOVATECH_IMS_CONNECTION";
 
-    /// <summary>
-    /// Returns a new unopened <see cref="NpgsqlConnection"/>.
-    /// </summary>
     public static NpgsqlConnection CreateConnection()
     {
+        return new NpgsqlConnection(BuildConnectionString());
+    }
+
+    public static string BuildConnectionString()
+    {
+        var fullOverride = Environment.GetEnvironmentVariable(
+            FullConnectionEnvironmentVariable,
+            EnvironmentVariableTarget.Process)
+            ?? Environment.GetEnvironmentVariable(
+                FullConnectionEnvironmentVariable,
+                EnvironmentVariableTarget.User)
+            ?? Environment.GetEnvironmentVariable(
+                FullConnectionEnvironmentVariable,
+                EnvironmentVariableTarget.Machine);
+
+        if (!string.IsNullOrWhiteSpace(fullOverride))
+            return fullOverride.Trim();
+
         var settings = ConfigurationManager.ConnectionStrings[ConnectionStringName]
             ?? throw new InvalidOperationException(
                 $"Connection string '{ConnectionStringName}' was not found in App.config.");
 
         if (string.IsNullOrWhiteSpace(settings.ConnectionString))
             throw new InvalidOperationException(
-                $"Connection string '{ConnectionStringName}' is empty. Set Host/Database/Username/Password in App.config.");
+                $"Connection string '{ConnectionStringName}' is empty in App.config.");
 
-        return new NpgsqlConnection(settings.ConnectionString);
+        var builder = new NpgsqlConnectionStringBuilder(settings.ConnectionString);
+
+        if (string.IsNullOrEmpty(builder.Password))
+        {
+            var password = Environment.GetEnvironmentVariable(
+                    PasswordEnvironmentVariable,
+                    EnvironmentVariableTarget.Process)
+                ?? Environment.GetEnvironmentVariable(
+                    PasswordEnvironmentVariable,
+                    EnvironmentVariableTarget.User)
+                ?? Environment.GetEnvironmentVariable(
+                    PasswordEnvironmentVariable,
+                    EnvironmentVariableTarget.Machine);
+
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new InvalidOperationException(
+                    $"PostgreSQL password not set. Create a user environment variable " +
+                    $"named '{PasswordEnvironmentVariable}' with your postgres password, " +
+                    $"then restart Visual Studio. " +
+                    $"(Alternatively set '{FullConnectionEnvironmentVariable}' to a full connection string.)");
+            }
+
+            builder.Password = password;
+        }
+
+        return builder.ConnectionString;
     }
 
-    /// <summary>Raw connection string for diagnostics (does not open a connection).</summary>
-    public static string GetConnectionString()
-    {
-        var settings = ConfigurationManager.ConnectionStrings[ConnectionStringName];
-        return settings?.ConnectionString
-            ?? throw new InvalidOperationException(
-                $"Connection string '{ConnectionStringName}' was not found in App.config.");
-    }
+    public static string GetConnectionString() => BuildConnectionString();
 }

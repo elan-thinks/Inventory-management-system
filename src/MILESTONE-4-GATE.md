@@ -18,21 +18,37 @@ Wire the WinForms project to PostgreSQL with a minimal data-access skeleton. No 
 
 | Item | Location |
 |------|----------|
-| Connection string | `App.config` → name `NovaTechIMS` |
+| Connection string (no password) | `App.config` → name `NovaTechIMS` |
+| Password | User env var **`NOVATECH_PG_PASSWORD`** |
+| Optional full override | Env var **`NOVATECH_IMS_CONNECTION`** |
 | Package Npgsql | `NovaTechIMS.csproj` |
-| ConfigurationManager | package for App.config |
 | `DbConnectionFactory` | `Data/DbConnectionFactory.cs` |
-| `DatabaseProbe.TryConnect` | `Data/DatabaseProbe.cs` — SELECT 1 |
+| `DatabaseProbe.TryConnect` | `Data/DatabaseProbe.cs` |
 
 ---
 
-## Setup (required once)
+## Setup
 
-1. Ensure database `NovaTechIMS` exists and Milestone 3 scripts ran.
-2. Edit `src/NovaTechIMS/App.config`: set your real PostgreSQL password (replace `YOUR_PASSWORD`).
-3. Rebuild solution (restores NuGet packages).
+1. Database `NovaTechIMS` exists; Milestone 3 scripts applied.
+2. Set user environment variable **NOVATECH_PG_PASSWORD** = your PostgreSQL password.
+3. **Fully restart Visual Studio** (required to pick up env vars).
+4. Rebuild solution.
 
-### Optional connectivity test
+### Environment variable setup (Windows)
+
+1. Windows search → **environment variables** → **Edit the system environment variables**.
+2. **Environment Variables…**
+3. Under **User variables** → **New…**
+   - Name: `NOVATECH_PG_PASSWORD`
+   - Value: *your postgres password*
+4. OK all dialogs.
+5. Close Visual Studio completely and open it again.
+
+Optional: `NOVATECH_IMS_CONNECTION` = full connection string (overrides App.config).
+
+---
+
+## Optional connectivity test
 
 ```csharp
 if (NovaTechIMS.Data.DatabaseProbe.TryConnect(out var msg))
@@ -40,17 +56,6 @@ if (NovaTechIMS.Data.DatabaseProbe.TryConnect(out var msg))
 else
     MessageBox.Show(msg, "Database", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 ```
-
-Login shell does **not** require DB to open.
-
----
-
-## Intentionally NOT implemented
-
-- Category / Supplier / Customer / Product repositories
-- Stock services
-- Authentication against DB
-- Full CRUD
 
 ---
 
