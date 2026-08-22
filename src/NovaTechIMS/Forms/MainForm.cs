@@ -15,7 +15,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms;
 
-/// <summary>Application shell (Milestone 12: Stock-Out).</summary>
+/// <summary>Application shell (Milestone 13: Inventory History).</summary>
 public partial class MainForm : Form
 {
     private readonly CurrentUser _currentUser;
@@ -41,7 +41,7 @@ public partial class MainForm : Form
         lblDateStatus.Text = DateTime.Now.ToString("dddd, dd MMM yyyy");
         lblMessageStatus.Text = "Ready";
         MinimumSize = new Size(UiTheme.MinWindowWidth, UiTheme.MinWindowHeight);
-        lblRoleBadge.Text = "Milestone 12";
+        lblRoleBadge.Text = "Milestone 13";
     }
 
     private void BuildNavigation()
@@ -159,6 +159,10 @@ public partial class MainForm : Form
                 HostList(new StockOutForm(), "Stock Out");
                 lblMessageStatus.Text = "Opened: Stock Out";
                 return;
+            case "Inventory History":
+                HostList(new InventoryHistoryForm(), "Inventory History");
+                lblMessageStatus.Text = "Opened: Inventory History";
+                return;
         }
 
         var title = key;
@@ -167,7 +171,6 @@ public partial class MainForm : Form
         {
             "Dashboard" => "Dashboard metrics and quick actions will arrive in a later milestone.",
             "Inventory Adjustment" => "Inventory Adjustment will be implemented in Milestone 14.",
-            "Inventory History" => "Inventory History will be implemented in Milestone 13.",
             "Reports" => "Reports will be implemented in Milestone 16.",
             "Delegations" => "Delegation management will be implemented in Milestone 15.",
             _ => "This area is reserved for a future milestone."
