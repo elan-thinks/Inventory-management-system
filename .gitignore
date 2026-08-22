@@ -1,0 +1,113 @@
+# ============================================================
+# NovaTech IMS — .gitignore
+# Milestone 0 baseline (Visual Studio / .NET / WinForms)
+# ============================================================
+
+## Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+*.dll
+*.exe
+*.pdb
+*.cache
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+## Visual Studio
+.vs/
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.userprefs
+*.rsuser
+*.DotSettings.user
+
+## Rider / VS Code / other IDEs
+.idea/
+*.sln.iml
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+## NuGet
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nupkg
+**/packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Publish / output
+publish/
+*.publishproj
+*.pubxml
+*.pubxml.user
+PublishScripts/
+
+## Test & coverage
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.coverage
+*.coveragexml
+*.trx
+TestResults/
+
+## Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+## SQL / LocalDB (do not commit database files)
+*.mdf
+*.ldf
+*.ndf
+App_Data/*.mdf
+App_Data/*.ldf
+
+## Secrets / local config overrides
+**/appsettings.*.local.json
+**/secrets.json
+*.pfx
+*.snk
+
+## OS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+## Misc
+*.bak
+*.swp
+*~
+*.orig
+*.rej
+.env
+.env.*
+!
