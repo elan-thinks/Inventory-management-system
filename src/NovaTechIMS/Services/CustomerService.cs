@@ -4,35 +4,33 @@ using System.Net.Mail;
 using System.Text.RegularExpressions;
 using NovaTechIMS.Data;
 using NovaTechIMS.Models;
+using NovaTechIMS.Security;
 using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Services;
 
-/// <summary>
-/// Customer business logic (FR-CUS, BR-010, VAL-007/008/013/014).
-/// Forms call this layer only — no SQL in the UI.
-/// </summary>
+/// <summary>Customer business logic with authorization gates (M10).</summary>
 public class CustomerService
 {
-    private static readonly Regex PhonePattern = new(
-        @"^[0-9+\-()\s]+$",
-        RegexOptions.Compiled);
-
+    private static readonly Regex PhonePattern = new(@"^[0-9+\-()\s]+$", RegexOptions.Compiled);
     private readonly CustomerRepository _repository = new();
 
     public IReadOnlyList<CustomerListRow> GetList(string? search = null, bool? isActiveFilter = null)
     {
+        AuthorizationService.RequirePermission(Permissions.ViewCustomers);
         return _repository.GetList(search, isActiveFilter);
     }
 
     public Customer GetById(int customerId)
     {
+        AuthorizationService.RequirePermission(Permissions.ViewCustomers);
         return _repository.GetById(customerId)
             ?? throw new NotFoundException("The selected customer no longer exists.");
     }
 
     public Customer Create(string name, string? phone, string? email, string? address)
     {
+        AuthorizationService.RequirePermission(Permissions.ManageCustomers);
         ValidateFields(name, phone, email, address);
 
         var customer = new Customer
@@ -49,14 +47,9 @@ public class CustomerService
         return customer;
     }
 
-    public void Update(
-        int customerId,
-        string name,
-        string? phone,
-        string? email,
-        string? address,
-        bool isActive)
+    public void Update(int customerId, string name, string? phone, string? email, string? address, bool isActive)
     {
+        AuthorizationService.RequirePermission(Permissions.ManageCustomers);
         ValidateFields(name, phone, email, address);
 
         var existing = GetById(customerId);
@@ -70,12 +63,9 @@ public class CustomerService
         _repository.Update(existing);
     }
 
-    /// <summary>
-    /// Attempts hard delete. When Stock-Out transactions reference the customer (BR-010),
-    /// throws <see cref="BusinessRuleException"/> so the UI can offer Mark Inactive.
-    /// </summary>
     public void DeleteOrThrowIfReferenced(int customerId)
     {
+        AuthorizationService.RequirePermission(Permissions.DeleteCustomers);
         _ = GetById(customerId);
 
         var txnCount = _repository.CountStockOutTransactions(customerId);
@@ -96,6 +86,7 @@ public class CustomerService
 
     public void Deactivate(int customerId)
     {
+        AuthorizationService.RequirePermission(Permissions.DeleteCustomers);
         _ = GetById(customerId);
         _repository.SoftDeactivate(customerId);
     }
@@ -104,20 +95,16 @@ public class CustomerService
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ValidationException("Customer name is required.");
-
         if (name.Trim().Length > 150)
             throw new ValidationException("Customer name cannot exceed 150 characters.");
-
         if (!string.IsNullOrWhiteSpace(phone))
         {
             var p = phone.Trim();
             if (p.Length > 30)
                 throw new ValidationException("Phone cannot exceed 30 characters.");
             if (!PhonePattern.IsMatch(p))
-                throw new ValidationException(
-                    "Phone may only contain digits, spaces, +, -, and parentheses.");
+                throw new ValidationException("Phone may only contain digits, spaces, +, -, and parentheses.");
         }
-
         if (!string.IsNullOrWhiteSpace(email))
         {
             var e = email.Trim();
@@ -126,8 +113,6 @@ public class CustomerService
             if (!IsValidEmail(e))
                 throw new ValidationException("Email format is not valid.");
         }
-
-        // VAL-008 max 250; schema allows 300 — enforce the stricter validation rule.
         if (address is not null && address.Trim().Length > 250)
             throw new ValidationException("Address cannot exceed 250 characters.");
     }
@@ -139,10 +124,7 @@ public class CustomerService
             var addr = new MailAddress(email);
             return addr.Address.Equals(email, StringComparison.OrdinalIgnoreCase);
         }
-        catch
-        {
-            return false;
-        }
+        catch { return false; }
     }
 
     private static string? NullIfWhiteSpace(string? value)

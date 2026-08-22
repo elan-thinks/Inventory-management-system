@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using NovaTechIMS.Data;
 using NovaTechIMS.Models;
 using NovaTechIMS.Models.Enums;
+using NovaTechIMS.Security;
 using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Services;
 
-/// <summary>
-/// Product business logic (FR-PROD, BR-001–006, BR-018, BR-026–027, VAL-002/003/009/011/012).
-/// QuantityOnHand is never set from this service on create/update.
-/// </summary>
+/// <summary>Product business logic with authorization gates (M10).</summary>
 public class ProductService
 {
     private readonly ProductRepository _repository = new();
@@ -24,11 +22,13 @@ public class ProductService
         StockStatus? stockStatus = null,
         bool? isActiveFilter = null)
     {
+        AuthorizationService.RequirePermission(Permissions.ViewProducts);
         return _repository.GetList(search, categoryId, supplierId, stockStatus, isActiveFilter);
     }
 
     public Product GetById(int productId)
     {
+        AuthorizationService.RequirePermission(Permissions.ViewProducts);
         return _repository.GetById(productId)
             ?? throw new NotFoundException("The selected product no longer exists.");
     }
@@ -42,10 +42,8 @@ public class ProductService
         decimal sellingPrice,
         int minimumStockLevel)
     {
-        Validate(
-            name, categoryId, supplierId, description,
-            purchasePrice, sellingPrice, minimumStockLevel);
-
+        AuthorizationService.RequirePermission(Permissions.ManageProducts);
+        Validate(name, categoryId, supplierId, description, purchasePrice, sellingPrice, minimumStockLevel);
         EnsureCategoryExists(categoryId);
         EnsureSupplierExists(supplierId);
 
@@ -57,7 +55,7 @@ public class ProductService
             Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
             PurchasePrice = RoundMoney(purchasePrice),
             SellingPrice = RoundMoney(sellingPrice),
-            QuantityOnHand = 0, // BR-026 — never create a stock movement on product create
+            QuantityOnHand = 0,
             MinimumStockLevel = minimumStockLevel,
             IsActive = true,
             CreatedDate = DateTime.UtcNow
@@ -78,15 +76,12 @@ public class ProductService
         int minimumStockLevel,
         bool isActive)
     {
-        Validate(
-            name, categoryId, supplierId, description,
-            purchasePrice, sellingPrice, minimumStockLevel);
-
+        AuthorizationService.RequirePermission(Permissions.ManageProducts);
+        Validate(name, categoryId, supplierId, description, purchasePrice, sellingPrice, minimumStockLevel);
         EnsureCategoryExists(categoryId);
         EnsureSupplierExists(supplierId);
 
         var existing = GetById(productId);
-        // QuantityOnHand intentionally not assigned (BR-027).
         existing.ProductName = name.Trim();
         existing.CategoryID = categoryId;
         existing.SupplierID = supplierId;
@@ -100,11 +95,9 @@ public class ProductService
         _repository.Update(existing);
     }
 
-    /// <summary>
-    /// Hard delete only when zero inventory transactions (BR-018); otherwise UI offers deactivate.
-    /// </summary>
     public void DeleteOrThrowIfReferenced(int productId)
     {
+        AuthorizationService.RequirePermission(Permissions.DeleteProducts);
         _ = GetById(productId);
 
         var txnCount = _repository.CountTransactions(productId);
@@ -125,6 +118,7 @@ public class ProductService
 
     public void Deactivate(int productId)
     {
+        AuthorizationService.RequirePermission(Permissions.DeleteProducts);
         _ = GetById(productId);
         _repository.SoftDeactivate(productId);
     }
@@ -142,35 +136,23 @@ public class ProductService
     }
 
     private static void Validate(
-        string name,
-        int categoryId,
-        int supplierId,
-        string? description,
-        decimal purchasePrice,
-        decimal sellingPrice,
-        int minimumStockLevel)
+        string name, int categoryId, int supplierId, string? description,
+        decimal purchasePrice, decimal sellingPrice, int minimumStockLevel)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ValidationException("Product name is required.");
-
         if (name.Trim().Length > 100)
             throw new ValidationException("Product name cannot exceed 100 characters.");
-
         if (categoryId <= 0)
             throw new ValidationException("Category is required.");
-
         if (supplierId <= 0)
             throw new ValidationException("Default supplier is required.");
-
         if (description is not null && description.Length > 500)
             throw new ValidationException("Description cannot exceed 500 characters.");
-
         if (purchasePrice < 0)
             throw new ValidationException("Purchase price must be greater than or equal to zero.");
-
         if (sellingPrice < 0)
             throw new ValidationException("Selling price must be greater than or equal to zero.");
-
         if (minimumStockLevel < 0)
             throw new ValidationException("Minimum stock level must be greater than or equal to zero.");
     }

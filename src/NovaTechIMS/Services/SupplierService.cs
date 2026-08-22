@@ -4,40 +4,33 @@ using System.Net.Mail;
 using System.Text.RegularExpressions;
 using NovaTechIMS.Data;
 using NovaTechIMS.Models;
+using NovaTechIMS.Security;
 using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Services;
 
-/// <summary>
-/// Supplier business logic (FR-SUP, BR-009, VAL-005/006/013/014).
-/// Forms call this layer only — no SQL in the UI.
-/// </summary>
+/// <summary>Supplier business logic with authorization gates (M10).</summary>
 public class SupplierService
 {
-    private static readonly Regex PhonePattern = new(
-        @"^[0-9+\-()\s]+$",
-        RegexOptions.Compiled);
-
+    private static readonly Regex PhonePattern = new(@"^[0-9+\-()\s]+$", RegexOptions.Compiled);
     private readonly SupplierRepository _repository = new();
 
     public IReadOnlyList<SupplierListRow> GetList(string? searchName = null, bool? isActiveFilter = null)
     {
+        AuthorizationService.RequirePermission(Permissions.ViewSuppliers);
         return _repository.GetList(searchName, isActiveFilter);
     }
 
     public Supplier GetById(int supplierId)
     {
+        AuthorizationService.RequirePermission(Permissions.ViewSuppliers);
         return _repository.GetById(supplierId)
             ?? throw new NotFoundException("The selected supplier no longer exists.");
     }
 
-    public Supplier Create(
-        string name,
-        string? contactPerson,
-        string? phone,
-        string? email,
-        string? address)
+    public Supplier Create(string name, string? contactPerson, string? phone, string? email, string? address)
     {
+        AuthorizationService.RequirePermission(Permissions.ManageSuppliers);
         ValidateFields(name, contactPerson, phone, email, address);
 
         var supplier = new Supplier
@@ -55,15 +48,9 @@ public class SupplierService
         return supplier;
     }
 
-    public void Update(
-        int supplierId,
-        string name,
-        string? contactPerson,
-        string? phone,
-        string? email,
-        string? address,
-        bool isActive)
+    public void Update(int supplierId, string name, string? contactPerson, string? phone, string? email, string? address, bool isActive)
     {
+        AuthorizationService.RequirePermission(Permissions.ManageSuppliers);
         ValidateFields(name, contactPerson, phone, email, address);
 
         var existing = GetById(supplierId);
@@ -78,12 +65,9 @@ public class SupplierService
         _repository.Update(existing);
     }
 
-    /// <summary>
-    /// Attempts hard delete. When products or transactions still reference the supplier (BR-009),
-    /// throws <see cref="BusinessRuleException"/> so the UI can offer Mark Inactive.
-    /// </summary>
     public void DeleteOrThrowIfReferenced(int supplierId)
     {
+        AuthorizationService.RequirePermission(Permissions.DeleteSuppliers);
         _ = GetById(supplierId);
 
         var productCount = _repository.CountProducts(supplierId);
@@ -106,36 +90,27 @@ public class SupplierService
 
     public void Deactivate(int supplierId)
     {
+        AuthorizationService.RequirePermission(Permissions.DeleteSuppliers);
         _ = GetById(supplierId);
         _repository.SoftDeactivate(supplierId);
     }
 
-    private static void ValidateFields(
-        string name,
-        string? contactPerson,
-        string? phone,
-        string? email,
-        string? address)
+    private static void ValidateFields(string name, string? contactPerson, string? phone, string? email, string? address)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ValidationException("Supplier name is required.");
-
         if (name.Trim().Length > 150)
             throw new ValidationException("Supplier name cannot exceed 150 characters.");
-
         if (contactPerson is not null && contactPerson.Trim().Length > 100)
             throw new ValidationException("Contact person cannot exceed 100 characters.");
-
         if (!string.IsNullOrWhiteSpace(phone))
         {
             var p = phone.Trim();
             if (p.Length > 30)
                 throw new ValidationException("Phone cannot exceed 30 characters.");
             if (!PhonePattern.IsMatch(p))
-                throw new ValidationException(
-                    "Phone may only contain digits, spaces, +, -, and parentheses.");
+                throw new ValidationException("Phone may only contain digits, spaces, +, -, and parentheses.");
         }
-
         if (!string.IsNullOrWhiteSpace(email))
         {
             var e = email.Trim();
@@ -144,7 +119,6 @@ public class SupplierService
             if (!IsValidEmail(e))
                 throw new ValidationException("Email format is not valid.");
         }
-
         if (address is not null && address.Trim().Length > 300)
             throw new ValidationException("Address cannot exceed 300 characters.");
     }
@@ -156,10 +130,7 @@ public class SupplierService
             var addr = new MailAddress(email);
             return addr.Address.Equals(email, StringComparison.OrdinalIgnoreCase);
         }
-        catch
-        {
-            return false;
-        }
+        catch { return false; }
     }
 
     private static string? NullIfWhiteSpace(string? value)

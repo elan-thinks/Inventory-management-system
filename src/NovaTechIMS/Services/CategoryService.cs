@@ -2,32 +2,32 @@ using System;
 using System.Collections.Generic;
 using NovaTechIMS.Data;
 using NovaTechIMS.Models;
+using NovaTechIMS.Security;
 using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Services;
 
-/// <summary>
-/// Category business logic (FR-CAT, BR-007, BR-008, VAL-004).
-/// Forms call this layer only — no SQL in the UI.
-/// </summary>
+/// <summary>Category business logic with authorization gates (M10).</summary>
 public class CategoryService
 {
     private readonly CategoryRepository _repository = new();
 
     public IReadOnlyList<CategoryListRow> GetList(string? searchName = null, bool? isActiveFilter = null)
     {
+        AuthorizationService.RequirePermission(Permissions.ViewCategories);
         return _repository.GetList(searchName, isActiveFilter);
     }
 
     public Category GetById(int categoryId)
     {
-        var category = _repository.GetById(categoryId)
+        AuthorizationService.RequirePermission(Permissions.ViewCategories);
+        return _repository.GetById(categoryId)
             ?? throw new NotFoundException("The selected category no longer exists.");
-        return category;
     }
 
     public Category Create(string name, string? description)
     {
+        AuthorizationService.RequirePermission(Permissions.ManageCategories);
         ValidateName(name);
         ValidateDescription(description);
 
@@ -48,6 +48,7 @@ public class CategoryService
 
     public void Update(int categoryId, string name, string? description, bool isActive)
     {
+        AuthorizationService.RequirePermission(Permissions.ManageCategories);
         ValidateName(name);
         ValidateDescription(description);
 
@@ -64,12 +65,9 @@ public class CategoryService
         _repository.Update(existing);
     }
 
-    /// <summary>
-    /// Attempts hard delete. When products still reference the category (BR-008),
-    /// throws <see cref="BusinessRuleException"/> so the UI can offer Mark Inactive.
-    /// </summary>
     public void DeleteOrThrowIfReferenced(int categoryId)
     {
+        AuthorizationService.RequirePermission(Permissions.DeleteCategories);
         _ = GetById(categoryId);
 
         var productCount = _repository.CountProducts(categoryId);
@@ -90,6 +88,7 @@ public class CategoryService
 
     public void Deactivate(int categoryId)
     {
+        AuthorizationService.RequirePermission(Permissions.DeleteCategories);
         _ = GetById(categoryId);
         _repository.SoftDeactivate(categoryId);
     }
@@ -100,7 +99,6 @@ public class CategoryService
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ValidationException("Category name is required.");
-
         if (name.Trim().Length > 100)
             throw new ValidationException("Category name cannot exceed 100 characters.");
     }
