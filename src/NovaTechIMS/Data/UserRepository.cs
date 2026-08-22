@@ -58,7 +58,8 @@ public class UserRepository
 
     public int CountUsers()
     {
-        const string sql = """SELECT COUNT(*)::int FROM "User"""";
+        // Use ordinary string — single-line raw """..."User""" confuses the C# parser (CS9006).
+        const string sql = "SELECT COUNT(*)::int FROM \"User\"";
 
         using var conn = DbConnectionFactory.CreateConnection();
         conn.Open();
