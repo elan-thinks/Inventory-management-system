@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using NovaTechIMS.Forms.Categories;
 using NovaTechIMS.Forms.Customers;
+using NovaTechIMS.Forms.Inventory;
 using NovaTechIMS.Forms.Products;
 using NovaTechIMS.Forms.Suppliers;
 using NovaTechIMS.Forms.Users;
@@ -15,7 +16,7 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms;
 
 /// <summary>
-/// Application shell with role-based navigation (Milestone 10).
+/// Application shell (Milestone 11: Stock-In).
 /// </summary>
 public partial class MainForm : Form
 {
@@ -42,7 +43,7 @@ public partial class MainForm : Form
         lblDateStatus.Text = DateTime.Now.ToString("dddd, dd MMM yyyy");
         lblMessageStatus.Text = "Ready";
         MinimumSize = new Size(UiTheme.MinWindowWidth, UiTheme.MinWindowHeight);
-        lblRoleBadge.Text = "Milestone 10";
+        lblRoleBadge.Text = "Milestone 11";
     }
 
     private void BuildNavigation()
@@ -56,13 +57,16 @@ public partial class MainForm : Form
         AddNavItem("Suppliers");
         AddNavItem("Customers");
         AddGroupLabel("INVENTORY OPERATIONS");
-        AddNavItem("Stock In");
-        AddNavItem("Stock Out");
 
+        if (AuthorizationService.HasPermission(_currentUser, Permissions.StockIn))
+            AddNavItem("Stock In");
+        if (AuthorizationService.HasPermission(_currentUser, Permissions.StockOut))
+            AddNavItem("Stock Out");
         if (AuthorizationService.HasPermission(_currentUser, Permissions.PerformAdjustment))
             AddNavItem("Inventory Adjustment");
+        if (AuthorizationService.HasPermission(_currentUser, Permissions.ViewInventoryHistory))
+            AddNavItem("Inventory History");
 
-        AddNavItem("Inventory History");
         AddGroupLabel("REPORTS");
         AddNavItem("Reports");
 
@@ -130,24 +134,28 @@ public partial class MainForm : Form
         switch (key)
         {
             case "Products":
-                ShowProducts();
+                HostList(new ProductListForm(), "Products");
                 lblMessageStatus.Text = "Opened: Products";
                 return;
             case "Categories":
-                ShowCategories();
+                HostList(new CategoryListForm(), "Categories");
                 lblMessageStatus.Text = "Opened: Categories";
                 return;
             case "Suppliers":
-                ShowSuppliers();
+                HostList(new SupplierListForm(), "Suppliers");
                 lblMessageStatus.Text = "Opened: Suppliers";
                 return;
             case "Customers":
-                ShowCustomers();
+                HostList(new CustomerListForm(), "Customers");
                 lblMessageStatus.Text = "Opened: Customers";
                 return;
             case "User Management":
-                ShowUsers();
+                HostList(new UserListForm(), "User Management");
                 lblMessageStatus.Text = "Opened: User Management";
+                return;
+            case "Stock In":
+                HostList(new StockInForm(), "Stock In");
+                lblMessageStatus.Text = "Opened: Stock In";
                 return;
         }
 
@@ -156,7 +164,6 @@ public partial class MainForm : Form
         var body = key switch
         {
             "Dashboard" => "Dashboard metrics and quick actions will arrive in a later milestone.",
-            "Stock In" => "Stock-In will be implemented in Milestone 11.",
             "Stock Out" => "Stock-Out will be implemented in Milestone 12.",
             "Inventory Adjustment" => "Inventory Adjustment will be implemented in Milestone 14.",
             "Inventory History" => "Inventory History will be implemented in Milestone 13.",
@@ -215,12 +222,6 @@ public partial class MainForm : Form
         listForm.Show();
         _hostedContent = listForm;
     }
-
-    private void ShowProducts() => HostList(new ProductListForm(), "Products");
-    private void ShowCategories() => HostList(new CategoryListForm(), "Categories");
-    private void ShowSuppliers() => HostList(new SupplierListForm(), "Suppliers");
-    private void ShowCustomers() => HostList(new CustomerListForm(), "Customers");
-    private void ShowUsers() => HostList(new UserListForm(), "User Management");
 
     private void ClearHostedContent()
     {
