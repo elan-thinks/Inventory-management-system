@@ -8,10 +8,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>NovaTechIMS</RootNamespace>
     <AssemblyName>NovaTechIMS</AssemblyName>
-    <ApplicationIcon></ApplicationIcon>
     <StartupObject>NovaTechIMS.Program</StartupObject>
     <LangVersion>latest</LangVersion>
     <Deterministic>true</Deterministic>
+    <!-- Assembly metadata (SDK generates attributes; do not also use Properties/AssemblyInfo.cs) -->
+    <AssemblyTitle>NovaTechIMS</AssemblyTitle>
+    <Product>NovaTechIMS</Product>
+    <Company>NovaTech Electronics (Educational)</Company>
+    <Copyright>Copyright © 2026</Copyright>
+    <Description>NovaTech Electronics Inventory Management System — University Windows Programming project</Description>
+    <Version>0.0.1</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
