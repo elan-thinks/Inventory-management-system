@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using NovaTechIMS.Forms.Categories;
 using NovaTechIMS.Forms.Customers;
+using NovaTechIMS.Forms.Products;
 using NovaTechIMS.Forms.Suppliers;
 using NovaTechIMS.Utilities;
 
@@ -10,8 +11,7 @@ namespace NovaTechIMS.Forms;
 
 /// <summary>
 /// Application shell (sidebar + header + content + status strip).
-/// Milestone 5–7: Categories, Suppliers, and Customers open list forms in the content area.
-/// Other nav items remain placeholders until their milestones.
+/// Milestone 5–8: Categories, Suppliers, Customers, and Products open list forms.
 /// </summary>
 public partial class MainForm : Form
 {
@@ -36,7 +36,7 @@ public partial class MainForm : Form
         lblDateStatus.Text = DateTime.Now.ToString("dddd, dd MMM yyyy");
         lblMessageStatus.Text = "Ready";
         MinimumSize = new Size(UiTheme.MinWindowWidth, UiTheme.MinWindowHeight);
-        lblRoleBadge.Text = "Milestone 7";
+        lblRoleBadge.Text = "Milestone 8";
     }
 
     private void BuildNavigation()
@@ -111,25 +111,24 @@ public partial class MainForm : Form
 
         SetActiveNav(btn);
 
-        if (key == "Categories")
+        switch (key)
         {
-            ShowCategories();
-            lblMessageStatus.Text = "Opened: Categories";
-            return;
-        }
-
-        if (key == "Suppliers")
-        {
-            ShowSuppliers();
-            lblMessageStatus.Text = "Opened: Suppliers";
-            return;
-        }
-
-        if (key == "Customers")
-        {
-            ShowCustomers();
-            lblMessageStatus.Text = "Opened: Customers";
-            return;
+            case "Products":
+                ShowProducts();
+                lblMessageStatus.Text = "Opened: Products";
+                return;
+            case "Categories":
+                ShowCategories();
+                lblMessageStatus.Text = "Opened: Categories";
+                return;
+            case "Suppliers":
+                ShowSuppliers();
+                lblMessageStatus.Text = "Opened: Suppliers";
+                return;
+            case "Customers":
+                ShowCustomers();
+                lblMessageStatus.Text = "Opened: Customers";
+                return;
         }
 
         var title = key;
@@ -137,7 +136,6 @@ public partial class MainForm : Form
         var body = key switch
         {
             "Dashboard" => "Dashboard metrics and quick actions will arrive in a later milestone.",
-            "Products" => "Product list and product forms will be implemented in Milestone 8.",
             "Stock In" => "Stock-In will be implemented in Milestone 11.",
             "Stock Out" => "Stock-Out will be implemented in Milestone 12.",
             "Inventory Adjustment" => "Inventory Adjustment will be implemented in Milestone 14.",
@@ -174,23 +172,37 @@ public partial class MainForm : Form
     private void ShowPlaceholder(string title, string subtitle, string body)
     {
         ClearHostedContent();
-
         lblPlaceholderTitle.Visible = true;
         lblPlaceholderBody.Visible = true;
         lblPlaceholderTitle.Text = subtitle;
         lblPlaceholderBody.Text = body;
-
         lblScreenTitle.Text = title;
         lblBreadcrumb.Text = title == "Dashboard" ? "Home" : $"Home › {title}";
+    }
+
+    private void ShowProducts()
+    {
+        ClearHostedContent();
+        lblPlaceholderTitle.Visible = false;
+        lblPlaceholderBody.Visible = false;
+        lblScreenTitle.Text = "Products";
+        lblBreadcrumb.Text = "Home › Products";
+
+        var listForm = new ProductListForm();
+        listForm.TopLevel = false;
+        listForm.FormBorderStyle = FormBorderStyle.None;
+        listForm.Dock = DockStyle.Fill;
+        pnlContent.Controls.Add(listForm);
+        listForm.BringToFront();
+        listForm.Show();
+        _hostedContent = listForm;
     }
 
     private void ShowCategories()
     {
         ClearHostedContent();
-
         lblPlaceholderTitle.Visible = false;
         lblPlaceholderBody.Visible = false;
-
         lblScreenTitle.Text = "Categories";
         lblBreadcrumb.Text = "Home › Categories";
 
@@ -207,10 +219,8 @@ public partial class MainForm : Form
     private void ShowSuppliers()
     {
         ClearHostedContent();
-
         lblPlaceholderTitle.Visible = false;
         lblPlaceholderBody.Visible = false;
-
         lblScreenTitle.Text = "Suppliers";
         lblBreadcrumb.Text = "Home › Suppliers";
 
@@ -227,10 +237,8 @@ public partial class MainForm : Form
     private void ShowCustomers()
     {
         ClearHostedContent();
-
         lblPlaceholderTitle.Visible = false;
         lblPlaceholderBody.Visible = false;
-
         lblScreenTitle.Text = "Customers";
         lblBreadcrumb.Text = "Home › Customers";
 
@@ -246,9 +254,7 @@ public partial class MainForm : Form
 
     private void ClearHostedContent()
     {
-        if (_hostedContent is null)
-            return;
-
+        if (_hostedContent is null) return;
         pnlContent.Controls.Remove(_hostedContent);
         _hostedContent.Dispose();
         _hostedContent = null;
