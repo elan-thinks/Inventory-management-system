@@ -6,7 +6,7 @@ using NpgsqlTypes;
 namespace NovaTechIMS.Data;
 
 /// <summary>
-/// Append-only inventory transactions (Milestones 11–13).
+/// Append-only inventory transactions (Milestones 11–14).
 /// </summary>
 public class InventoryTransactionRepository
 {
@@ -145,8 +145,72 @@ public class InventoryTransactionRepository
     }
 
     /// <summary>
-    /// Read-only history with optional filters (FR-SRCH-003). No update/delete.
+    /// Inventory Adjustment: set QuantityOnHand to newQuantity (FR-ADJ).
+    /// Quantity stored as absolute difference; Difference = new - previous.
     /// </summary>
+    public int InsertAdjustment(
+        int productId,
+        int newQuantity,
+        DateTime transactionDate,
+        string reason,
+        string? notes,
+        int userId)
+    {
+        using var conn = DbConnectionFactory.CreateConnection();
+        conn.Open();
+        using var tx = conn.BeginTransaction();
+
+        try
+        {
+            var (currentQty, isActive) = LockProduct(conn, tx, productId);
+            if (!isActive)
+                throw new InvalidOperationException("Product is inactive.");
+
+            var difference = newQuantity - currentQty;
+            var absQty = Math.Abs(difference);
+
+            const string insertSql = """
+                INSERT INTO "InventoryTransaction"
+                    ("TransactionType", "ProductID", "Quantity", "TransactionDate",
+                     "PreviousQuantity", "NewQuantity", "Difference", "Reason",
+                     "Notes", "UserID", "CreatedDateTime")
+                VALUES
+                    ('Adjustment', @productId, @quantity, @txnDate,
+                     @prevQty, @newQty, @diff, @reason,
+                     @notes, @userId, @created)
+                RETURNING "TransactionID"
+                """;
+
+            int txnId;
+            using (var insertCmd = new NpgsqlCommand(insertSql, conn, tx))
+            {
+                insertCmd.Parameters.Add(new NpgsqlParameter("productId", NpgsqlDbType.Integer) { Value = productId });
+                insertCmd.Parameters.Add(new NpgsqlParameter("quantity", NpgsqlDbType.Integer) { Value = absQty });
+                insertCmd.Parameters.Add(new NpgsqlParameter("txnDate", NpgsqlDbType.Date) { Value = transactionDate.Date });
+                insertCmd.Parameters.Add(new NpgsqlParameter("prevQty", NpgsqlDbType.Integer) { Value = currentQty });
+                insertCmd.Parameters.Add(new NpgsqlParameter("newQty", NpgsqlDbType.Integer) { Value = newQuantity });
+                insertCmd.Parameters.Add(new NpgsqlParameter("diff", NpgsqlDbType.Integer) { Value = difference });
+                insertCmd.Parameters.Add(new NpgsqlParameter("reason", NpgsqlDbType.Varchar) { Value = reason.Trim() });
+                insertCmd.Parameters.Add(new NpgsqlParameter("notes", NpgsqlDbType.Varchar)
+                {
+                    Value = string.IsNullOrWhiteSpace(notes) ? DBNull.Value : notes.Trim()
+                });
+                insertCmd.Parameters.Add(new NpgsqlParameter("userId", NpgsqlDbType.Integer) { Value = userId });
+                insertCmd.Parameters.Add(new NpgsqlParameter("created", NpgsqlDbType.TimestampTz) { Value = DateTime.UtcNow });
+                txnId = Convert.ToInt32(insertCmd.ExecuteScalar());
+            }
+
+            UpdateQuantity(conn, tx, productId, newQuantity);
+            tx.Commit();
+            return txnId;
+        }
+        catch
+        {
+            tx.Rollback();
+            throw;
+        }
+    }
+
     public IReadOnlyList<TransactionHistoryRow> GetHistory(
         DateTime? dateFrom,
         DateTime? dateTo,
