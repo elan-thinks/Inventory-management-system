@@ -8,7 +8,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Delegations;
 
-/// <summary>Delegation Management list (SCR-020, Milestone 15).</summary>
+/// <summary>Delegation list — M19 status chips, Revoke header, full filter labels.</summary>
 public class DelegationListForm : Form
 {
     private readonly DelegationService _service = new();
@@ -41,7 +41,7 @@ public class DelegationListForm : Form
         cboStatus = new ComboBox
         {
             DropDownStyle = ComboBoxStyle.DropDownList,
-            Width = 130,
+            Width = 140,
             Location = new Point(0, 8),
             Font = UiTheme.Body
         };
@@ -52,11 +52,14 @@ public class DelegationListForm : Form
         cboResponsibility = new ComboBox
         {
             DropDownStyle = ComboBoxStyle.DropDownList,
-            Width = 140,
-            Location = new Point(140, 8),
+            Width = 180,
+            Location = new Point(150, 8),
             Font = UiTheme.Body
         };
-        cboResponsibility.Items.AddRange(new object[] { "All responsibilities", "Stock-In", "Stock-Out", "Report Access" });
+        cboResponsibility.Items.AddRange(new object[]
+        {
+            "All responsibilities", "Stock-In", "Stock-Out", "Report Access"
+        });
         cboResponsibility.SelectedIndex = 0;
         cboResponsibility.SelectedIndexChanged += (_, _) => ReloadGrid();
 
@@ -104,8 +107,6 @@ public class DelegationListForm : Form
         grid = new DataGridView
         {
             Dock = DockStyle.Fill,
-            BackgroundColor = UiTheme.Surface,
-            BorderStyle = BorderStyle.FixedSingle,
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
             AllowUserToResizeRows = false,
@@ -113,16 +114,9 @@ public class DelegationListForm : Form
             MultiSelect = false,
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
             AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-            RowHeadersVisible = false,
-            Font = UiTheme.Body,
-            ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-            {
-                Font = UiTheme.Label,
-                BackColor = UiTheme.StatusStripBackground,
-                ForeColor = UiTheme.Text
-            },
-            EnableHeadersVisualStyles = false
+            RowHeadersVisible = false
         };
+        GridStyles.Apply(grid);
         grid.CellContentClick += Grid_CellContentClick;
 
         lblEmpty = new Label
@@ -205,14 +199,8 @@ public class DelegationListForm : Form
             Show(nameof(DelegationListRow.Reason), "Reason", 1.4f);
             Show(nameof(DelegationListRow.DelegatedByName), "By", 1.0f);
 
-            grid.Columns.Add(new DataGridViewButtonColumn
-            {
-                Name = "colRevoke",
-                Text = "Revoke",
-                UseColumnTextForButtonValue = true,
-                FillWeight = 0.6f,
-                FlatStyle = FlatStyle.Flat
-            });
+            grid.Columns.Add(GridStyles.ActionButton("colRevoke", "Revoke", 0.6f));
+            GridStyles.ApplyStatusFormatting(grid, nameof(DelegationListRow.StatusLabel));
 
             lblCount.Text = rows.Count == 1 ? "1 delegation" : $"{rows.Count} delegations";
         }
@@ -220,7 +208,8 @@ public class DelegationListForm : Form
         {
             grid.Visible = false;
             lblEmpty.Visible = true;
-            lblEmpty.Text = "Unable to load delegations.\n" + ex.Message +
+            lblEmpty.Text = "Unable to load delegations.\n" +
+                ErrorPresenter.ToUserMessage(DbExceptionMapper.Map(ex)) +
                 "\n\nIf the Delegation table is missing, run database/15-delegation.sql.";
             lblCount.Text = "";
         }
@@ -255,10 +244,9 @@ public class DelegationListForm : Form
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
             ReloadGrid();
         }
-        catch (AppException ex)
+        catch (Exception ex)
         {
-            MessageBox.Show(FindForm(), ex.Message, "Delegations",
-                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            ErrorPresenter.Show(FindForm(), DbExceptionMapper.Map(ex));
         }
     }
 }

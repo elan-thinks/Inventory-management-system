@@ -8,7 +8,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Stock-Out screen (FR-SOUT, Milestone 12).</summary>
+/// <summary>Stock-Out — M19 available banner + insufficient UX + Clear Form.</summary>
 public class StockOutForm : Form
 {
     private readonly StockOutService _service = new();
@@ -19,10 +19,13 @@ public class StockOutForm : Form
     private DateTimePicker dtpDate = null!;
     private TextBox txtUnitPrice = null!;
     private TextBox txtNotes = null!;
-    private Label lblCurrentQty = null!;
+    private Label lblAvailable = null!;
     private Label lblError = null!;
     private Button btnSave = null!;
+    private Button btnClear = null!;
     private DataGridView grid = null!;
+
+    private int _available;
 
     public StockOutForm()
     {
@@ -46,7 +49,7 @@ public class StockOutForm : Form
         var formPanel = new Panel
         {
             Dock = DockStyle.Top,
-            Height = 280,
+            Height = 320,
             BackColor = UiTheme.Surface,
             Padding = new Padding(16)
         };
@@ -75,9 +78,23 @@ public class StockOutForm : Form
             DropDownStyle = ComboBoxStyle.DropDownList,
             Font = UiTheme.Body
         };
-        cboProduct.SelectedIndexChanged += CboProduct_SelectedIndexChanged;
+        cboProduct.SelectedIndexChanged += (_, _) => UpdateAvailable();
         formPanel.Controls.Add(cboProduct);
         yL += 32;
+
+        lblAvailable = new Label
+        {
+            Text = "Available quantity: —",
+            Font = UiTheme.Label,
+            BackColor = UiTheme.InfoTint,
+            ForeColor = UiTheme.Info,
+            Location = new Point(lx, yL),
+            Size = new Size(fw, 32),
+            Padding = new Padding(8, 6, 8, 6),
+            TextAlign = ContentAlignment.MiddleLeft
+        };
+        formPanel.Controls.Add(lblAvailable);
+        yL += 40;
 
         L("Customer (optional)", lx, ref yL);
         cboCustomer = new ComboBox
@@ -100,6 +117,7 @@ public class StockOutForm : Form
             Value = 1,
             Font = UiTheme.Body
         };
+        nudQuantity.ValueChanged += (_, _) => EvaluateInsufficient();
         formPanel.Controls.Add(nudQuantity);
         yL += 32;
 
@@ -130,41 +148,43 @@ public class StockOutForm : Form
         formPanel.Controls.Add(txtUnitPrice);
         yR += 32;
 
-        L("Current quantity on hand", xR, ref yR);
-        lblCurrentQty = new Label
-        {
-            Text = "—",
-            Font = UiTheme.Body,
-            ForeColor = UiTheme.TextMuted,
-            Location = new Point(xR, yR),
-            AutoSize = true
-        };
-        formPanel.Controls.Add(lblCurrentQty);
-        yR += 28;
-
         L("Notes", lx, ref yL);
         txtNotes = new TextBox
         {
             Location = new Point(lx, yL),
             Width = fw + 240,
-            Height = 48,
+            Height = 40,
             Multiline = true,
             MaxLength = 500,
             Font = UiTheme.Body,
             ScrollBars = ScrollBars.Vertical
         };
         formPanel.Controls.Add(txtNotes);
-        yL += 56;
+        yL += 48;
 
         lblError = new Label
         {
             ForeColor = UiTheme.Error,
             Font = UiTheme.Label,
             Location = new Point(lx, yL),
-            Size = new Size(520, 28),
+            Size = new Size(400, 28),
             Visible = false
         };
         formPanel.Controls.Add(lblError);
+
+        btnClear = new Button
+        {
+            Text = "Clear Form",
+            Font = UiTheme.Label,
+            FlatStyle = FlatStyle.Flat,
+            Size = new Size(100, 34),
+            Location = new Point(xR, yL),
+            BackColor = UiTheme.Surface,
+            Cursor = Cursors.Hand
+        };
+        btnClear.FlatAppearance.BorderColor = UiTheme.Border;
+        btnClear.Click += (_, _) => ClearForm();
+        formPanel.Controls.Add(btnClear);
 
         btnSave = new Button
         {
@@ -174,7 +194,7 @@ public class StockOutForm : Form
             ForeColor = Color.White,
             FlatStyle = FlatStyle.Flat,
             Size = new Size(160, 34),
-            Location = new Point(xR + 40, yL),
+            Location = new Point(xR + 110, yL),
             Cursor = Cursors.Hand
         };
         btnSave.FlatAppearance.BorderSize = 0;
@@ -194,8 +214,6 @@ public class StockOutForm : Form
         grid = new DataGridView
         {
             Dock = DockStyle.Fill,
-            BackgroundColor = UiTheme.Surface,
-            BorderStyle = BorderStyle.FixedSingle,
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
             AllowUserToResizeRows = false,
@@ -203,16 +221,9 @@ public class StockOutForm : Form
             MultiSelect = false,
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
             AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-            RowHeadersVisible = false,
-            Font = UiTheme.Body,
-            ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-            {
-                Font = UiTheme.Label,
-                BackColor = UiTheme.StatusStripBackground,
-                ForeColor = UiTheme.Text
-            },
-            EnableHeadersVisualStyles = false
+            RowHeadersVisible = false
         };
+        GridStyles.Apply(grid);
 
         Controls.Add(grid);
         Controls.Add(lblHint);
@@ -237,33 +248,90 @@ public class StockOutForm : Form
         }
         catch (Exception ex)
         {
-            lblError.Text = "Could not load products/customers. " + ex.Message;
+            lblError.Text = ErrorPresenter.ToUserMessage(DbExceptionMapper.Map(ex));
             lblError.Visible = true;
         }
     }
 
-    private void CboProduct_SelectedIndexChanged(object? sender, EventArgs e)
+    private void UpdateAvailable()
     {
         if (cboProduct.SelectedItem is not LookupItem item || item.Value <= 0)
         {
-            lblCurrentQty.Text = "—";
+            _available = 0;
+            lblAvailable.Text = "Available quantity: —";
+            lblAvailable.BackColor = UiTheme.InfoTint;
+            lblAvailable.ForeColor = UiTheme.Info;
+            EvaluateInsufficient();
             return;
         }
 
         try
         {
             var p = _service.GetProduct(item.Value);
-            lblCurrentQty.Text = p.QuantityOnHand.ToString(CultureInfo.InvariantCulture);
+            _available = p.QuantityOnHand;
+            lblAvailable.Text = $"Available quantity: {_available}";
             txtUnitPrice.Text = p.SellingPrice.ToString("0.00", CultureInfo.InvariantCulture);
         }
         catch
         {
-            lblCurrentQty.Text = "—";
+            _available = 0;
+            lblAvailable.Text = "Available quantity: —";
         }
+
+        EvaluateInsufficient();
+    }
+
+    private void EvaluateInsufficient()
+    {
+        var qty = (int)nudQuantity.Value;
+        var insufficient = cboProduct.SelectedItem is LookupItem item
+            && item.Value > 0
+            && qty > _available;
+
+        if (insufficient)
+        {
+            lblAvailable.Text = $"Insufficient stock. Available: {_available}.";
+            lblAvailable.BackColor = UiTheme.ErrorTint;
+            lblAvailable.ForeColor = UiTheme.Error;
+            nudQuantity.BackColor = UiTheme.ErrorTint;
+            btnSave.Enabled = false;
+            btnSave.BackColor = UiTheme.DisabledBackground;
+            btnSave.ForeColor = UiTheme.DisabledText;
+            lblError.Text = $"Insufficient stock. Available: {_available}, requested: {qty}.";
+            lblError.Visible = true;
+        }
+        else
+        {
+            if (cboProduct.SelectedItem is LookupItem sel && sel.Value > 0)
+            {
+                lblAvailable.Text = $"Available quantity: {_available}";
+                lblAvailable.BackColor = UiTheme.InfoTint;
+                lblAvailable.ForeColor = UiTheme.Info;
+            }
+            nudQuantity.BackColor = UiTheme.Surface;
+            btnSave.Enabled = true;
+            btnSave.BackColor = UiTheme.Primary;
+            btnSave.ForeColor = Color.White;
+            lblError.Visible = false;
+        }
+    }
+
+    private void ClearForm()
+    {
+        if (cboProduct.Items.Count > 0) cboProduct.SelectedIndex = 0;
+        if (cboCustomer.Items.Count > 0) cboCustomer.SelectedIndex = 0;
+        nudQuantity.Value = 1;
+        dtpDate.Value = DateTime.Today;
+        txtUnitPrice.Text = "0.00";
+        txtNotes.Clear();
+        lblError.Visible = false;
+        UpdateAvailable();
     }
 
     private void BtnSave_Click(object? sender, EventArgs e)
     {
+        if (!btnSave.Enabled) return;
+
         lblError.Visible = false;
         btnSave.Enabled = false;
 
@@ -281,6 +349,18 @@ public class StockOutForm : Form
                 throw new ValidationException("Selling price must be a valid number.");
 
             var qty = (int)nudQuantity.Value;
+            if (qty > _available)
+                throw new InsufficientStockException(_available, qty);
+
+            var remaining = _available - qty;
+            var confirm = MessageBox.Show(
+                FindForm(),
+                $"Record Stock-Out of {qty} unit(s)?\nRemaining stock will be: {remaining}",
+                "Confirm Stock-Out",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+            if (confirm != DialogResult.Yes) return;
+
             var txnId = _service.Record(
                 prod.Value,
                 customerId,
@@ -291,14 +371,12 @@ public class StockOutForm : Form
 
             MessageBox.Show(
                 FindForm(),
-                $"Stock-Out recorded successfully.\nTransaction ID: {txnId}",
+                $"Stock-Out recorded successfully.\nTransaction ID: {txnId}\nRemaining: {remaining}",
                 "Stock-Out",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
 
-            nudQuantity.Value = 1;
-            txtNotes.Clear();
-            CboProduct_SelectedIndexChanged(null, EventArgs.Empty);
+            ClearForm();
             ReloadRecent();
         }
         catch (AppException ex)
@@ -308,12 +386,12 @@ public class StockOutForm : Form
         }
         catch (Exception ex)
         {
-            lblError.Text = "Could not record Stock-Out. " + ex.Message;
+            lblError.Text = ErrorPresenter.ToUserMessage(DbExceptionMapper.Map(ex));
             lblError.Visible = true;
         }
         finally
         {
-            btnSave.Enabled = true;
+            EvaluateInsufficient();
         }
     }
 

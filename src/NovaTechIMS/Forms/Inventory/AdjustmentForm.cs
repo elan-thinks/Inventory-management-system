@@ -8,9 +8,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>
-/// Inventory Adjustment (FR-ADJ, Milestone 14). Administrator only.
-/// </summary>
+/// <summary>Inventory Adjustment — M19 admin banner, Diff hierarchy, Save Adjustment.</summary>
 public class AdjustmentForm : Form
 {
     private readonly AdjustmentService _service = new();
@@ -46,6 +44,17 @@ public class AdjustmentForm : Form
         FormBorderStyle = FormBorderStyle.None;
         Dock = DockStyle.Fill;
         TopLevel = false;
+
+        var banner = new Label
+        {
+            Dock = DockStyle.Top,
+            Height = 36,
+            Text = "  Administrator-only action. Adjustments are append-only and require a reason.",
+            Font = UiTheme.Label,
+            BackColor = UiTheme.WarningTint,
+            ForeColor = UiTheme.Warning,
+            TextAlign = ContentAlignment.MiddleLeft
+        };
 
         var formPanel = new Panel
         {
@@ -83,19 +92,18 @@ public class AdjustmentForm : Form
         formPanel.Controls.Add(cboProduct);
         y += 32;
 
-        L("Previous quantity (system)");
+        L("Previous quantity  →  New quantity  →  Difference");
         lblPreviousQty = new Label
         {
-            Text = "—",
+            Text = "Prev: —",
             Font = UiTheme.Body,
             ForeColor = UiTheme.TextMuted,
             Location = new Point(lx, y),
             AutoSize = true
         };
         formPanel.Controls.Add(lblPreviousQty);
-        y += 28;
+        y += 24;
 
-        L("New quantity *");
         nudNewQty = new NumericUpDown
         {
             Location = new Point(lx, y),
@@ -107,18 +115,16 @@ public class AdjustmentForm : Form
         };
         nudNewQty.ValueChanged += (_, _) => UpdateDifference();
         formPanel.Controls.Add(nudNewQty);
-        y += 32;
 
-        L("Difference (New − Previous)");
         lblDifference = new Label
         {
-            Text = "—",
-            Font = UiTheme.Body,
-            Location = new Point(lx, y),
+            Text = "Diff: 0",
+            Font = UiTheme.SectionTitle,
+            Location = new Point(lx + 140, y + 4),
             AutoSize = true
         };
         formPanel.Controls.Add(lblDifference);
-        y += 28;
+        y += 36;
 
         var xR = lx + fw + 40;
         var yR = 12;
@@ -145,8 +151,9 @@ public class AdjustmentForm : Form
 
         formPanel.Controls.Add(new Label
         {
-            Text = "Reason *",
+            Text = "Reason * (required)",
             Font = UiTheme.Label,
+            ForeColor = UiTheme.Error,
             Location = new Point(xR, yR),
             AutoSize = true
         });
@@ -155,11 +162,14 @@ public class AdjustmentForm : Form
         {
             Location = new Point(xR, yR),
             Width = 280,
+            Height = 48,
+            Multiline = true,
             MaxLength = 250,
-            Font = UiTheme.Body
+            Font = UiTheme.Body,
+            ScrollBars = ScrollBars.Vertical
         };
         formPanel.Controls.Add(txtReason);
-        yR += 32;
+        yR += 56;
 
         formPanel.Controls.Add(new Label
         {
@@ -173,7 +183,7 @@ public class AdjustmentForm : Form
         {
             Location = new Point(xR, yR),
             Width = 280,
-            Height = 48,
+            Height = 40,
             Multiline = true,
             MaxLength = 500,
             Font = UiTheme.Body,
@@ -193,7 +203,7 @@ public class AdjustmentForm : Form
 
         btnSave = new Button
         {
-            Text = "Record Adjustment",
+            Text = "Save Adjustment",
             Font = UiTheme.Button,
             BackColor = UiTheme.Primary,
             ForeColor = Color.White,
@@ -210,7 +220,7 @@ public class AdjustmentForm : Form
         {
             Dock = DockStyle.Top,
             Height = 28,
-            Text = "  Recent adjustments",
+            Text = "  Recent adjustments (read-only log)",
             Font = UiTheme.Label,
             ForeColor = UiTheme.TextMuted,
             TextAlign = ContentAlignment.MiddleLeft
@@ -219,8 +229,6 @@ public class AdjustmentForm : Form
         grid = new DataGridView
         {
             Dock = DockStyle.Fill,
-            BackgroundColor = UiTheme.Surface,
-            BorderStyle = BorderStyle.FixedSingle,
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
             AllowUserToResizeRows = false,
@@ -228,20 +236,14 @@ public class AdjustmentForm : Form
             MultiSelect = false,
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
             AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-            RowHeadersVisible = false,
-            Font = UiTheme.Body,
-            ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-            {
-                Font = UiTheme.Label,
-                BackColor = UiTheme.StatusStripBackground,
-                ForeColor = UiTheme.Text
-            },
-            EnableHeadersVisualStyles = false
+            RowHeadersVisible = false
         };
+        GridStyles.Apply(grid);
 
         Controls.Add(grid);
         Controls.Add(lblHint);
         Controls.Add(formPanel);
+        Controls.Add(banner);
     }
 
     private void LoadProducts()
@@ -256,7 +258,7 @@ public class AdjustmentForm : Form
         }
         catch (Exception ex)
         {
-            lblError.Text = "Could not load products. " + ex.Message;
+            lblError.Text = ErrorPresenter.ToUserMessage(DbExceptionMapper.Map(ex));
             lblError.Visible = true;
         }
     }
@@ -266,7 +268,7 @@ public class AdjustmentForm : Form
         if (cboProduct.SelectedItem is not LookupItem item || item.Value <= 0)
         {
             _previousQty = 0;
-            lblPreviousQty.Text = "—";
+            lblPreviousQty.Text = "Prev: —";
             UpdateDifference();
             return;
         }
@@ -275,23 +277,23 @@ public class AdjustmentForm : Form
         {
             var p = _service.GetProduct(item.Value);
             _previousQty = p.QuantityOnHand;
-            lblPreviousQty.Text = _previousQty.ToString(CultureInfo.InvariantCulture);
+            lblPreviousQty.Text = $"Prev: {_previousQty}";
             nudNewQty.Value = _previousQty;
             UpdateDifference();
         }
         catch
         {
-            lblPreviousQty.Text = "—";
+            lblPreviousQty.Text = "Prev: —";
         }
     }
 
     private void UpdateDifference()
     {
         var diff = (int)nudNewQty.Value - _previousQty;
-        lblDifference.Text = diff.ToString(CultureInfo.InvariantCulture);
+        lblDifference.Text = $"Diff: {(diff >= 0 ? "+" : "")}{diff}";
         lblDifference.ForeColor = diff == 0
             ? UiTheme.TextMuted
-            : (diff > 0 ? Color.DarkGreen : UiTheme.Error);
+            : (diff > 0 ? UiTheme.Success : UiTheme.Error);
     }
 
     private void BtnSave_Click(object? sender, EventArgs e)
@@ -304,9 +306,21 @@ public class AdjustmentForm : Form
             if (cboProduct.SelectedItem is not LookupItem prod || prod.Value <= 0)
                 throw new ValidationException("Product is required.");
 
+            if (string.IsNullOrWhiteSpace(txtReason.Text))
+                throw new ValidationException("A reason is required for inventory adjustments.");
+
+            var newQty = (int)nudNewQty.Value;
+            var confirm = MessageBox.Show(
+                FindForm(),
+                $"Save adjustment?\nPrevious: {_previousQty} → New: {newQty}\nThis cannot be undone.",
+                "Confirm Adjustment",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+            if (confirm != DialogResult.Yes) return;
+
             var txnId = _service.Record(
                 prod.Value,
-                (int)nudNewQty.Value,
+                newQty,
                 dtpDate.Value.Date,
                 txtReason.Text,
                 txtNotes.Text);
@@ -330,7 +344,7 @@ public class AdjustmentForm : Form
         }
         catch (Exception ex)
         {
-            lblError.Text = "Could not record adjustment. " + ex.Message;
+            lblError.Text = ErrorPresenter.ToUserMessage(DbExceptionMapper.Map(ex));
             lblError.Visible = true;
         }
         finally
