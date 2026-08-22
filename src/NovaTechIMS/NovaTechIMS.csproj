@@ -11,7 +11,6 @@
     <StartupObject>NovaTechIMS.Program</StartupObject>
     <LangVersion>latest</LangVersion>
     <Deterministic>true</Deterministic>
-    <!-- Assembly metadata (SDK generates attributes; do not also use Properties/AssemblyInfo.cs) -->
     <AssemblyTitle>NovaTechIMS</AssemblyTitle>
     <Product>NovaTechIMS</Product>
     <Company>NovaTech Electronics (Educational)</Company>
@@ -19,6 +18,11 @@
     <Description>NovaTech Electronics Inventory Management System — University Windows Programming project</Description>
     <Version>0.0.1</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="8.0.5" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.1" />
+  </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG;TRACE</DefineConstants>
