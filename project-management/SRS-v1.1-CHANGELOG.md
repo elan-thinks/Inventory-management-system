@@ -8,6 +8,7 @@
 
 ## Documents Updated
 
+- `docs/01-Document-Control.md`
 - `docs/05-Scope.md`
 - `docs/08-Functional-Requirements.md`
 - `docs/09-Business-Rules.md`
@@ -15,15 +16,17 @@
 - `docs/11-Validation-Requirements.md`
 - `docs/18-Use-Cases.md`
 - `docs/20-Requirement-Traceability.md`
+- `docs/26-Delegation-Requirements-v1.1.md`
+- `project-management/SRS-v1.1-AUDIT.md`
 
-## New Requirement Set
+## Authoritative Delegation Requirement Set
 
-- Functional Requirements: `FR-DEL-001` through `FR-DEL-011`
+- Functional Requirements: `FR-DEL-001` through `FR-DEL-014`
 - Business Rules: `BR-031` through `BR-039`
 - Data Entity: `DR-DEL`
 - Validation Requirements: `VAL-023` through `VAL-029`
-- Use Case: `UC-019 — Manage Delegations`
-- Objective: `OBJ-013 — Provide controlled temporary delegation`
+- Use Cases: `UC-019` through `UC-021`
+- Objective: controlled temporary delegation as defined by the amended requirements and traceability documents
 
 ## Delegation Boundary
 
@@ -39,20 +42,27 @@ Delegation is intentionally narrow and educationally appropriate for the WinForm
 
 - Administrator privileges
 - User Management
+- Administrator-only security/authorization management
 - Inventory Adjustment
 - Master-data deletion/deactivation
+- Any responsibility the delegator is not authorized to perform
 
 ## Authorization Rules
 
 - Only Administrators create/revoke delegations.
-- Recipient must be an active eligible Inventory/Store Staff user.
+- Recipient must be an eligible active Inventory/Store Staff user.
 - Delegator cannot delegate beyond their own authority.
 - Delegation does not change the recipient's permanent role.
 - Start/end dates control validity.
 - Expired or revoked delegations provide no effective permission.
 - Conflicting overlapping delegations are prevented.
 - Delegation history is retained with attribution.
+- Creation and revocation are attributable to the responsible Administrator.
 
 ## Downstream Impact Gate
 
-The Product Requirements + UX/UI specification must be updated to include Delegation Management and effective-permission states before Visual Design v1.0 is approved.
+The Product/UX and Visual Design baselines must include Delegation Management and effective-permission behavior before technical implementation begins.
+
+## Reconciliation Note
+
+An earlier draft of this changelog referenced only FR-DEL-001 through FR-DEL-011 and UC-019. That was incomplete. The authoritative SRS v1.1 baseline is now reconciled to FR-DEL-001 through FR-DEL-014 and UC-019 through UC-021, matching `docs/26-Delegation-Requirements-v1.1.md`.
