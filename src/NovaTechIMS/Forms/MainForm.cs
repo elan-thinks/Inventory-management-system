@@ -5,15 +5,17 @@ using NovaTechIMS.Forms.Categories;
 using NovaTechIMS.Forms.Customers;
 using NovaTechIMS.Forms.Products;
 using NovaTechIMS.Forms.Suppliers;
+using NovaTechIMS.Forms.Users;
 using NovaTechIMS.Models;
 using NovaTechIMS.Models.Enums;
+using NovaTechIMS.Security;
+using NovaTechIMS.Services;
 using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms;
 
 /// <summary>
-/// Application shell after successful authentication (Milestone 9).
-/// Role-based UI gating arrives in Milestone 10.
+/// Application shell with role-based navigation (Milestone 10).
 /// </summary>
 public partial class MainForm : Form
 {
@@ -40,7 +42,7 @@ public partial class MainForm : Form
         lblDateStatus.Text = DateTime.Now.ToString("dddd, dd MMM yyyy");
         lblMessageStatus.Text = "Ready";
         MinimumSize = new Size(UiTheme.MinWindowWidth, UiTheme.MinWindowHeight);
-        lblRoleBadge.Text = "Milestone 9";
+        lblRoleBadge.Text = "Milestone 10";
     }
 
     private void BuildNavigation()
@@ -56,13 +58,23 @@ public partial class MainForm : Form
         AddGroupLabel("INVENTORY OPERATIONS");
         AddNavItem("Stock In");
         AddNavItem("Stock Out");
-        AddNavItem("Inventory Adjustment");
+
+        if (AuthorizationService.HasPermission(_currentUser, Permissions.PerformAdjustment))
+            AddNavItem("Inventory Adjustment");
+
         AddNavItem("Inventory History");
         AddGroupLabel("REPORTS");
         AddNavItem("Reports");
-        AddGroupLabel("ADMINISTRATION");
-        AddNavItem("User Management");
-        AddNavItem("Delegations");
+
+        if (AuthorizationService.HasPermission(_currentUser, Permissions.ManageUsers)
+            || AuthorizationService.HasPermission(_currentUser, Permissions.ManageDelegations))
+        {
+            AddGroupLabel("ADMINISTRATION");
+            if (AuthorizationService.HasPermission(_currentUser, Permissions.ManageUsers))
+                AddNavItem("User Management");
+            if (AuthorizationService.HasPermission(_currentUser, Permissions.ManageDelegations))
+                AddNavItem("Delegations");
+        }
     }
 
     private void AddGroupLabel(string text)
@@ -133,6 +145,10 @@ public partial class MainForm : Form
                 ShowCustomers();
                 lblMessageStatus.Text = "Opened: Customers";
                 return;
+            case "User Management":
+                ShowUsers();
+                lblMessageStatus.Text = "Opened: User Management";
+                return;
         }
 
         var title = key;
@@ -145,7 +161,6 @@ public partial class MainForm : Form
             "Inventory Adjustment" => "Inventory Adjustment will be implemented in Milestone 14.",
             "Inventory History" => "Inventory History will be implemented in Milestone 13.",
             "Reports" => "Reports will be implemented in Milestone 16.",
-            "User Management" => "User management UI will be completed with authorization (Milestone 10).",
             "Delegations" => "Delegation management will be implemented in Milestone 15.",
             _ => "This area is reserved for a future milestone."
         };
@@ -184,15 +199,14 @@ public partial class MainForm : Form
         lblBreadcrumb.Text = title == "Dashboard" ? "Home" : $"Home › {title}";
     }
 
-    private void ShowProducts()
+    private void HostList(Form listForm, string title)
     {
         ClearHostedContent();
         lblPlaceholderTitle.Visible = false;
         lblPlaceholderBody.Visible = false;
-        lblScreenTitle.Text = "Products";
-        lblBreadcrumb.Text = "Home › Products";
+        lblScreenTitle.Text = title;
+        lblBreadcrumb.Text = $"Home › {title}";
 
-        var listForm = new ProductListForm();
         listForm.TopLevel = false;
         listForm.FormBorderStyle = FormBorderStyle.None;
         listForm.Dock = DockStyle.Fill;
@@ -202,59 +216,11 @@ public partial class MainForm : Form
         _hostedContent = listForm;
     }
 
-    private void ShowCategories()
-    {
-        ClearHostedContent();
-        lblPlaceholderTitle.Visible = false;
-        lblPlaceholderBody.Visible = false;
-        lblScreenTitle.Text = "Categories";
-        lblBreadcrumb.Text = "Home › Categories";
-
-        var listForm = new CategoryListForm();
-        listForm.TopLevel = false;
-        listForm.FormBorderStyle = FormBorderStyle.None;
-        listForm.Dock = DockStyle.Fill;
-        pnlContent.Controls.Add(listForm);
-        listForm.BringToFront();
-        listForm.Show();
-        _hostedContent = listForm;
-    }
-
-    private void ShowSuppliers()
-    {
-        ClearHostedContent();
-        lblPlaceholderTitle.Visible = false;
-        lblPlaceholderBody.Visible = false;
-        lblScreenTitle.Text = "Suppliers";
-        lblBreadcrumb.Text = "Home › Suppliers";
-
-        var listForm = new SupplierListForm();
-        listForm.TopLevel = false;
-        listForm.FormBorderStyle = FormBorderStyle.None;
-        listForm.Dock = DockStyle.Fill;
-        pnlContent.Controls.Add(listForm);
-        listForm.BringToFront();
-        listForm.Show();
-        _hostedContent = listForm;
-    }
-
-    private void ShowCustomers()
-    {
-        ClearHostedContent();
-        lblPlaceholderTitle.Visible = false;
-        lblPlaceholderBody.Visible = false;
-        lblScreenTitle.Text = "Customers";
-        lblBreadcrumb.Text = "Home › Customers";
-
-        var listForm = new CustomerListForm();
-        listForm.TopLevel = false;
-        listForm.FormBorderStyle = FormBorderStyle.None;
-        listForm.Dock = DockStyle.Fill;
-        pnlContent.Controls.Add(listForm);
-        listForm.BringToFront();
-        listForm.Show();
-        _hostedContent = listForm;
-    }
+    private void ShowProducts() => HostList(new ProductListForm(), "Products");
+    private void ShowCategories() => HostList(new CategoryListForm(), "Categories");
+    private void ShowSuppliers() => HostList(new SupplierListForm(), "Suppliers");
+    private void ShowCustomers() => HostList(new CustomerListForm(), "Customers");
+    private void ShowUsers() => HostList(new UserListForm(), "User Management");
 
     private void ClearHostedContent()
     {
