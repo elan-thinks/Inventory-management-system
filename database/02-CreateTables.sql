@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS "User" (
     "FullName"          VARCHAR(100)    NOT NULL,
     "Role"              VARCHAR(30)     NOT NULL,
     "IsActive"          BOOLEAN         NOT NULL DEFAULT TRUE,
-    "CreatedDate"       TIMESTAMPTZ     NOT NULL DEFAULT (NOW() AT TIME ZONE),
+    "CreatedDate"       TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "LastLoginDate"     TIMESTAMPTZ     NULL,
     CONSTRAINT "UQ_User_Username" UNIQUE ("Username"),
     CONSTRAINT "CK_User_Role" CHECK ("Role" IN ('Administrator', 'InventoryStaff')),
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS "Category" (
     "CategoryName"      VARCHAR(100)    NOT NULL,
     "Description"       VARCHAR(500)    NULL,
     "IsActive"          BOOLEAN         NOT NULL DEFAULT TRUE,
-    "CreatedDate"       TIMESTAMPTZ     NOT NULL DEFAULT (NOW() AT TIME ZONE),
+    "CreatedDate"       TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "ModifiedDate"      TIMESTAMPTZ     NULL,
     CONSTRAINT "UQ_Category_Name" UNIQUE ("CategoryName"),
     CONSTRAINT "CK_Category_Name_NotEmpty" CHECK (LENGTH(TRIM("CategoryName")) > 0)
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS "Supplier" (
     "Email"             VARCHAR(100)    NULL,
     "Address"           VARCHAR(300)    NULL,
     "IsActive"          BOOLEAN         NOT NULL DEFAULT TRUE,
-    "CreatedDate"       TIMESTAMPTZ     NOT NULL DEFAULT (NOW() AT TIME ZONE),
+    "CreatedDate"       TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "ModifiedDate"      TIMESTAMPTZ     NULL,
     CONSTRAINT "CK_Supplier_Name_NotEmpty" CHECK (LENGTH(TRIM("SupplierName")) > 0)
 );
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS "Customer" (
     "Email"             VARCHAR(100)    NULL,
     "Address"           VARCHAR(300)    NULL,
     "IsActive"          BOOLEAN         NOT NULL DEFAULT TRUE,
-    "CreatedDate"       TIMESTAMPTZ     NOT NULL DEFAULT (NOW() AT TIME ZONE),
+    "CreatedDate"       TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "ModifiedDate"      TIMESTAMPTZ     NULL,
     CONSTRAINT "CK_Customer_Name_NotEmpty" CHECK (LENGTH(TRIM("CustomerName")) > 0)
 );
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS "Product" (
     "QuantityOnHand"        INT             NOT NULL DEFAULT 0,
     "MinimumStockLevel"     INT             NOT NULL DEFAULT 0,
     "IsActive"              BOOLEAN         NOT NULL DEFAULT TRUE,
-    "CreatedDate"           TIMESTAMPTZ     NOT NULL DEFAULT (NOW() AT TIME ZONE),
+    "CreatedDate"           TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "ModifiedDate"          TIMESTAMPTZ     NULL,
     "CreatedByUserID"       INT             NULL,
     "ModifiedByUserID"      INT             NULL,
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS "InventoryTransaction" (
     "Reason"                VARCHAR(300)    NULL,
     "Notes"                 VARCHAR(500)    NULL,
     "UserID"                INT             NOT NULL,
-    "CreatedDateTime"       TIMESTAMPTZ     NOT NULL DEFAULT (NOW() AT TIME ZONE),
+    "CreatedDateTime"       TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "CK_Txn_Type" CHECK ("TransactionType" IN ('StockIn', 'StockOut', 'Adjustment')),
     CONSTRAINT "CK_Txn_Quantity" CHECK ("Quantity" >= 0),
     CONSTRAINT "CK_Txn_UnitPrice" CHECK ("UnitPrice" IS NULL OR "UnitPrice" >= 0),
@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS "Delegation" (
     "EndDate"               DATE            NOT NULL,
     "Reason"                VARCHAR(300)    NOT NULL,
     "Status"                VARCHAR(20)     NOT NULL,
-    "CreatedDateTime"       TIMESTAMPTZ     NOT NULL DEFAULT (NOW() AT TIME ZONE),
+    "CreatedDateTime"       TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "RevokedByUserID"       INT             NULL,
     "RevokedDateTime"       TIMESTAMPTZ     NULL,
     CONSTRAINT "CK_Delegation_Responsibility" CHECK ("Responsibility" IN ('StockIn', 'StockOut', 'ReportAccess')),
