@@ -9,9 +9,7 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Services;
 
 /// <summary>
-/// Role-based authorization (ADR-005, FR-AUTH-005).
-/// Service layer is authoritative; UI only hides controls.
-/// Delegations are merged in Milestone 15; M10 uses permanent role only.
+/// Role-based authorization (ADR-005/006). Effective = role U valid delegations.
 /// </summary>
 public class AuthorizationService
 {
@@ -39,8 +37,7 @@ public class AuthorizationService
         => HasPermission(SessionContext.Current, permission);
 
     /// <summary>
-    /// Builds effective permissions from permanent role.
-    /// (Valid delegations are unioned in Milestone 15.)
+    /// Permanent role permissions only (no delegations).
     /// </summary>
     public static List<string> BuildEffectivePermissions(UserRole role)
     {
@@ -50,6 +47,22 @@ public class AuthorizationService
             UserRole.InventoryStaff => StaffPermissions().ToList(),
             _ => StaffPermissions().ToList()
         };
+    }
+
+    /// <summary>
+    /// Role permissions union currently valid delegations (Milestone 15).
+    /// </summary>
+    public static List<string> BuildEffectivePermissions(UserRole role, int userId)
+    {
+        var set = new HashSet<string>(BuildEffectivePermissions(role), StringComparer.Ordinal);
+
+        if (role != UserRole.Administrator)
+        {
+            foreach (var key in DelegationService.GetDelegatedPermissionKeys(userId))
+                set.Add(key);
+        }
+
+        return set.ToList();
     }
 
     private static IEnumerable<string> AdministratorPermissions()
@@ -77,8 +90,8 @@ public class AuthorizationService
     }
 
     /// <summary>
-    /// Staff: view master data, stock-in/out, history, reports, dashboard.
-    /// No master-data CUD, no adjustment, no user/delegation management.
+    /// Staff base: view master data + history + dashboard.
+    /// Stock-In / Stock-Out / Reports may also come from permanent role (SRS) and/or delegation.
     /// </summary>
     private static IEnumerable<string> StaffPermissions()
     {

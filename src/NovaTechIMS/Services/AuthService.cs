@@ -8,7 +8,7 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Services;
 
 /// <summary>
-/// Authentication (FR-AUTH, ADR-004) + effective permissions (M10).
+/// Authentication + effective permissions including valid delegations (M15).
 /// </summary>
 public class AuthService
 {
@@ -38,7 +38,7 @@ public class AuthService
             Username = user.Username,
             FullName = user.FullName,
             Role = user.Role,
-            EffectivePermissions = AuthorizationService.BuildEffectivePermissions(user.Role)
+            EffectivePermissions = AuthorizationService.BuildEffectivePermissions(user.Role, user.UserID)
         };
     }
 
