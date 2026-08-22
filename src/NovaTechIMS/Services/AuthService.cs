@@ -8,18 +8,12 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Services;
 
 /// <summary>
-/// Authentication (FR-AUTH, ADR-004).
-/// Milestone 9: login + hashed passwords. Authorization gates arrive in Milestone 10.
+/// Authentication (FR-AUTH, ADR-004) + effective permissions (M10).
 /// </summary>
 public class AuthService
 {
     private readonly UserRepository _users = new();
 
-    /// <summary>
-    /// Authenticates username/password against an active user record.
-    /// On success builds <see cref="CurrentUser"/> and updates LastLoginDate.
-    /// Always returns the same generic failure message (FR-AUTH-003).
-    /// </summary>
     public CurrentUser Authenticate(string username, string password)
     {
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrEmpty(password))
@@ -29,7 +23,6 @@ public class AuthService
 
         var user = _users.GetByUsername(username.Trim());
 
-        // Generic failure for missing user, inactive, or bad password (FR-AUTH-003).
         if (user is null || !user.IsActive)
             throw new AuthenticationException("Invalid username or password.");
 
@@ -45,14 +38,10 @@ public class AuthService
             Username = user.Username,
             FullName = user.FullName,
             Role = user.Role,
-            EffectivePermissions = new() // filled in Milestone 10
+            EffectivePermissions = AuthorizationService.BuildEffectivePermissions(user.Role)
         };
     }
 
-    /// <summary>
-    /// If the User table is empty, creates a default Administrator so first-run login works.
-    /// Username: admin  Password: Admin@123
-    /// </summary>
     public void EnsureBootstrapAdmin()
     {
         if (_users.CountUsers() > 0)

@@ -38,3 +38,9 @@ public class AuthenticationException : AppException
 {
     public AuthenticationException(string message) : base(message) { }
 }
+
+/// <summary>Caller lacks required permission (ADR-005).</summary>
+public class UnauthorizedException : AppException
+{
+    public UnauthorizedException(string message) : base(message) { }
+}
