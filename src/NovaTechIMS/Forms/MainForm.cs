@@ -17,7 +17,9 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms;
 
-/// <summary>Application shell (Milestone 17: validation + error polish).</summary>
+/// <summary>
+/// Application shell — Milestone 19 final integration (approved UI only).
+/// </summary>
 public partial class MainForm : Form
 {
     private readonly CurrentUser _currentUser;
@@ -29,8 +31,7 @@ public partial class MainForm : Form
         _currentUser = currentUser;
         InitializeComponent();
         BuildNavigation();
-        ShowPlaceholder("Dashboard", "Welcome to NovaTech IMS.",
-            "Dashboard metrics and quick actions will arrive in a later milestone.");
+        NavigateTo("Dashboard");
     }
 
     private void MainForm_Load(object? sender, EventArgs e)
@@ -43,7 +44,7 @@ public partial class MainForm : Form
         lblDateStatus.Text = DateTime.Now.ToString("dddd, dd MMM yyyy");
         lblMessageStatus.Text = "Ready";
         MinimumSize = new Size(UiTheme.MinWindowWidth, UiTheme.MinWindowHeight);
-        lblRoleBadge.Text = "Milestone 17";
+        lblRoleBadge.Text = "v1.0";
     }
 
     private void BuildNavigation()
@@ -133,11 +134,30 @@ public partial class MainForm : Form
             return;
 
         SetActiveNav(btn);
+        NavigateTo(key);
+    }
+
+    /// <summary>Central navigation used by sidebar and Dashboard quick actions.</summary>
+    public void NavigateTo(string key)
+    {
+        // Highlight matching nav button if present
+        foreach (Control c in flpNav.Controls)
+        {
+            if (c is Button b && b.Tag is string t && t == key)
+            {
+                SetActiveNav(b);
+                break;
+            }
+        }
 
         try
         {
             switch (key)
             {
+                case "Dashboard":
+                    HostList(new DashboardForm(_currentUser, NavigateTo), "Dashboard");
+                    lblMessageStatus.Text = "Opened: Dashboard";
+                    return;
                 case "Products":
                     HostList(new ProductListForm(), "Products");
                     lblMessageStatus.Text = "Opened: Products";
@@ -191,14 +211,8 @@ public partial class MainForm : Form
             return;
         }
 
-        var title = key;
-        var subtitle = key == "Dashboard" ? "Welcome to NovaTech IMS." : "Coming in a later milestone";
-        var body = key == "Dashboard"
-            ? "Dashboard metrics and quick actions will arrive in a later milestone."
-            : "This area is reserved for a future milestone.";
-
-        ShowPlaceholder(title, subtitle, body);
-        lblMessageStatus.Text = $"Opened: {title}";
+        ShowPlaceholder(key, "Screen not available", "This navigation target is not mapped.");
+        lblMessageStatus.Text = $"Opened: {key}";
     }
 
     private void SetActiveNav(Button btn)
@@ -234,7 +248,7 @@ public partial class MainForm : Form
         lblPlaceholderTitle.Visible = false;
         lblPlaceholderBody.Visible = false;
         lblScreenTitle.Text = title;
-        lblBreadcrumb.Text = $"Home › {title}";
+        lblBreadcrumb.Text = title == "Dashboard" ? "Home" : $"Home › {title}";
 
         listForm.TopLevel = false;
         listForm.FormBorderStyle = FormBorderStyle.None;
