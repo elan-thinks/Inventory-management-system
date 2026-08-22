@@ -1,16 +1,17 @@
 using System;
 using System.Windows.Forms;
+using NovaTechIMS.Services;
 using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms;
 
 /// <summary>
-/// SCR-001 Login shell (Milestone 1).
-/// UI only — no authentication, no database, no password hashing.
-/// Any non-empty username + password advances to MainForm for navigation demo.
+/// SCR-001 Login (Milestone 9 — real authentication against PostgreSQL).
 /// </summary>
 public partial class LoginForm : Form
 {
+    private readonly AuthService _auth = new();
+
     public LoginForm()
     {
         InitializeComponent();
@@ -26,33 +27,59 @@ public partial class LoginForm : Form
     private void BtnLogin_Click(object? sender, EventArgs e)
     {
         lblError.Visible = false;
+        btnLogin.Enabled = false;
 
         var username = txtUsername.Text.Trim();
         var password = txtPassword.Text;
 
-        // Shell-level only: require non-empty fields. Not real authentication.
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
-            lblError.Text = "Please enter username and password.";
-            lblError.Visible = true;
+            ShowError("Please enter username and password.");
             if (string.IsNullOrEmpty(username))
                 txtUsername.Focus();
             else
                 txtPassword.Focus();
+            btnLogin.Enabled = true;
             return;
         }
 
-        // Demo session label for StatusStrip (not a domain User entity).
-        var displayName = username;
-        Hide();
-        using var main = new MainForm(displayName, "Administrator (demo)");
-        main.ShowDialog(this);
-        // After MainForm closes (logout), clear fields and show login again.
-        txtPassword.Clear();
-        txtUsername.SelectAll();
-        lblError.Visible = false;
-        Show();
-        txtUsername.Focus();
+        try
+        {
+            var current = _auth.Authenticate(username, password);
+            SessionContext.SignIn(current);
+
+            Hide();
+            using var main = new MainForm(current);
+            main.ShowDialog(this);
+
+            // After MainForm closes (logout), clear session and show login again.
+            SessionContext.SignOut();
+            txtPassword.Clear();
+            txtUsername.SelectAll();
+            lblError.Visible = false;
+            Show();
+            txtUsername.Focus();
+        }
+        catch (AuthenticationException ex)
+        {
+            ShowError(ex.Message);
+            txtPassword.SelectAll();
+            txtPassword.Focus();
+        }
+        catch (Exception ex)
+        {
+            ShowError("Unable to sign in. Check the database connection.\n" + ex.Message);
+        }
+        finally
+        {
+            btnLogin.Enabled = true;
+        }
+    }
+
+    private void ShowError(string message)
+    {
+        lblError.Text = message;
+        lblError.Visible = true;
     }
 
     private void BtnCancel_Click(object? sender, EventArgs e)

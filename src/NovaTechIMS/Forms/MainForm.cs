@@ -5,25 +5,25 @@ using NovaTechIMS.Forms.Categories;
 using NovaTechIMS.Forms.Customers;
 using NovaTechIMS.Forms.Products;
 using NovaTechIMS.Forms.Suppliers;
+using NovaTechIMS.Models;
+using NovaTechIMS.Models.Enums;
 using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms;
 
 /// <summary>
-/// Application shell (sidebar + header + content + status strip).
-/// Milestone 5–8: Categories, Suppliers, Customers, and Products open list forms.
+/// Application shell after successful authentication (Milestone 9).
+/// Role-based UI gating arrives in Milestone 10.
 /// </summary>
 public partial class MainForm : Form
 {
-    private readonly string _displayName;
-    private readonly string _roleLabel;
+    private readonly CurrentUser _currentUser;
     private Button? _activeNavButton;
     private Form? _hostedContent;
 
-    public MainForm(string displayName, string roleLabel)
+    public MainForm(CurrentUser currentUser)
     {
-        _displayName = displayName;
-        _roleLabel = roleLabel;
+        _currentUser = currentUser;
         InitializeComponent();
         BuildNavigation();
         ShowPlaceholder("Dashboard", "Welcome to NovaTech IMS.",
@@ -32,11 +32,15 @@ public partial class MainForm : Form
 
     private void MainForm_Load(object? sender, EventArgs e)
     {
-        lblUserStatus.Text = $"{_displayName}  ·  {_roleLabel}";
+        var roleLabel = _currentUser.Role == UserRole.Administrator
+            ? "Administrator"
+            : "Inventory Staff";
+
+        lblUserStatus.Text = $"{_currentUser.FullName}  ·  {roleLabel}";
         lblDateStatus.Text = DateTime.Now.ToString("dddd, dd MMM yyyy");
         lblMessageStatus.Text = "Ready";
         MinimumSize = new Size(UiTheme.MinWindowWidth, UiTheme.MinWindowHeight);
-        lblRoleBadge.Text = "Milestone 8";
+        lblRoleBadge.Text = "Milestone 9";
     }
 
     private void BuildNavigation()
@@ -141,7 +145,7 @@ public partial class MainForm : Form
             "Inventory Adjustment" => "Inventory Adjustment will be implemented in Milestone 14.",
             "Inventory History" => "Inventory History will be implemented in Milestone 13.",
             "Reports" => "Reports will be implemented in Milestone 16.",
-            "User Management" => "User management will be implemented with authentication (Milestone 9).",
+            "User Management" => "User management UI will be completed with authorization (Milestone 10).",
             "Delegations" => "Delegation management will be implemented in Milestone 15.",
             _ => "This area is reserved for a future milestone."
         };
@@ -270,6 +274,9 @@ public partial class MainForm : Form
             MessageBoxIcon.Question);
 
         if (result == DialogResult.Yes)
+        {
+            SessionContext.SignOut();
             Close();
+        }
     }
 }

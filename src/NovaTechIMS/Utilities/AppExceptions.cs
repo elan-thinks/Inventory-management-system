@@ -32,3 +32,9 @@ public class NotFoundException : AppException
 {
     public NotFoundException(string message) : base(message) { }
 }
+
+/// <summary>Login / credential failure (FR-AUTH-003).</summary>
+public class AuthenticationException : AppException
+{
+    public AuthenticationException(string message) : base(message) { }
+}

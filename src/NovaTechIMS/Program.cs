@@ -6,7 +6,7 @@ namespace NovaTechIMS;
 
 /// <summary>
 /// Application entry point.
-/// Milestone 1: LoginForm → MainForm shell (no authentication or database).
+/// Milestone 9: LoginForm requires real authentication before MainForm.
 /// </summary>
 internal static class Program
 {
