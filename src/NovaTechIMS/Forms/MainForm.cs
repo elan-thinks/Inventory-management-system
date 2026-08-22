@@ -6,6 +6,7 @@ using NovaTechIMS.Forms.Customers;
 using NovaTechIMS.Forms.Delegations;
 using NovaTechIMS.Forms.Inventory;
 using NovaTechIMS.Forms.Products;
+using NovaTechIMS.Forms.Reports;
 using NovaTechIMS.Forms.Suppliers;
 using NovaTechIMS.Forms.Users;
 using NovaTechIMS.Models;
@@ -16,7 +17,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms;
 
-/// <summary>Application shell (Milestone 15: Delegations).</summary>
+/// <summary>Application shell (Milestone 16: Reports).</summary>
 public partial class MainForm : Form
 {
     private readonly CurrentUser _currentUser;
@@ -42,7 +43,7 @@ public partial class MainForm : Form
         lblDateStatus.Text = DateTime.Now.ToString("dddd, dd MMM yyyy");
         lblMessageStatus.Text = "Ready";
         MinimumSize = new Size(UiTheme.MinWindowWidth, UiTheme.MinWindowHeight);
-        lblRoleBadge.Text = "Milestone 15";
+        lblRoleBadge.Text = "Milestone 16";
     }
 
     private void BuildNavigation()
@@ -66,8 +67,11 @@ public partial class MainForm : Form
         if (AuthorizationService.HasPermission(_currentUser, Permissions.ViewInventoryHistory))
             AddNavItem("Inventory History");
 
-        AddGroupLabel("REPORTS");
-        AddNavItem("Reports");
+        if (AuthorizationService.HasPermission(_currentUser, Permissions.ViewReports))
+        {
+            AddGroupLabel("REPORTS");
+            AddNavItem("Reports");
+        }
 
         if (AuthorizationService.HasPermission(_currentUser, Permissions.ManageUsers)
             || AuthorizationService.HasPermission(_currentUser, Permissions.ManageDelegations))
@@ -172,19 +176,17 @@ public partial class MainForm : Form
                 HostList(new DelegationListForm(), "Delegations");
                 lblMessageStatus.Text = "Opened: Delegations";
                 return;
+            case "Reports":
+                HostList(new ReportsHubForm(), "Reports");
+                lblMessageStatus.Text = "Opened: Reports";
+                return;
         }
 
         var title = key;
-        var subtitle = "Coming in a later milestone";
-        var body = key switch
-        {
-            "Dashboard" => "Dashboard metrics and quick actions will arrive in a later milestone.",
-            "Reports" => "Reports will be implemented in Milestone 16.",
-            _ => "This area is reserved for a future milestone."
-        };
-
-        if (key == "Dashboard")
-            subtitle = "Welcome to NovaTech IMS.";
+        var subtitle = key == "Dashboard" ? "Welcome to NovaTech IMS." : "Coming in a later milestone";
+        var body = key == "Dashboard"
+            ? "Dashboard metrics and quick actions will arrive in a later milestone."
+            : "This area is reserved for a future milestone.";
 
         ShowPlaceholder(title, subtitle, body);
         lblMessageStatus.Text = $"Opened: {title}";
