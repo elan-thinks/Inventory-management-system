@@ -19,26 +19,58 @@ public class StockOutService
     public IReadOnlyList<StockOutListRow> GetRecent(int limit = 50)
     {
         AuthorizationService.RequirePermission(Permissions.StockOut);
-        return _txnRepo.GetRecentStockOuts(limit);
+        try
+        {
+            return _txnRepo.GetRecentStockOuts(limit);
+        }
+        catch (Exception ex)
+        {
+            throw DbExceptionMapper.Map(ex);
+        }
     }
 
     public IReadOnlyList<ProductListRow> GetActiveProducts()
     {
         AuthorizationService.RequirePermission(Permissions.StockOut);
-        return _productRepo.GetList(null, null, null, null, isActiveFilter: true);
+        try
+        {
+            return _productRepo.GetList(null, null, null, null, isActiveFilter: true);
+        }
+        catch (Exception ex)
+        {
+            throw DbExceptionMapper.Map(ex);
+        }
     }
 
     public IReadOnlyList<CustomerListRow> GetActiveCustomers()
     {
         AuthorizationService.RequirePermission(Permissions.StockOut);
-        return _customerRepo.GetList(null, isActiveFilter: true);
+        try
+        {
+            return _customerRepo.GetList(null, isActiveFilter: true);
+        }
+        catch (Exception ex)
+        {
+            throw DbExceptionMapper.Map(ex);
+        }
     }
 
     public Product GetProduct(int productId)
     {
         AuthorizationService.RequirePermission(Permissions.StockOut);
-        return _productRepo.GetById(productId)
-            ?? throw new NotFoundException("The selected product no longer exists.");
+        try
+        {
+            return _productRepo.GetById(productId)
+                ?? throw new NotFoundException("The selected product no longer exists.");
+        }
+        catch (AppException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw DbExceptionMapper.Map(ex);
+        }
     }
 
     public int Record(
@@ -71,27 +103,47 @@ public class StockOutService
         if (notes is not null && notes.Length > 500)
             throw new ValidationException("Notes cannot exceed 500 characters.");
 
-        var product = _productRepo.GetById(productId)
-            ?? throw new NotFoundException("The selected product no longer exists.");
+        Product product;
+        try
+        {
+            product = _productRepo.GetById(productId)
+                ?? throw new NotFoundException("The selected product no longer exists.");
+        }
+        catch (AppException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw DbExceptionMapper.Map(ex);
+        }
 
         if (!product.IsActive)
             throw new BusinessRuleException("Stock-Out is not allowed for inactive products.");
 
         if (quantity > product.QuantityOnHand)
-        {
-            throw new BusinessRuleException(
-                $"Insufficient stock. Available: {product.QuantityOnHand}, requested: {quantity}.");
-        }
+            throw new InsufficientStockException(product.QuantityOnHand, quantity);
 
         if (customerId is int cid && cid > 0)
         {
-            var customer = _customerRepo.GetById(cid);
-            if (customer is null || !customer.IsActive)
-                throw new ValidationException("Please select a valid active customer, or leave customer blank.");
+            try
+            {
+                var customer = _customerRepo.GetById(cid);
+                if (customer is null || !customer.IsActive)
+                    throw new ValidationException("Please select a valid active customer, or leave customer blank.");
+            }
+            catch (AppException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw DbExceptionMapper.Map(ex);
+            }
         }
         else
         {
-            customerId = null; // BR-029 optional customer
+            customerId = null;
         }
 
         try
@@ -107,12 +159,19 @@ public class StockOutService
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("Insufficient", StringComparison.OrdinalIgnoreCase))
         {
-            throw new BusinessRuleException(
-                "Insufficient stock. The quantity on hand is less than the requested amount.");
+            throw new InsufficientStockException("Insufficient stock. The quantity on hand is less than the requested amount.");
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("inactive", StringComparison.OrdinalIgnoreCase))
         {
             throw new BusinessRuleException("Stock-Out is not allowed for inactive products.");
+        }
+        catch (AppException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw DbExceptionMapper.Map(ex);
         }
     }
 }

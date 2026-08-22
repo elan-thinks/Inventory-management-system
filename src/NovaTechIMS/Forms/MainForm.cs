@@ -17,7 +17,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms;
 
-/// <summary>Application shell (Milestone 16: Reports).</summary>
+/// <summary>Application shell (Milestone 17: validation + error polish).</summary>
 public partial class MainForm : Form
 {
     private readonly CurrentUser _currentUser;
@@ -43,7 +43,7 @@ public partial class MainForm : Form
         lblDateStatus.Text = DateTime.Now.ToString("dddd, dd MMM yyyy");
         lblMessageStatus.Text = "Ready";
         MinimumSize = new Size(UiTheme.MinWindowWidth, UiTheme.MinWindowHeight);
-        lblRoleBadge.Text = "Milestone 16";
+        lblRoleBadge.Text = "Milestone 17";
     }
 
     private void BuildNavigation()
@@ -134,52 +134,61 @@ public partial class MainForm : Form
 
         SetActiveNav(btn);
 
-        switch (key)
+        try
         {
-            case "Products":
-                HostList(new ProductListForm(), "Products");
-                lblMessageStatus.Text = "Opened: Products";
-                return;
-            case "Categories":
-                HostList(new CategoryListForm(), "Categories");
-                lblMessageStatus.Text = "Opened: Categories";
-                return;
-            case "Suppliers":
-                HostList(new SupplierListForm(), "Suppliers");
-                lblMessageStatus.Text = "Opened: Suppliers";
-                return;
-            case "Customers":
-                HostList(new CustomerListForm(), "Customers");
-                lblMessageStatus.Text = "Opened: Customers";
-                return;
-            case "User Management":
-                HostList(new UserListForm(), "User Management");
-                lblMessageStatus.Text = "Opened: User Management";
-                return;
-            case "Stock In":
-                HostList(new StockInForm(), "Stock In");
-                lblMessageStatus.Text = "Opened: Stock In";
-                return;
-            case "Stock Out":
-                HostList(new StockOutForm(), "Stock Out");
-                lblMessageStatus.Text = "Opened: Stock Out";
-                return;
-            case "Inventory History":
-                HostList(new InventoryHistoryForm(), "Inventory History");
-                lblMessageStatus.Text = "Opened: Inventory History";
-                return;
-            case "Inventory Adjustment":
-                HostList(new AdjustmentForm(), "Inventory Adjustment");
-                lblMessageStatus.Text = "Opened: Inventory Adjustment";
-                return;
-            case "Delegations":
-                HostList(new DelegationListForm(), "Delegations");
-                lblMessageStatus.Text = "Opened: Delegations";
-                return;
-            case "Reports":
-                HostList(new ReportsHubForm(), "Reports");
-                lblMessageStatus.Text = "Opened: Reports";
-                return;
+            switch (key)
+            {
+                case "Products":
+                    HostList(new ProductListForm(), "Products");
+                    lblMessageStatus.Text = "Opened: Products";
+                    return;
+                case "Categories":
+                    HostList(new CategoryListForm(), "Categories");
+                    lblMessageStatus.Text = "Opened: Categories";
+                    return;
+                case "Suppliers":
+                    HostList(new SupplierListForm(), "Suppliers");
+                    lblMessageStatus.Text = "Opened: Suppliers";
+                    return;
+                case "Customers":
+                    HostList(new CustomerListForm(), "Customers");
+                    lblMessageStatus.Text = "Opened: Customers";
+                    return;
+                case "User Management":
+                    HostList(new UserListForm(), "User Management");
+                    lblMessageStatus.Text = "Opened: User Management";
+                    return;
+                case "Stock In":
+                    HostList(new StockInForm(), "Stock In");
+                    lblMessageStatus.Text = "Opened: Stock In";
+                    return;
+                case "Stock Out":
+                    HostList(new StockOutForm(), "Stock Out");
+                    lblMessageStatus.Text = "Opened: Stock Out";
+                    return;
+                case "Inventory History":
+                    HostList(new InventoryHistoryForm(), "Inventory History");
+                    lblMessageStatus.Text = "Opened: Inventory History";
+                    return;
+                case "Inventory Adjustment":
+                    HostList(new AdjustmentForm(), "Inventory Adjustment");
+                    lblMessageStatus.Text = "Opened: Inventory Adjustment";
+                    return;
+                case "Delegations":
+                    HostList(new DelegationListForm(), "Delegations");
+                    lblMessageStatus.Text = "Opened: Delegations";
+                    return;
+                case "Reports":
+                    HostList(new ReportsHubForm(), "Reports");
+                    lblMessageStatus.Text = "Opened: Reports";
+                    return;
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorPresenter.Show(this, DbExceptionMapper.Map(ex));
+            lblMessageStatus.Text = "Error opening screen";
+            return;
         }
 
         var title = key;

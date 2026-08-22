@@ -6,7 +6,7 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms;
 
 /// <summary>
-/// SCR-001 Login (Milestone 9 — real authentication against PostgreSQL).
+/// SCR-001 Login (authentication + polished errors — Milestone 17).
 /// </summary>
 public partial class LoginForm : Form
 {
@@ -52,7 +52,6 @@ public partial class LoginForm : Form
             using var main = new MainForm(current);
             main.ShowDialog(this);
 
-            // After MainForm closes (logout), clear session and show login again.
             SessionContext.SignOut();
             txtPassword.Clear();
             txtUsername.SelectAll();
@@ -68,7 +67,9 @@ public partial class LoginForm : Form
         }
         catch (Exception ex)
         {
-            ShowError("Unable to sign in. Check the database connection.\n" + ex.Message);
+            // Never show raw SQL / stack — map to a friendly message.
+            var mapped = DbExceptionMapper.Map(ex);
+            ShowError(ErrorPresenter.ToUserMessage(mapped));
         }
         finally
         {
