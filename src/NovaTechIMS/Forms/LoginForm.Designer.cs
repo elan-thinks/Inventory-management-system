@@ -17,7 +17,6 @@ partial class LoginForm
     private TextBox txtPassword;
     private Label lblError;
     private Button btnLogin;
-    private Button btnCancel;
     private Label lblHint;
 
     protected override void Dispose(bool disposing)
@@ -40,7 +39,6 @@ partial class LoginForm
         txtPassword = new TextBox();
         lblError = new Label();
         btnLogin = new Button();
-        btnCancel = new Button();
         lblHint = new Label();
 
         SuspendLayout();
@@ -49,7 +47,7 @@ partial class LoginForm
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = UiTheme.Background;
-        ClientSize = new Size(480, 420);
+        ClientSize = new Size(480, 400);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = true;
@@ -61,8 +59,8 @@ partial class LoginForm
 
         pnlCard.BackColor = UiTheme.Surface;
         pnlCard.BorderStyle = BorderStyle.FixedSingle;
-        pnlCard.Location = new Point(60, 40);
-        pnlCard.Size = new Size(360, 320);
+        pnlCard.Location = new Point(60, 36);
+        pnlCard.Size = new Size(360, 310);
         pnlCard.Name = "pnlCard";
 
         lblBrand.Text = "NovaTech IMS";
@@ -111,47 +109,36 @@ partial class LoginForm
         lblError.Text = "";
         lblError.Font = UiTheme.Label;
         lblError.ForeColor = UiTheme.Error;
+        lblError.BackColor = UiTheme.ErrorTint;
         lblError.AutoSize = false;
-        lblError.Size = new Size(300, 20);
+        lblError.Size = new Size(300, 36);
         lblError.Location = new Point(28, 208);
         lblError.Name = "lblError";
+        lblError.Padding = new Padding(8, 6, 8, 6);
         lblError.Visible = false;
 
-        btnLogin.Text = "Sign In";
+        // Full-width primary Login (approved SCR-001)
+        btnLogin.Text = "Login";
         btnLogin.Font = UiTheme.Button;
         btnLogin.BackColor = UiTheme.Primary;
         btnLogin.ForeColor = Color.White;
         btnLogin.FlatStyle = FlatStyle.Flat;
         btnLogin.FlatAppearance.BorderSize = 0;
-        btnLogin.Size = new Size(140, 34);
-        btnLogin.Location = new Point(28, 240);
+        btnLogin.Size = new Size(300, 36);
+        btnLogin.Location = new Point(28, 252);
         btnLogin.Name = "btnLogin";
         btnLogin.TabIndex = 2;
         btnLogin.Cursor = Cursors.Hand;
         btnLogin.Click += BtnLogin_Click;
-        btnLogin.AccessibleName = "Sign In";
+        btnLogin.AccessibleName = "Login";
 
-        btnCancel.Text = "Exit";
-        btnCancel.Font = UiTheme.Button;
-        btnCancel.BackColor = UiTheme.Surface;
-        btnCancel.ForeColor = UiTheme.Text;
-        btnCancel.FlatStyle = FlatStyle.Flat;
-        btnCancel.FlatAppearance.BorderColor = UiTheme.Border;
-        btnCancel.FlatAppearance.BorderSize = 1;
-        btnCancel.Size = new Size(140, 34);
-        btnCancel.Location = new Point(188, 240);
-        btnCancel.Name = "btnCancel";
-        btnCancel.TabIndex = 3;
-        btnCancel.Cursor = Cursors.Hand;
-        btnCancel.Click += BtnCancel_Click;
-        btnCancel.AccessibleName = "Exit";
-
-        lblHint.Text = "Milestone 1 shell — any username/password opens the app.";
+        // Version footnote only — never claim open credentials
+        lblHint.Text = "NovaTech Electronics · Inventory Management System · v1.0";
         lblHint.Font = UiTheme.Label;
         lblHint.ForeColor = UiTheme.TextMuted;
         lblHint.AutoSize = false;
-        lblHint.Size = new Size(300, 32);
-        lblHint.Location = new Point(28, 282);
+        lblHint.Size = new Size(300, 28);
+        lblHint.Location = new Point(28, 296);
         lblHint.Name = "lblHint";
 
         pnlCard.Controls.Add(lblBrand);
@@ -162,7 +149,6 @@ partial class LoginForm
         pnlCard.Controls.Add(txtPassword);
         pnlCard.Controls.Add(lblError);
         pnlCard.Controls.Add(btnLogin);
-        pnlCard.Controls.Add(btnCancel);
         pnlCard.Controls.Add(lblHint);
 
         Controls.Add(pnlCard);

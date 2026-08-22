@@ -6,7 +6,7 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms;
 
 /// <summary>
-/// SCR-001 Login (authentication + polished errors — Milestone 17).
+/// SCR-001 Login — real authentication; approved presentation (M19).
 /// </summary>
 public partial class LoginForm : Form
 {
@@ -59,15 +59,14 @@ public partial class LoginForm : Form
             Show();
             txtUsername.Focus();
         }
-        catch (AuthenticationException ex)
+        catch (AuthenticationException)
         {
-            ShowError(ex.Message);
-            txtPassword.SelectAll();
+            ShowError("Invalid username or password.");
+            txtPassword.Clear();
             txtPassword.Focus();
         }
         catch (Exception ex)
         {
-            // Never show raw SQL / stack — map to a friendly message.
             var mapped = DbExceptionMapper.Map(ex);
             ShowError(ErrorPresenter.ToUserMessage(mapped));
         }
@@ -81,10 +80,5 @@ public partial class LoginForm : Form
     {
         lblError.Text = message;
         lblError.Visible = true;
-    }
-
-    private void BtnCancel_Click(object? sender, EventArgs e)
-    {
-        Close();
     }
 }
