@@ -1,40 +1,33 @@
--- NovaTech IMS — Milestone 3 (optional)
--- Sample master-data rows only. No users (password hashing = Milestone 9).
--- Safe to re-run: inserts only when tables are empty.
+-- NovaTech IMS — Milestone 3 (PostgreSQL, optional)
+-- Sample master-data only. No users (password hashing = Milestone 9).
 
-USE NovaTechIMS;
-GO
+BEGIN;
 
-IF NOT EXISTS (SELECT 1 FROM dbo.Category)
-BEGIN
-    INSERT INTO dbo.Category (CategoryName, Description, IsActive)
-    VALUES
-        (N'Electronics', N'Consumer and office electronics', 1),
-        (N'Accessories', N'Cables, cases, and peripherals', 1),
-        (N'Components',  N'Internal parts and modules', 1);
-    PRINT 'Sample categories inserted.';
-END
-GO
+INSERT INTO "Category" ("CategoryName", "Description", "IsActive")
+SELECT v.name, v.descr, TRUE
+FROM (VALUES
+    ('Electronics', 'Consumer and office electronics'),
+    ('Accessories', 'Cables, cases, and peripherals'),
+    ('Components',  'Internal parts and modules')
+) AS v(name, descr)
+WHERE NOT EXISTS (SELECT 1 FROM "Category" LIMIT 1);
 
-IF NOT EXISTS (SELECT 1 FROM dbo.Supplier)
-BEGIN
-    INSERT INTO dbo.Supplier (SupplierName, ContactPerson, Phone, Email, IsActive)
-    VALUES
-        (N'Nova Supply Co.', N'A. Bekele', N'+251-11-000-0001', N'sales@novasupply.example', 1),
-        (N'East Africa Parts', N'M. Hailu', N'+251-11-000-0002', N'orders@eaparts.example', 1);
-    PRINT 'Sample suppliers inserted.';
-END
-GO
+INSERT INTO "Supplier" ("SupplierName", "ContactPerson", "Phone", "Email", "IsActive")
+SELECT v.name, v.contact, v.phone, v.email, TRUE
+FROM (VALUES
+    ('Nova Supply Co.', 'A. Bekele', '+251-11-000-0001', 'sales@novasupply.example'),
+    ('East Africa Parts', 'M. Hailu', '+251-11-000-0002', 'orders@eaparts.example')
+) AS v(name, contact, phone, email)
+WHERE NOT EXISTS (SELECT 1 FROM "Supplier" LIMIT 1);
 
-IF NOT EXISTS (SELECT 1 FROM dbo.Customer)
-BEGIN
-    INSERT INTO dbo.Customer (CustomerName, Phone, Email, IsActive)
-    VALUES
-        (N'Addis Retail PLC', N'+251-11-555-0100', N'purchasing@addisretail.example', 1),
-        (N'Campus Store', N'+251-11-555-0200', NULL, 1);
-    PRINT 'Sample customers inserted.';
-END
-GO
+INSERT INTO "Customer" ("CustomerName", "Phone", "Email", "IsActive")
+SELECT v.name, v.phone, v.email, TRUE
+FROM (VALUES
+    ('Addis Retail PLC', '+251-11-555-0100', 'purchasing@addisretail.example'),
+    ('Campus Store', '+251-11-555-0200', NULL)
+) AS v(name, phone, email)
+WHERE NOT EXISTS (SELECT 1 FROM "Customer" LIMIT 1);
 
-PRINT 'Optional seed finished. Products/users/transactions intentionally not seeded.';
-GO
+COMMIT;
+
+SELECT 'Optional seed finished. Products/users/transactions intentionally not seeded.' AS message;

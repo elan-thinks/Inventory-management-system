@@ -1,6 +1,6 @@
-# Milestone 3 Gate — Database Schema (LocalDB)
+# Milestone 3 Gate — Database Schema (PostgreSQL)
 
-**Status:** COMPLETE  
+**Status:** COMPLETE (engine amended to PostgreSQL)  
 
 **Branch:** `version1.2`  
 
@@ -8,53 +8,44 @@
 
 ## Objective
 
-Create the physical SQL Server schema that matches Technical Design §04 and SRS Data Requirements. No application connection, ADO.NET, or CRUD yet (Milestone 4+).
+Create the physical schema matching Technical Design §04 and SRS Data Requirements, targeting **PostgreSQL**.
+
+No application connection, Npgsql, or CRUD yet (Milestone 4+).
 
 ---
 
-## What was implemented
+## Engine amendment
+
+| OLD | NEW |
+|-----|-----|
+| SQL Server LocalDB | **PostgreSQL** |
+
+See `project-management/DATABASE-ENGINE-AMENDMENT.md`.
+
+---
+
+## Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `database/01-CreateDatabase.sql` | Creates `NovaTechIMS` database |
-| `database/02-CreateTables.sql` | All tables, FKs, CHECKs, indexes |
-| `database/03-SeedOptional.sql` | Sample Category / Supplier / Customer only |
-| `database/README.md` | How to run scripts |
-
-### Tables
-
-`User`, `Category`, `Supplier`, `Customer`, `Product`, `InventoryTransaction`, `Delegation`
-
-### Key constraints
-
-- Unique Username, CategoryName
-- Role / TransactionType / Responsibility / Status CHECKs
-- Prices ≥ 0, QuantityOnHand ≥ 0, MinStock ≥ 0
-- Product FKs to Category + default Supplier
-- Transaction FKs; SupplierID on txn = actual Stock-In supplier
-- Delegation EndDate ≥ StartDate; unique Active (ToUser, Responsibility)
-- ON DELETE NO ACTION (soft-delete preferred)
+| `database/01-CreateDatabase.sql` | `CREATE DATABASE "NovaTechIMS"` |
+| `database/02-CreateTables.sql` | 7 tables, FKs, CHECKs, indexes |
+| `database/03-SeedOptional.sql` | Sample Category / Supplier / Customer |
+| `database/README.md` | Run instructions |
 
 ---
 
-## Intentionally NOT implemented
+## How to verify
 
-- App.config / connection string usage in code
-- DbConnectionFactory / ADO.NET
-- Repositories / services
-- User seed with password hashes
-
----
-
-## How to verify locally
-
-1. Connect to `(localdb)\MSSQLLocalDB`
-2. Run `01`, then `02`, optionally `03`
-3. Confirm seven tables exist
-4. Application still builds and runs (shell unchanged)
+1. Ensure local PostgreSQL is running.
+2. Create DB: run `01` (or create `NovaTechIMS` in pgAdmin).
+3. Connect to `NovaTechIMS`, run `02-CreateTables.sql`.
+4. Optional: run `03-SeedOptional.sql`.
+5. Confirm seven tables via `information_schema.tables`.
+6. WinForms app still builds and runs (no DB code in app).
 
 ---
 
 ## Next milestone
 
-**Milestone 4 — Connection + data access skeleton**
+**Milestone 4 — Connection + data access skeleton** (Npgsql + PostgreSQL)

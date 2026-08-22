@@ -1,32 +1,47 @@
 # Database scripts — NovaTech IMS
 
-**Engine:** SQL Server LocalDB (or full SQL Server Express / Developer)  
+**Engine:** PostgreSQL  
 **Milestone:** 3 — schema only (application connection is Milestone 4)
+
+## Amendment
+
+| Item | Value |
+|------|--------|
+| **Previous engine** | SQL Server LocalDB |
+| **Current engine** | PostgreSQL |
+| **Reason** | Already available in developer environment; avoids second server install; full relational features. |
 
 ## Files
 
 | Script | Purpose |
 |--------|---------|
-| `01-CreateDatabase.sql` | Creates database `NovaTechIMS` (idempotent) |
+| `01-CreateDatabase.sql` | Creates database `NovaTechIMS` |
 | `02-CreateTables.sql` | Tables, FKs, CHECKs, indexes |
-| `03-SeedOptional.sql` | Optional sample Category/Supplier/Customer only (no users yet) |
+| `03-SeedOptional.sql` | Optional sample Category / Supplier / Customer |
 
-## How to run (Visual Studio / SSMS)
+## How to run (psql)
 
-1. Install **SQL Server LocalDB** (VS 2022 workload “Data storage and processing” or SQL Express).
-2. Open **SQL Server Object Explorer** in Visual Studio, or **SSMS**.
-3. Connect to `(localdb)\MSSQLLocalDB`.
-4. Run `01-CreateDatabase.sql`, then `02-CreateTables.sql`.
-5. Optionally run `03-SeedOptional.sql`.
-
-## Connection string (for Milestone 4 — do not use in the app yet)
-
-```
-Server=(localdb)\MSSQLLocalDB;Database=NovaTechIMS;Trusted_Connection=True;TrustServerCertificate=True;
+```bash
+psql -U postgres -f database/01-CreateDatabase.sql
+psql -U postgres -d NovaTechIMS -f database/02-CreateTables.sql
+psql -U postgres -d NovaTechIMS -f database/03-SeedOptional.sql
 ```
 
-## Notes
+Or use **pgAdmin**: create DB `NovaTechIMS`, then run `02` (and optional `03`) on that database.
 
-- No application code connects to the database in Milestone 3.
-- Seed does **not** create login users (password hashing arrives in Milestone 9).
-- InventoryTransaction is append-only by design (no UPDATE/DELETE from the app).
+## Verify
+
+```sql
+SELECT table_name FROM information_schema.tables
+WHERE table_schema = 'public' ORDER BY table_name;
+```
+
+Expect: Category, Customer, Delegation, InventoryTransaction, Product, Supplier, User.
+
+## Connection string (Milestone 4 only — not used in app yet)
+
+```
+Host=localhost;Port=5432;Database=NovaTechIMS;Username=postgres;Password=YOUR_PASSWORD
+```
+
+Provider later: **Npgsql** (not added in Milestone 3).
