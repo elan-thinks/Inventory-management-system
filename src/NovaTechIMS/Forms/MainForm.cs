@@ -359,4 +359,9 @@ public partial class MainForm : Form
             Close();
         }
     }
+
+    private void lblPlaceholderTitle_Click(object sender, EventArgs e)
+    {
+
+    }
 }
