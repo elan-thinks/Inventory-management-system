@@ -42,43 +42,30 @@ partial class DashboardForm
         base.Dispose(disposing);
     }
 
-    private static Panel MakeTile(string caption, out Label valueLabel, out Label capLabel, string valueName)
-    {
-        var tile = new Panel
-        {
-            Width = 140,
-            Height = 88,
-            Margin = new Padding(0, 0, 10, 0),
-            BackColor = Color.White,
-            Padding = new Padding(10)
-        };
-
-        valueLabel = new Label
-        {
-            Text = "—",
-            Font = new Font("Segoe UI", 18F, FontStyle.Bold),
-            Location = new Point(10, 12),
-            AutoSize = true,
-            Name = valueName
-        };
-
-        capLabel = new Label
-        {
-            Text = caption,
-            Font = new Font("Segoe UI", 9F),
-            Location = new Point(10, 52),
-            AutoSize = true
-        };
-
-        tile.Controls.Add(valueLabel);
-        tile.Controls.Add(capLabel);
-        return tile;
-    }
-
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container();
+
         metricsPanel = new FlowLayoutPanel();
+        tileProducts = new Panel();
+        lblProducts = new Label();
+        capProducts = new Label();
+        tileCategories = new Panel();
+        lblCategories = new Label();
+        capCategories = new Label();
+        tileSuppliers = new Panel();
+        lblSuppliers = new Label();
+        capSuppliers = new Label();
+        tileTotalQty = new Panel();
+        lblTotalQty = new Label();
+        capTotalQty = new Label();
+        tileLow = new Panel();
+        lblLow = new Label();
+        capLow = new Label();
+        tileOut = new Panel();
+        lblOut = new Label();
+        capOut = new Label();
+
         bottom = new TableLayoutPanel();
         activityPanel = new Panel();
         lblAct = new Label();
@@ -88,14 +75,13 @@ partial class DashboardForm
         lblQa = new Label();
         lblError = new Label();
 
-        tileProducts = MakeTile("Active products", out lblProducts, out capProducts, "lblProducts");
-        tileCategories = MakeTile("Categories", out lblCategories, out capCategories, "lblCategories");
-        tileSuppliers = MakeTile("Suppliers", out lblSuppliers, out capSuppliers, "lblSuppliers");
-        tileTotalQty = MakeTile("Total qty on hand", out lblTotalQty, out capTotalQty, "lblTotalQty");
-        tileLow = MakeTile("Low stock", out lblLow, out capLow, "lblLow");
-        tileOut = MakeTile("Out of stock", out lblOut, out capOut, "lblOut");
-
         metricsPanel.SuspendLayout();
+        tileProducts.SuspendLayout();
+        tileCategories.SuspendLayout();
+        tileSuppliers.SuspendLayout();
+        tileTotalQty.SuspendLayout();
+        tileLow.SuspendLayout();
+        tileOut.SuspendLayout();
         bottom.SuspendLayout();
         activityPanel.SuspendLayout();
         actionsPanel.SuspendLayout();
@@ -110,6 +96,14 @@ partial class DashboardForm
         TopLevel = false;
         Name = "DashboardForm";
         Text = "Dashboard";
+
+        // ---- Metric tiles (explicit, Designer-safe) ----
+        ConfigureTile(tileProducts, lblProducts, capProducts, "lblProducts", "Active products");
+        ConfigureTile(tileCategories, lblCategories, capCategories, "lblCategories", "Categories");
+        ConfigureTile(tileSuppliers, lblSuppliers, capSuppliers, "lblSuppliers", "Suppliers");
+        ConfigureTile(tileTotalQty, lblTotalQty, capTotalQty, "lblTotalQty", "Total qty on hand");
+        ConfigureTile(tileLow, lblLow, capLow, "lblLow", "Low stock");
+        ConfigureTile(tileOut, lblOut, capOut, "lblOut", "Out of stock");
 
         metricsPanel.Dock = DockStyle.Top;
         metricsPanel.Height = 110;
@@ -183,11 +177,48 @@ partial class DashboardForm
         Controls.Add(lblError);
         Controls.Add(metricsPanel);
 
+        tileProducts.ResumeLayout(false);
+        tileProducts.PerformLayout();
+        tileCategories.ResumeLayout(false);
+        tileCategories.PerformLayout();
+        tileSuppliers.ResumeLayout(false);
+        tileSuppliers.PerformLayout();
+        tileTotalQty.ResumeLayout(false);
+        tileTotalQty.PerformLayout();
+        tileLow.ResumeLayout(false);
+        tileLow.PerformLayout();
+        tileOut.ResumeLayout(false);
+        tileOut.PerformLayout();
         metricsPanel.ResumeLayout(false);
         activityPanel.ResumeLayout(false);
         actionsPanel.ResumeLayout(false);
         bottom.ResumeLayout(false);
         ((System.ComponentModel.ISupportInitialize)grid).EndInit();
         ResumeLayout(false);
+    }
+
+    private static void ConfigureTile(Panel tile, Label valueLabel, Label capLabel, string valueName, string caption)
+    {
+        tile.Width = 140;
+        tile.Height = 88;
+        tile.Margin = new Padding(0, 0, 10, 0);
+        tile.BackColor = Color.White;
+        tile.Padding = new Padding(10);
+        tile.Name = "tile" + valueName;
+
+        valueLabel.Text = "—";
+        valueLabel.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
+        valueLabel.Location = new Point(10, 12);
+        valueLabel.AutoSize = true;
+        valueLabel.Name = valueName;
+
+        capLabel.Text = caption;
+        capLabel.Font = new Font("Segoe UI", 9F);
+        capLabel.Location = new Point(10, 52);
+        capLabel.AutoSize = true;
+        capLabel.Name = "cap" + valueName;
+
+        tile.Controls.Add(valueLabel);
+        tile.Controls.Add(capLabel);
     }
 }
