@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 using System.Globalization;
 using System.Windows.Forms;
 using NovaTechIMS.Data;
@@ -7,12 +8,11 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>
-/// Stock-In screen (FR-SIN) — Designer-based (partial).
-/// </summary>
+/// <summary>Stock-In (FR-SIN) — mockup-style sections + confirm.</summary>
 public partial class StockInForm : Form
 {
     private readonly StockInService _service = new();
+    private int _currentOnHand;
 
     public StockInForm()
     {
@@ -22,6 +22,7 @@ public partial class StockInForm : Form
         {
             LoadLookups();
             ReloadRecent();
+            UpdatePreview();
         };
     }
 
@@ -30,20 +31,39 @@ public partial class StockInForm : Form
         Font = UiTheme.Body;
         BackColor = UiTheme.Background;
         formPanel.BackColor = UiTheme.Surface;
+        formPanel.Paint += (_, e) =>
+        {
+            using var pen = new Pen(UiTheme.Border, 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, formPanel.Width - 1, formPanel.Height - 1);
+        };
+
+        foreach (var sec in new[] { secProduct, secMovement, secNotes })
+        {
+            sec.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
+            sec.ForeColor = UiTheme.Secondary;
+        }
+
         foreach (Control c in formPanel.Controls)
         {
-            if (c is Label lbl && lbl != lblError && lbl != lblCurrentQty)
+            if (c is Label lbl && lbl != lblError && lbl != lblPreview
+                && lbl != secProduct && lbl != secMovement && lbl != secNotes
+                && lbl != helpProduct && lbl != helpSupplier)
             {
                 lbl.Font = UiTheme.Label;
                 lbl.ForeColor = UiTheme.Text;
             }
         }
-        lblCurrentQty.Font = UiTheme.Body;
-        lblCurrentQty.ForeColor = UiTheme.TextMuted;
+
+        helpProduct.ForeColor = UiTheme.TextMuted;
+        helpSupplier.ForeColor = UiTheme.TextMuted;
+        previewBanner.BackColor = UiTheme.InfoTint;
+        lblPreview.Font = UiTheme.Label;
+        lblPreview.ForeColor = UiTheme.Text;
         lblError.Font = UiTheme.Label;
         lblError.ForeColor = UiTheme.Error;
         lblHint.Font = UiTheme.Label;
         lblHint.ForeColor = UiTheme.TextMuted;
+
         UiTheme.StyleComboBox(cboProduct);
         UiTheme.StyleComboBox(cboSupplier);
         UiTheme.StyleTextBox(txtUnitPrice);
@@ -51,6 +71,7 @@ public partial class StockInForm : Form
         UiTheme.StyleDatePicker(dtpDate);
         UiTheme.StyleButton(btnSave, UiTheme.ButtonKind.Primary);
         UiTheme.ApplyGridTheme(grid);
+
         dtpDate.MaxDate = DateTime.Today;
         dtpDate.Value = DateTime.Today;
     }
@@ -62,7 +83,8 @@ public partial class StockInForm : Form
             cboProduct.Items.Clear();
             cboProduct.Items.Add(new LookupItem(0, "— Select product —"));
             foreach (var p in _service.GetActiveProducts())
-                cboProduct.Items.Add(new LookupItem(p.ProductID, $"{p.ProductName} (ID {p.ProductID})"));
+                cboProduct.Items.Add(new LookupItem(p.ProductID,
+                    $"{p.ProductName} — On hand: {p.QuantityOnHand}"));
             cboProduct.SelectedIndex = 0;
 
             cboSupplier.Items.Clear();
@@ -82,14 +104,17 @@ public partial class StockInForm : Form
     {
         if (cboProduct.SelectedItem is not LookupItem item || item.Value <= 0)
         {
+            _currentOnHand = 0;
             lblCurrentQty.Text = "—";
+            UpdatePreview();
             return;
         }
 
         try
         {
             var p = _service.GetProduct(item.Value);
-            lblCurrentQty.Text = p.QuantityOnHand.ToString(CultureInfo.InvariantCulture);
+            _currentOnHand = p.QuantityOnHand;
+            lblCurrentQty.Text = _currentOnHand.ToString(CultureInfo.InvariantCulture);
             txtUnitPrice.Text = p.PurchasePrice.ToString("0.00", CultureInfo.InvariantCulture);
 
             for (var i = 0; i < cboSupplier.Items.Count; i++)
@@ -100,17 +125,33 @@ public partial class StockInForm : Form
                     break;
                 }
             }
+
+            UpdatePreview();
         }
         catch
         {
+            _currentOnHand = 0;
             lblCurrentQty.Text = "—";
+            UpdatePreview();
         }
+    }
+
+    private void UpdatePreview()
+    {
+        if (cboProduct.SelectedItem is not LookupItem item || item.Value <= 0)
+        {
+            lblPreview.Text = "  Select a product to see the new quantity on hand.";
+            return;
+        }
+
+        var qty = (int)nudQuantity.Value;
+        var neu = _currentOnHand + qty;
+        lblPreview.Text = $"  New quantity on hand will be: {_currentOnHand} + {qty} = {neu}";
     }
 
     private void BtnSave_Click(object? sender, EventArgs e)
     {
         lblError.Visible = false;
-        btnSave.Enabled = false;
 
         try
         {
@@ -125,6 +166,25 @@ public partial class StockInForm : Form
                 throw new ValidationException("Purchase price must be a valid number.");
 
             var qty = (int)nudQuantity.Value;
+            var productName = prod.Text;
+            var supplierName = sup.Text;
+            var neu = _currentOnHand + qty;
+
+            var confirm = MessageBox.Show(
+                FindForm(),
+                $"Add {qty} × {productName.Split('—')[0].Trim()} from {supplierName}?\n\n" +
+                $"Current on hand:  {_currentOnHand}\n" +
+                $"Quantity received: +{qty}\n" +
+                $"New on hand:       {neu}",
+                "Confirm Stock-In",
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Question);
+
+            if (confirm != DialogResult.OK)
+                return;
+
+            btnSave.Enabled = false;
+
             var txnId = _service.Record(
                 prod.Value,
                 sup.Value,
@@ -182,18 +242,16 @@ public partial class StockInForm : Form
             }
 
             Show(nameof(StockInListRow.TransactionID), "Txn ID", 0.5f);
-            Show(nameof(StockInListRow.TransactionDate), "Date", 0.7f);
             Show(nameof(StockInListRow.ProductName), "Product", 1.4f);
             Show(nameof(StockInListRow.Quantity), "Qty", 0.5f);
+            Show(nameof(StockInListRow.TransactionDate), "Date", 0.7f);
             Show(nameof(StockInListRow.UnitPrice), "Price", 0.6f);
             Show(nameof(StockInListRow.SupplierName), "Supplier", 1.0f);
+            Show(nameof(StockInListRow.UserFullName), "User", 1.0f);
             Show(nameof(StockInListRow.PreviousQuantity), "Prev", 0.5f);
             Show(nameof(StockInListRow.NewQuantity), "New", 0.5f);
-            Show(nameof(StockInListRow.UserFullName), "User", 1.0f);
         }
-        catch
-        {
-        }
+        catch { }
     }
 
     private sealed class LookupItem
