@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NovaTech IMS — View Design (all screens)</title>
+<style>
+  :root {
+    --primary: #1E4B8F;
+    --bg: #F4F6F8;
+    --surface: #FFFFFF;
+    --text: #1F2933;
+    --muted: #6B7785;
+    --border: #D7DCE1;
+    --sidebar: #16324F;
+    --accent: #5B9BD5;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header {
+    background: var(--sidebar);
+    color: #fff;
+    padding: 20px 32px;
+  }
+  header h1 { margin: 0 0 6px; font-size: 22px; font-weight: 600; }
+  header p { margin: 0; color: #C7D3E0; font-size: 13px; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 32px 48px; }
+  .note {
+    background: #E7F0F7;
+    border: 1px solid #B8D0E8;
+    color: #2E6E9E;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+  h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--primary);
+    margin: 28px 0 12px;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 6px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+  }
+  a.card {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    text-decoration: none;
+    color: var(--text);
+    transition: border-color .15s, background .15s;
+  }
+  a.card:hover {
+    border-color: var(--primary);
+    background: #EAF1F8;
+  }
+  a.card strong {
+    display: block;
+    color: var(--primary);
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  a.card span {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 11px;
+    margin-top: 8px;
+  }
+  .badge-approved { background: #E4F3EA; color: #2E8B57; }
+  .badge-updated { background: #E7F0F7; color: #2E6E9E; }
+  .badge-baseline { background: #ECEEF1; color: #6B7785; }
+  footer {
+    margin-top: 40px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  code { background: #EEF1F4; padding: 1px 5px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>NovaTech IMS — View Design</h1>
+  <p>Branch <strong>version1.2</strong> · Approved visual mockups for refinement · Open any card in the browser</p>
+</header>
+
+<div class="wrap">
+  <div class="note">
+    <strong>How to use:</strong> After <code>git pull origin version1.2</code>, open this file in Chrome/Edge:
+    <code>UI/VIEW-DESIGN.html</code> (double-click or “Open with Live Server”).
+    Edit the linked HTML mockups under <code>UI/update-ui/</code> or <code>UI/UI-mock/</code>, then tell the team which refinements to implement in WinForms.
+    Spec docs: <code>UI/02-Design-Tokens.md</code>, <code>UI/05-Screen-Designs.md</code>.
+  </div>
+
+  <h2>1. Preferred — Updated mockups (use these for refinements)</h2>
+  <p style="font-size:13px;color:var(--muted);margin-top:-4px;">Source: <code>UI/update-ui/UI-mock-updated/UI-mock-updated/</code></p>
+  <div class="grid">
+    <a class="card" href="update-ui/UI-mock-updated/UI-mock-updated/login.html" target="_blank" rel="noopener">
+      <strong>Login</strong><span>SCR-001 · Sign-in</span>
+      <span class="badge badge-updated">UPDATED</span>
+    </a>
+    <a class="card" href="update-ui/UI-mock-updated/UI-mock-updated/dashboard.html" target="_blank" rel="noopener">
+      <strong>Dashboard</strong><span>SCR-002 · Metrics &amp; quick actions</span>
+      <span class="badge badge-updated">UPDATED</span>
+    </a>
+    <a class="card" href="update-ui/UI-mock-updated/UI-mock-updated/product-list.html" target="_blank" rel="noopener">
+      <strong>Product list</strong><span>SCR-003 · Filters &amp; grid</span>
+      <span class="badge badge-updated">UPDATED</span>
+    </a>
+    <a class="card" href="update-ui/UI-mock-updated/UI-mock-updated/product-form.html" target="_blank" rel="noopener">
+      <strong>Product form</strong><span>Add / Edit product</span>
+      <span class="badge badge-updated">UPDATED</span>
+    </a>
+    <a class="card" href="update-ui/UI-mock-updated/UI-mock-updated/category-management.html" target="_blank" rel="noopener">
+      <strong>Categories</strong><span>Master data</span>
+      <span class="badge badge-updated">UPDATED</span>
+    </a>
+    <a class="card" href="update-ui/UI-mock-updated/UI-mock-updated/supplier-management.html" target="_blank" rel="noopener">
+      <strong>Suppliers</strong><span>Master data</span>
+      <span class="badge badge-updated">UPDATED</span>
+    </a>
+    <a class="card" href="update-ui/UI-mock-updated/UI-mock-updated/customer-management.html" target="_blank" rel="noopener">
+      <strong>Customers</strong><span>Master data</span>
+      <span class="badge badge-updated">UPDATED</span>
+    </a>
+    <a class="card" href="update-ui/UI-mock-updated/UI-mock-updated/stock-in.html" target="_blank" rel="noopener">
+      <strong>Stock-In</strong><span>Goods received + preview</span>
+      <span class="badge badge-updated">UPDATED</span>
+    </a>
+    <a class="card" href="update-ui/UI-mock-updated/UI-mock-updated/stock-out.html" target="_blank" rel="noopener">
+      <strong>Stock-Out</strong><span>Issue + available qty</span>
+      <span class="badge badge-updated">UPDATED</span>
+    </a>
+    <a class="card" href="update-ui/UI-mock-updated/UI-mock-updated/inventory-adjustment.html" target="_blank" rel="noopener">
+      <strong>Inventory Adjustment</strong><span>Admin · reason required</span>
+      <span class="badge badge-updated">UPDATED</span>
+    </a>
+    <a class="card" href="update-ui/UI-mock-updated/UI-mock-updated/inventory-history.html" target="_blank" rel="noopener">
+      <strong>Inventory History</strong><span>Read-only log</span>
+      <span class="badge badge-updated">UPDATED</span>
+    </a>
+    <a class="card" href="update-ui/UI-mock-updated/UI-mock-updated/reports.html" target="_blank" rel="noopener">
+      <strong>Reports</strong><span>Card hub + viewer</span>
+      <span class="badge badge-updated">UPDATED</span>
+    </a>
+    <a class="card" href="update-ui/UI-mock-updated/UI-mock-updated/user-management.html" target="_blank" rel="noopener">
+      <strong>User Management</strong><span>Roles &amp; deactivate</span>
+      <span class="badge badge-updated">UPDATED</span>
+    </a>
+    <a class="card" href="update-ui/UI-mock-updated/UI-mock-updated/delegation-management.html" target="_blank" rel="noopener">
+      <strong>Delegation Management</strong><span>v1.1 amendment</span>
+      <span class="badge badge-updated">UPDATED</span>
+    </a>
+  </div>
+
+  <h2>2. Baseline mockups (original set)</h2>
+  <p style="font-size:13px;color:var(--muted);margin-top:-4px;">Source: <code>UI/UI-mock/</code> — keep for comparison</p>
+  <div class="grid">
+    <a class="card" href="UI-mock/login.html" target="_blank" rel="noopener"><strong>Login</strong><span>Baseline</span><span class="badge badge-baseline">BASELINE</span></a>
+    <a class="card" href="UI-mock/dashboard.html" target="_blank" rel="noopener"><strong>Dashboard</strong><span>Baseline</span><span class="badge badge-baseline">BASELINE</span></a>
+    <a class="card" href="UI-mock/product-list.html" target="_blank" rel="noopener"><strong>Product list</strong><span>Baseline</span><span class="badge badge-baseline">BASELINE</span></a>
+    <a class="card" href="UI-mock/product-form.html" target="_blank" rel="noopener"><strong>Product form</strong><span>Baseline</span><span class="badge badge-baseline">BASELINE</span></a>
+    <a class="card" href="UI-mock/category-management.html" target="_blank" rel="noopener"><strong>Categories</strong><span>Baseline</span><span class="badge badge-baseline">BASELINE</span></a>
+    <a class="card" href="UI-mock/supplier-management.html" target="_blank" rel="noopener"><strong>Suppliers</strong><span>Baseline</span><span class="badge badge-baseline">BASELINE</span></a>
+    <a class="card" href="UI-mock/customer-management.html" target="_blank" rel="noopener"><strong>Customers</strong><span>Baseline</span><span class="badge badge-baseline">BASELINE</span></a>
+    <a class="card" href="UI-mock/stock-in.html" target="_blank" rel="noopener"><strong>Stock-In</strong><span>Baseline</span><span class="badge badge-baseline">BASELINE</span></a>
+    <a class="card" href="UI-mock/stock-out.html" target="_blank" rel="noopener"><strong>Stock-Out</strong><span>Baseline</span><span class="badge badge-baseline">BASELINE</span></a>
+    <a class="card" href="UI-mock/inventory-adjustment.html" target="_blank" rel="noopener"><strong>Adjustment</strong><span>Baseline</span><span class="badge badge-baseline">BASELINE</span></a>
+    <a class="card" href="UI-mock/inventory-history.html" target="_blank" rel="noopener"><strong>History</strong><span>Baseline</span><span class="badge badge-baseline">BASELINE</span></a>
+    <a class="card" href="UI-mock/reports.html" target="_blank" rel="noopener"><strong>Reports</strong><span>Baseline</span><span class="badge badge-baseline">BASELINE</span></a>
+    <a class="card" href="UI-mock/user-management.html" target="_blank" rel="noopener"><strong>Users</strong><span>Baseline</span><span class="badge badge-baseline">BASELINE</span></a>
+    <a class="card" href="UI-mock/delegation-management.html" target="_blank" rel="noopener"><strong>Delegation</strong><span>Baseline</span><span class="badge badge-baseline">BASELINE</span></a>
+  </div>
+
+  <h2>3. Spec documents (read / refine copy &amp; rules)</h2>
+  <div class="grid">
+    <a class="card" href="00-README.md" target="_blank" rel="noopener"><strong>00 README</strong><span>UI package index</span></a>
+    <a class="card" href="01-Visual-Design-Overview.md" target="_blank" rel="noopener"><strong>01 Overview</strong><span>Visual design overview</span></a>
+    <a class="card" href="02-Design-Tokens.md" target="_blank" rel="noopener"><strong>02 Design Tokens</strong><span>Colors, type, spacing</span></a>
+    <a class="card" href="03-Component-Library.md" target="_blank" rel="noopener"><strong>03 Components</strong><span>Buttons, grids, badges</span></a>
+    <a class="card" href="04-Application-Shell.md" target="_blank" rel="noopener"><strong>04 Shell</strong><span>Sidebar &amp; chrome</span></a>
+    <a class="card" href="05-Screen-Designs.md" target="_blank" rel="noopener"><strong>05 Screens</strong><span>Screen-by-screen specs</span></a>
+    <a class="card" href="06-Dialogs-and-States.md" target="_blank" rel="noopener"><strong>06 Dialogs</strong><span>States &amp; dialogs</span></a>
+    <a class="card" href="11-Visual-Design-v1.1-Delegation-Amendment.md" target="_blank" rel="noopener"><strong>11 Delegation</strong><span>v1.1 amendment</span></a>
+    <a class="card" href="CURRENT-UI-GAP-ANALYSIS.md" target="_blank" rel="noopener"><strong>Gap analysis</strong><span>M19 audit vs live app</span></a>
+  </div>
+
+  <footer>
+    NovaTech Electronics · Inventory Management System · Design gallery on branch <strong>version1.2</strong>.
+    Prefer <span class="badge badge-updated">UPDATED</span> mocks when refining; implement changes in WinForms only after you approve the HTML.
+  </footer>
+</div>
+</body>
+</html>
