@@ -1,6 +1,5 @@
 using System.Drawing;
 using System.Windows.Forms;
-using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms;
 
@@ -64,22 +63,22 @@ partial class MainForm
 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        BackColor = UiTheme.Background;
+        BackColor = Color.FromArgb(244, 246, 248);
         ClientSize = new Size(1100, 700);
-        MinimumSize = new Size(UiTheme.MinWindowWidth, UiTheme.MinWindowHeight);
+        MinimumSize = new Size(1024, 768);
         Name = "MainForm";
         StartPosition = FormStartPosition.CenterScreen;
         Text = "NovaTech IMS";
-        Font = UiTheme.Body;
+        Font = new Font("Segoe UI", 10F);
         Load += MainForm_Load;
 
         pnlSidebar.Dock = DockStyle.Left;
-        pnlSidebar.Width = UiTheme.SidebarWidth;
-        pnlSidebar.BackColor = UiTheme.SidebarBackground;
+        pnlSidebar.Width = 220;
+        pnlSidebar.BackColor = Color.FromArgb(22, 50, 79);
         pnlSidebar.Name = "pnlSidebar";
 
         lblBrand.Text = "  NovaTech IMS";
-        lblBrand.Font = UiTheme.SectionTitle;
+        lblBrand.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
         lblBrand.ForeColor = Color.White;
         lblBrand.Dock = DockStyle.Top;
         lblBrand.Height = 56;
@@ -92,16 +91,15 @@ partial class MainForm
         flpNav.WrapContents = false;
         flpNav.AutoScroll = true;
         flpNav.Padding = new Padding(0, 8, 0, 8);
-        flpNav.BackColor = UiTheme.SidebarBackground;
+        flpNav.BackColor = Color.FromArgb(22, 50, 79);
         flpNav.Name = "flpNav";
 
         btnLogout.Text = "  Sign Out";
-        btnLogout.Font = UiTheme.SidebarItem;
-        btnLogout.ForeColor = UiTheme.SidebarText;
-        btnLogout.BackColor = UiTheme.SidebarBackground;
+        btnLogout.Font = new Font("Segoe UI", 9.5F);
+        btnLogout.ForeColor = Color.FromArgb(199, 211, 224);
+        btnLogout.BackColor = Color.FromArgb(22, 50, 79);
         btnLogout.FlatStyle = FlatStyle.Flat;
         btnLogout.FlatAppearance.BorderSize = 0;
-        btnLogout.FlatAppearance.MouseOverBackColor = Color.FromArgb(40, 255, 255, 255);
         btnLogout.Dock = DockStyle.Bottom;
         btnLogout.Height = 44;
         btnLogout.TextAlign = ContentAlignment.MiddleLeft;
@@ -115,65 +113,59 @@ partial class MainForm
         pnlSidebar.Controls.Add(lblBrand);
 
         pnlMain.Dock = DockStyle.Fill;
-        pnlMain.BackColor = UiTheme.Background;
+        pnlMain.BackColor = Color.FromArgb(244, 246, 248);
         pnlMain.Name = "pnlMain";
 
         pnlHeader.Dock = DockStyle.Top;
         pnlHeader.Height = 72;
-        pnlHeader.BackColor = UiTheme.Surface;
+        pnlHeader.BackColor = Color.White;
         pnlHeader.Padding = new Padding(24, 12, 24, 12);
         pnlHeader.Name = "pnlHeader";
-        pnlHeader.Paint += (_, e) =>
-        {
-            using var pen = new Pen(UiTheme.Border, 1);
-            e.Graphics.DrawLine(pen, 0, pnlHeader.Height - 1, pnlHeader.Width, pnlHeader.Height - 1);
-        };
 
         lblBreadcrumb.Text = "Home";
-        lblBreadcrumb.Font = UiTheme.Label;
-        lblBreadcrumb.ForeColor = UiTheme.TextMuted;
+        lblBreadcrumb.Font = new Font("Segoe UI", 9F);
+        lblBreadcrumb.ForeColor = Color.FromArgb(107, 119, 133);
         lblBreadcrumb.AutoSize = true;
         lblBreadcrumb.Location = new Point(24, 12);
         lblBreadcrumb.Name = "lblBreadcrumb";
 
         lblScreenTitle.Text = "Dashboard";
-        lblScreenTitle.Font = UiTheme.ScreenTitle;
-        lblScreenTitle.ForeColor = UiTheme.Text;
+        lblScreenTitle.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+        lblScreenTitle.ForeColor = Color.FromArgb(31, 41, 51);
         lblScreenTitle.AutoSize = true;
         lblScreenTitle.Location = new Point(24, 32);
         lblScreenTitle.Name = "lblScreenTitle";
 
         lblRoleBadge.Text = "v1.3";
-        lblRoleBadge.Font = UiTheme.BadgeText;
-        lblRoleBadge.ForeColor = UiTheme.Primary;
-        lblRoleBadge.BackColor = UiTheme.InfoTint;
+        lblRoleBadge.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+        lblRoleBadge.ForeColor = Color.FromArgb(30, 75, 143);
+        lblRoleBadge.BackColor = Color.FromArgb(231, 240, 247);
         lblRoleBadge.AutoSize = false;
         lblRoleBadge.Size = new Size(44, 20);
         lblRoleBadge.TextAlign = ContentAlignment.MiddleCenter;
         lblRoleBadge.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         lblRoleBadge.Location = new Point(900, 28);
         lblRoleBadge.Name = "lblRoleBadge";
-        UiTheme.ApplyRoundedRegion(lblRoleBadge, 10);
 
         pnlHeader.Controls.Add(lblBreadcrumb);
         pnlHeader.Controls.Add(lblScreenTitle);
         pnlHeader.Controls.Add(lblRoleBadge);
 
         pnlContent.Dock = DockStyle.Fill;
-        pnlContent.BackColor = UiTheme.Background;
+        pnlContent.BackColor = Color.FromArgb(244, 246, 248);
         pnlContent.Padding = new Padding(32);
         pnlContent.Name = "pnlContent";
 
         lblPlaceholderTitle.Text = "Welcome";
-        lblPlaceholderTitle.Font = UiTheme.ScreenTitle;
-        lblPlaceholderTitle.ForeColor = UiTheme.Text;
+        lblPlaceholderTitle.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+        lblPlaceholderTitle.ForeColor = Color.FromArgb(31, 41, 51);
         lblPlaceholderTitle.AutoSize = true;
         lblPlaceholderTitle.Location = new Point(32, 40);
         lblPlaceholderTitle.Name = "lblPlaceholderTitle";
 
         lblPlaceholderBody.Text = "";
-        lblPlaceholderBody.Font = UiTheme.Body;
-        lblPlaceholderBody.ForeColor = UiTheme.TextMuted;
+        lblPlaceholderBody.Font = new Font("Segoe UI", 10F);
+        lblPlaceholderBody.ForeColor = Color.FromArgb(107, 119, 133);
         lblPlaceholderBody.AutoSize = false;
         lblPlaceholderBody.MaximumSize = new Size(700, 0);
         lblPlaceholderBody.Size = new Size(700, 80);
@@ -183,18 +175,16 @@ partial class MainForm
         pnlContent.Controls.Add(lblPlaceholderTitle);
         pnlContent.Controls.Add(lblPlaceholderBody);
 
-        statusStrip.BackColor = UiTheme.StatusStripBackground;
-        statusStrip.Font = UiTheme.StatusStrip;
+        statusStrip.BackColor = Color.FromArgb(238, 241, 244);
+        statusStrip.Font = new Font("Segoe UI", 9F);
         statusStrip.SizingGrip = true;
         statusStrip.Name = "statusStrip";
         statusStrip.Dock = DockStyle.Bottom;
 
         lblUserStatus.Text = "User";
-        lblUserStatus.ForeColor = UiTheme.Text;
         lblUserStatus.Name = "lblUserStatus";
 
         lblDateStatus.Text = "";
-        lblDateStatus.ForeColor = UiTheme.TextMuted;
         lblDateStatus.BorderSides = ToolStripStatusLabelBorderSides.Left;
         lblDateStatus.BorderStyle = Border3DStyle.Etched;
         lblDateStatus.Name = "lblDateStatus";
@@ -203,7 +193,6 @@ partial class MainForm
         lblSpacer.Name = "lblSpacer";
 
         lblMessageStatus.Text = "Ready";
-        lblMessageStatus.ForeColor = UiTheme.TextMuted;
         lblMessageStatus.Name = "lblMessageStatus";
 
         statusStrip.Items.AddRange(new ToolStripItem[]
