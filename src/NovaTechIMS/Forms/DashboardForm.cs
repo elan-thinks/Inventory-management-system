@@ -10,7 +10,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms;
 
-/// <summary>SCR-002 Dashboard — UI aligned to approved mockup (this page only).</summary>
+/// <summary>SCR-002 Dashboard — metric tiles + activity + quick actions.</summary>
 public partial class DashboardForm : Form
 {
     private readonly DashboardService _service = new();
@@ -27,7 +27,6 @@ public partial class DashboardForm : Form
         BuildQuickActions();
         Load += (_, _) =>
         {
-            // Anchor View all to the right of the header after layout
             if (activityHeader is not null && lnkViewAll is not null)
                 lnkViewAll.Left = Math.Max(80, activityHeader.ClientSize.Width - lnkViewAll.Width - 4);
             Reload();
@@ -81,13 +80,27 @@ public partial class DashboardForm : Form
             lnkViewAll.ActiveLinkColor = UiTheme.PrimaryHover;
         }
 
-        // Caption top + value below; low/out use warning/error colors
-        StyleMetricTile(tileProducts, lblProducts, capProducts, UiTheme.Text);
-        StyleMetricTile(tileCategories, lblCategories, capCategories, UiTheme.Text);
-        StyleMetricTile(tileSuppliers, lblSuppliers, capSuppliers, UiTheme.Text);
-        StyleMetricTile(tileTotalQty, lblTotalQty, capTotalQty, UiTheme.Text);
-        StyleMetricTile(tileLow, lblLow, capLow, UiTheme.Warning);
-        StyleMetricTile(tileOut, lblOut, capOut, UiTheme.Error);
+        // Explicit colors — never rely on theme alone for readability
+        StyleValue(lblProducts, Color.FromArgb(31, 41, 51));
+        StyleValue(lblCategories, Color.FromArgb(31, 41, 51));
+        StyleValue(lblSuppliers, Color.FromArgb(31, 41, 51));
+        StyleValue(lblTotalQty, Color.FromArgb(31, 41, 51));
+        StyleValue(lblLow, Color.FromArgb(199, 119, 0));   // warning
+        StyleValue(lblOut, Color.FromArgb(192, 57, 43));   // error
+
+        StyleCaption(capProducts);
+        StyleCaption(capCategories);
+        StyleCaption(capSuppliers);
+        StyleCaption(capTotalQty);
+        StyleCaption(capLow);
+        StyleCaption(capOut);
+
+        foreach (var tile in new[] { tileProducts, tileCategories, tileSuppliers, tileTotalQty, tileLow, tileOut })
+        {
+            if (tile is null) continue;
+            tile.BackColor = Color.White;
+            tile.BorderStyle = BorderStyle.FixedSingle;
+        }
 
         if (grid is not null)
             UiTheme.ApplyGridTheme(grid);
@@ -96,44 +109,36 @@ public partial class DashboardForm : Form
     private static void StyleCard(Panel? card)
     {
         if (card is null) return;
-        card.BackColor = UiTheme.Surface;
+        card.BackColor = Color.White;
         card.Paint += (_, e) =>
         {
-            using var pen = new Pen(UiTheme.Border, 1);
+            using var pen = new Pen(Color.FromArgb(215, 220, 225), 1);
             e.Graphics.DrawRectangle(pen, 0, 0, card.Width - 1, card.Height - 1);
         };
     }
 
-    private static void StyleMetricTile(Panel? tile, Label? valueLabel, Label? capLabel, Color valueColor)
+    private static void StyleValue(Label? lbl, Color color)
     {
-        if (tile is null) return;
+        if (lbl is null) return;
+        lbl.ForeColor = color;
+        lbl.BackColor = Color.White;
+        lbl.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
+        lbl.Visible = true;
+    }
 
-        tile.BackColor = UiTheme.Surface;
-        // Soft border instead of Region (Region was clipping labels to blank tiles)
-        tile.Paint += (_, e) =>
-        {
-            using var pen = new Pen(UiTheme.Border, 1);
-            e.Graphics.DrawRectangle(pen, 0, 0, tile.Width - 1, tile.Height - 1);
-        };
-
-        if (capLabel is not null)
-        {
-            capLabel.Font = UiTheme.Label;
-            capLabel.ForeColor = UiTheme.TextMuted;
-        }
-
-        if (valueLabel is not null)
-        {
-            valueLabel.Font = new Font("Segoe UI", 22F, FontStyle.Bold);
-            valueLabel.ForeColor = valueColor;
-        }
+    private static void StyleCaption(Label? lbl)
+    {
+        if (lbl is null) return;
+        lbl.ForeColor = Color.FromArgb(90, 100, 110);
+        lbl.BackColor = Color.White;
+        lbl.Font = new Font("Segoe UI", 8.25F);
+        lbl.Visible = true;
     }
 
     private void BuildQuickActions()
     {
         if (actionsPanel is null || _user is null) return;
 
-        // Remove any prior action buttons (keep title label)
         for (int i = actionsPanel.Controls.Count - 1; i >= 0; i--)
         {
             if (actionsPanel.Controls[i] is Button)
@@ -142,11 +147,12 @@ public partial class DashboardForm : Form
 
         int ay = 44;
         int btnWidth = Math.Max(160, actionsPanel.ClientSize.Width - 32);
-        bool first = true;
+        bool primaryUsed = false;
 
-        void AddAction(string text, string navKey, bool primary)
+        void AddAction(string text, string navKey)
         {
-            var kind = primary ? UiTheme.ButtonKind.Primary : UiTheme.ButtonKind.Secondary;
+            var kind = !primaryUsed ? UiTheme.ButtonKind.Primary : UiTheme.ButtonKind.Secondary;
+            primaryUsed = true;
             var b = UiTheme.StyleButton(new Button
             {
                 Text = text,
@@ -159,19 +165,18 @@ public partial class DashboardForm : Form
             b.Click += (_, _) => _navigate?.Invoke(navKey);
             actionsPanel.Controls.Add(b);
             ay += 44;
-            first = false;
         }
 
         if (AuthorizationService.HasPermission(_user, Permissions.StockIn))
-            AddAction("  ↓  Record Stock-In", "Stock In", primary: true);
+            AddAction("  ↓  Record Stock-In", "Stock In");
         if (AuthorizationService.HasPermission(_user, Permissions.StockOut))
-            AddAction("  ↑  Record Stock-Out", "Stock Out", primary: first);
+            AddAction("  ↑  Record Stock-Out", "Stock Out");
         if (AuthorizationService.HasPermission(_user, Permissions.ViewProducts))
-            AddAction("  🔍  Search Products", "Products", primary: false);
+            AddAction("  🔍  Search Products", "Products");
         if (AuthorizationService.HasPermission(_user, Permissions.PerformAdjustment))
-            AddAction("  ⇄  Inventory Adjustment", "Inventory Adjustment", primary: false);
+            AddAction("  ⇄  Inventory Adjustment", "Inventory Adjustment");
         if (AuthorizationService.HasPermission(_user, Permissions.ManageUsers))
-            AddAction("  👤  Manage Users", "User Management", primary: false);
+            AddAction("  👤  Manage Users", "User Management");
 
         actionsPanel.Resize += (_, _) =>
         {
@@ -200,18 +205,17 @@ public partial class DashboardForm : Form
             var m = _service.GetMetrics();
             var nfi = CultureInfo.CurrentCulture.NumberFormat;
 
-            if (lblProducts is not null)
-                lblProducts.Text = m.ActiveProductCount.ToString("N0", nfi);
-            if (lblCategories is not null)
-                lblCategories.Text = m.CategoryCount.ToString("N0", nfi);
-            if (lblSuppliers is not null)
-                lblSuppliers.Text = m.SupplierCount.ToString("N0", nfi);
-            if (lblTotalQty is not null)
-                lblTotalQty.Text = m.TotalQuantityOnHand.ToString("N0", nfi);
-            if (lblLow is not null)
-                lblLow.Text = m.LowStockCount.ToString("N0", nfi);
-            if (lblOut is not null)
-                lblOut.Text = m.OutOfStockCount.ToString("N0", nfi);
+            SetMetric(lblProducts, m.ActiveProductCount.ToString("N0", nfi));
+            SetMetric(lblCategories, m.CategoryCount.ToString("N0", nfi));
+            SetMetric(lblSuppliers, m.SupplierCount.ToString("N0", nfi));
+            SetMetric(lblTotalQty, m.TotalQuantityOnHand.ToString("N0", nfi));
+            SetMetric(lblLow, m.LowStockCount.ToString("N0", nfi));
+            SetMetric(lblOut, m.OutOfStockCount.ToString("N0", nfi));
+
+            // Force paint
+            foreach (var t in new[] { tileProducts, tileCategories, tileSuppliers, tileTotalQty, tileLow, tileOut })
+                t?.Invalidate();
+            metricsPanel?.Refresh();
 
             var rows = _service.GetRecentActivity(10);
             if (grid is null) return;
@@ -232,16 +236,17 @@ public partial class DashboardForm : Form
                 foreach (DataGridViewColumn col in grid.Columns)
                     col.Visible = false;
 
-                void Show(string name, string header, float w = 1f)
+                // Fixed order: Date | Type | Product | Qty | User
+                int di = 0;
+                void Show(string name, string header, float w)
                 {
                     if (grid.Columns[name] is not DataGridViewColumn c) return;
                     c.Visible = true;
                     c.HeaderText = header;
                     c.FillWeight = w;
-                    c.DisplayIndex = grid.Columns.GetColumnCount(DataGridViewElementStates.Visible) - 1;
+                    c.DisplayIndex = di++;
                 }
 
-                // Mockup order: Date | Type | Product | Qty | User
                 Show(nameof(TransactionHistoryRow.TransactionDate), "Date", 0.9f);
                 Show(nameof(TransactionHistoryRow.TypeLabel), "Type", 0.85f);
                 Show(nameof(TransactionHistoryRow.ProductName), "Product", 1.5f);
@@ -266,11 +271,27 @@ public partial class DashboardForm : Form
         }
         catch (Exception ex)
         {
+            // Still show zeros so tiles are never empty
+            SetMetric(lblProducts, "0");
+            SetMetric(lblCategories, "0");
+            SetMetric(lblSuppliers, "0");
+            SetMetric(lblTotalQty, "0");
+            SetMetric(lblLow, "0");
+            SetMetric(lblOut, "0");
+
             if (lblError is not null)
             {
                 lblError.Text = "Unable to load dashboard data. " + ErrorPresenter.ToUserMessage(ex);
                 lblError.Visible = true;
             }
         }
+    }
+
+    private static void SetMetric(Label? lbl, string text)
+    {
+        if (lbl is null) return;
+        lbl.Text = text;
+        lbl.Visible = true;
+        lbl.BringToFront();
     }
 }
