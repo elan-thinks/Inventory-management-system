@@ -104,7 +104,6 @@ internal static class UiTheme
     }
 
     // ---- Buttons ---------------------------------------------------------
-    /// <summary>Applies flat, rounded, color-correct styling + hover state for a given button kind.</summary>
     public static Button StyleButton(Button btn, ButtonKind kind)
     {
         btn.FlatStyle = FlatStyle.Flat;
@@ -128,7 +127,7 @@ internal static class UiTheme
                 baseColor = Surface; hoverColor = RowHover; textColor = Text;
                 btn.FlatAppearance.BorderColor = Border;
                 break;
-            default: // Ghost
+            default:
                 baseColor = Background; hoverColor = RowHover; textColor = Primary;
                 btn.Font = Label;
                 break;
@@ -149,7 +148,6 @@ internal static class UiTheme
     }
 
     // ---- Inputs ------------------------------------------------------------
-    /// <summary>Standard bordered TextBox, matching the border-focus token via native focus ring.</summary>
     public static TextBox StyleTextBox(TextBox box)
     {
         box.Font = Body;
@@ -175,9 +173,6 @@ internal static class UiTheme
         return picker;
     }
 
-    /// <summary>Panel wrapper that draws a 1px border which turns BorderFocus-colored when a
-    /// contained input has focus — the closest WinForms equivalent to a CSS focus ring on
-    /// borderless-look inputs.</summary>
     public static void WireFocusBorder(Control input, Panel wrapper)
     {
         wrapper.Paint += (_, e) =>
@@ -189,7 +184,7 @@ internal static class UiTheme
         input.Leave += (_, _) => wrapper.Invalidate();
     }
 
-    // ---- Status badges (icon + label + color, never color alone) --------
+    // ---- Status badges ----------------------------------------------------
     public enum BadgeTone { Success, Warning, Error, Muted, Info }
 
     private static (Color Fore, Color Tint) BadgeColors(BadgeTone tone) => tone switch
@@ -201,8 +196,6 @@ internal static class UiTheme
         _ => (TextMuted, DisabledBackground),
     };
 
-    /// <summary>Draws a small icon glyph (check / warning / cross / clock) with GDI+ only —
-    /// no image resources required, so the badge remains a single self-contained draw call.</summary>
     private static void DrawGlyph(Graphics g, char glyph, Rectangle bounds, Color color)
     {
         using var pen = new Pen(color, 1.6f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
@@ -210,7 +203,7 @@ internal static class UiTheme
         var r = bounds;
         switch (glyph)
         {
-            case '\u2713': // check
+            case '\u2713':
                 g.DrawLines(pen, new[]
                 {
                     new PointF(r.Left, r.Top + r.Height * 0.55f),
@@ -218,11 +211,11 @@ internal static class UiTheme
                     new PointF(r.Right - 1, r.Top + 1)
                 });
                 break;
-            case '\u2715': // cross
+            case '\u2715':
                 g.DrawLine(pen, r.Left, r.Top, r.Right, r.Bottom);
                 g.DrawLine(pen, r.Right, r.Top, r.Left, r.Bottom);
                 break;
-            case '!': // warning triangle
+            case '!':
                 g.DrawPolygon(pen, new[]
                 {
                     new PointF(r.Left + r.Width / 2f, r.Top),
@@ -233,7 +226,7 @@ internal static class UiTheme
                 using (var dotBrush = new SolidBrush(color))
                     g.FillEllipse(dotBrush, r.Left + r.Width / 2f - 0.75f, r.Bottom - 2.5f, 1.5f, 1.5f);
                 break;
-            case 'c': // clock (expired)
+            case 'c':
                 g.DrawEllipse(pen, r);
                 g.DrawLine(pen, r.Left + r.Width / 2f, r.Top + r.Height * 0.25f, r.Left + r.Width / 2f, r.Top + r.Height / 2f);
                 g.DrawLine(pen, r.Left + r.Width / 2f, r.Top + r.Height / 2f, r.Right - r.Width * 0.2f, r.Top + r.Height * 0.55f);
@@ -245,8 +238,6 @@ internal static class UiTheme
         }
     }
 
-    /// <summary>Renders a pill badge (icon + label + tint) into the given Graphics context —
-    /// used for owner-drawn grid cells so status is never color alone.</summary>
     public static void PaintBadge(Graphics g, Rectangle cellBounds, string label, BadgeTone tone, char glyph)
     {
         var (fore, tint) = BadgeColors(tone);
@@ -278,8 +269,6 @@ internal static class UiTheme
     }
 
     // ---- DataGridView theming ---------------------------------------------
-    /// <summary>Applies the shared grid look (zebra rows, hover, selection, header style,
-    /// row height) used identically by every list/history screen in the system.</summary>
     public static void ApplyGridTheme(DataGridView grid)
     {
         grid.BackgroundColor = Surface;
@@ -318,7 +307,6 @@ internal static class UiTheme
             SelectionForeColor = Text
         };
 
-        // Row hover highlight — repaint on enter/leave since DataGridView has no native hover state.
         int hoverRow = -1;
         grid.CellMouseEnter += (_, e) =>
         {
@@ -346,8 +334,6 @@ internal static class UiTheme
         };
     }
 
-    /// <summary>Wires an owner-drawn status badge (icon+label+color) into the named column of a
-    /// themed grid. valueMap converts each cell's raw value into (label, tone, glyph).</summary>
     public static void WireStatusBadgeColumn(
         DataGridView grid,
         string columnName,
@@ -368,7 +354,6 @@ internal static class UiTheme
         };
     }
 
-    // ---- Empty state ---------------------------------------------------
     public static Label CreateEmptyStateLabel(string text)
     {
         return new Label
