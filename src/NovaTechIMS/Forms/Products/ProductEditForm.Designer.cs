@@ -1,6 +1,5 @@
 using System.Drawing;
 using System.Windows.Forms;
-using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Products;
 
@@ -63,188 +62,169 @@ partial class ProductEditForm
         btnCancel = new Button();
         SuspendLayout();
 
-        // ProductEditForm
+        // ProductEditForm — no UiTheme here (Designer-safe BCL only)
         AutoScaleMode = AutoScaleMode.Font;
-        Font = UiTheme.Body;
+        Font = new Font("Segoe UI", 10F);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
         ShowInTaskbar = false;
         StartPosition = FormStartPosition.CenterParent;
-        BackColor = UiTheme.Surface;
+        BackColor = Color.White;
         ClientSize = new Size(468, 560);
         Name = "ProductEditForm";
         Text = "Product";
 
         // lblName
-        lblName.Text = "Product name *";
-        lblName.Font = UiTheme.Label;
-        lblName.ForeColor = UiTheme.Text;
-        lblName.Location = new Point(24, 16);
         lblName.AutoSize = true;
+        lblName.Location = new Point(24, 16);
         lblName.Name = "lblName";
+        lblName.Text = "Product name *";
 
         // txtName
         txtName.BorderStyle = BorderStyle.FixedSingle;
         txtName.Location = new Point(24, 34);
-        txtName.Size = new Size(420, 23);
         txtName.MaxLength = 100;
         txtName.Name = "txtName";
+        txtName.Size = new Size(420, 25);
         txtName.TabIndex = 0;
 
         // lblCategory
-        lblCategory.Text = "Category *";
-        lblCategory.Font = UiTheme.Label;
-        lblCategory.ForeColor = UiTheme.Text;
-        lblCategory.Location = new Point(24, 64);
         lblCategory.AutoSize = true;
+        lblCategory.Location = new Point(24, 64);
         lblCategory.Name = "lblCategory";
+        lblCategory.Text = "Category *";
 
         // cboCategory
+        cboCategory.DropDownStyle = ComboBoxStyle.DropDownList;
         cboCategory.FlatStyle = FlatStyle.Flat;
         cboCategory.Location = new Point(24, 82);
-        cboCategory.Size = new Size(420, 23);
-        cboCategory.DropDownStyle = ComboBoxStyle.DropDownList;
         cboCategory.Name = "cboCategory";
+        cboCategory.Size = new Size(420, 25);
         cboCategory.TabIndex = 1;
 
         // lblSupplier
-        lblSupplier.Text = "Default supplier *";
-        lblSupplier.Font = UiTheme.Label;
-        lblSupplier.ForeColor = UiTheme.Text;
-        lblSupplier.Location = new Point(24, 112);
         lblSupplier.AutoSize = true;
+        lblSupplier.Location = new Point(24, 112);
         lblSupplier.Name = "lblSupplier";
+        lblSupplier.Text = "Default supplier *";
 
         // cboSupplier
+        cboSupplier.DropDownStyle = ComboBoxStyle.DropDownList;
         cboSupplier.FlatStyle = FlatStyle.Flat;
         cboSupplier.Location = new Point(24, 130);
-        cboSupplier.Size = new Size(420, 23);
-        cboSupplier.DropDownStyle = ComboBoxStyle.DropDownList;
         cboSupplier.Name = "cboSupplier";
+        cboSupplier.Size = new Size(420, 25);
         cboSupplier.TabIndex = 2;
 
         // lblDescription
-        lblDescription.Text = "Description";
-        lblDescription.Font = UiTheme.Label;
-        lblDescription.ForeColor = UiTheme.Text;
-        lblDescription.Location = new Point(24, 160);
         lblDescription.AutoSize = true;
+        lblDescription.Location = new Point(24, 160);
         lblDescription.Name = "lblDescription";
+        lblDescription.Text = "Description";
 
         // txtDescription
         txtDescription.BorderStyle = BorderStyle.FixedSingle;
         txtDescription.Location = new Point(24, 178);
-        txtDescription.Size = new Size(420, 52);
         txtDescription.MaxLength = 500;
         txtDescription.Multiline = true;
-        txtDescription.ScrollBars = ScrollBars.Vertical;
         txtDescription.Name = "txtDescription";
+        txtDescription.ScrollBars = ScrollBars.Vertical;
+        txtDescription.Size = new Size(420, 52);
         txtDescription.TabIndex = 3;
 
         // lblPurchase
-        lblPurchase.Text = "Purchase price *";
-        lblPurchase.Font = UiTheme.Label;
-        lblPurchase.ForeColor = UiTheme.Text;
-        lblPurchase.Location = new Point(24, 238);
         lblPurchase.AutoSize = true;
+        lblPurchase.Location = new Point(24, 238);
         lblPurchase.Name = "lblPurchase";
+        lblPurchase.Text = "Purchase price *";
 
         // txtPurchase
         txtPurchase.BorderStyle = BorderStyle.FixedSingle;
         txtPurchase.Location = new Point(24, 256);
-        txtPurchase.Size = new Size(420, 23);
         txtPurchase.MaxLength = 20;
         txtPurchase.Name = "txtPurchase";
+        txtPurchase.Size = new Size(420, 25);
         txtPurchase.TabIndex = 4;
 
         // lblSelling
-        lblSelling.Text = "Selling price *";
-        lblSelling.Font = UiTheme.Label;
-        lblSelling.ForeColor = UiTheme.Text;
-        lblSelling.Location = new Point(24, 286);
         lblSelling.AutoSize = true;
+        lblSelling.Location = new Point(24, 286);
         lblSelling.Name = "lblSelling";
+        lblSelling.Text = "Selling price *";
 
         // txtSelling
         txtSelling.BorderStyle = BorderStyle.FixedSingle;
         txtSelling.Location = new Point(24, 304);
-        txtSelling.Size = new Size(420, 23);
         txtSelling.MaxLength = 20;
         txtSelling.Name = "txtSelling";
+        txtSelling.Size = new Size(420, 25);
         txtSelling.TabIndex = 5;
 
         // lblMinStock
-        lblMinStock.Text = "Minimum stock level *";
-        lblMinStock.Font = UiTheme.Label;
-        lblMinStock.ForeColor = UiTheme.Text;
-        lblMinStock.Location = new Point(24, 334);
         lblMinStock.AutoSize = true;
+        lblMinStock.Location = new Point(24, 334);
         lblMinStock.Name = "lblMinStock";
+        lblMinStock.Text = "Minimum stock level *";
 
         // txtMinStock
         txtMinStock.BorderStyle = BorderStyle.FixedSingle;
         txtMinStock.Location = new Point(24, 352);
-        txtMinStock.Size = new Size(420, 23);
         txtMinStock.MaxLength = 10;
         txtMinStock.Name = "txtMinStock";
+        txtMinStock.Size = new Size(420, 25);
         txtMinStock.TabIndex = 6;
 
         // lblQty
-        lblQty.Text = "Quantity on hand";
-        lblQty.Font = UiTheme.Label;
-        lblQty.ForeColor = UiTheme.Text;
-        lblQty.Location = new Point(24, 382);
         lblQty.AutoSize = true;
+        lblQty.Location = new Point(24, 382);
         lblQty.Name = "lblQty";
+        lblQty.Text = "Quantity on hand";
 
         // lblQtyValue
-        lblQtyValue.Text = "0";
-        lblQtyValue.Font = UiTheme.Body;
-        lblQtyValue.ForeColor = UiTheme.TextMuted;
-        lblQtyValue.Location = new Point(24, 400);
         lblQtyValue.AutoSize = true;
+        lblQtyValue.Location = new Point(24, 400);
         lblQtyValue.Name = "lblQtyValue";
+        lblQtyValue.Text = "0";
 
         // lblQtyHint
-        lblQtyHint.Text = "Adjust stock using Stock-In, Stock-Out, or Inventory Adjustment.";
-        lblQtyHint.Font = UiTheme.Label;
-        lblQtyHint.ForeColor = UiTheme.TextMuted;
-        lblQtyHint.Location = new Point(24, 422);
         lblQtyHint.AutoSize = true;
+        lblQtyHint.Location = new Point(24, 422);
         lblQtyHint.Name = "lblQtyHint";
+        lblQtyHint.Text = "Adjust stock using Stock-In, Stock-Out, or Inventory Adjustment.";
 
         // chkActive
-        chkActive.Text = "Active";
-        chkActive.Font = UiTheme.Body;
-        chkActive.Location = new Point(24, 448);
         chkActive.AutoSize = true;
         chkActive.Checked = true;
+        chkActive.CheckState = CheckState.Checked;
+        chkActive.Location = new Point(24, 448);
         chkActive.Name = "chkActive";
         chkActive.TabIndex = 7;
+        chkActive.Text = "Active";
+        chkActive.UseVisualStyleBackColor = true;
 
         // lblError
-        lblError.ForeColor = UiTheme.Error;
-        lblError.Font = UiTheme.Label;
         lblError.Location = new Point(24, 476);
+        lblError.Name = "lblError";
         lblError.Size = new Size(420, 36);
         lblError.Visible = false;
-        lblError.Name = "lblError";
 
         // btnSave
-        btnSave.Text = "Save";
-        btnSave.Size = new Size(100, 32);
         btnSave.Location = new Point(236, 520);
         btnSave.Name = "btnSave";
+        btnSave.Size = new Size(100, 32);
         btnSave.TabIndex = 8;
+        btnSave.Text = "Save";
+        btnSave.UseVisualStyleBackColor = true;
         btnSave.Click += BtnSave_Click;
 
         // btnCancel
-        btnCancel.Text = "Cancel";
-        btnCancel.Size = new Size(100, 32);
         btnCancel.Location = new Point(344, 520);
         btnCancel.Name = "btnCancel";
+        btnCancel.Size = new Size(100, 32);
         btnCancel.TabIndex = 9;
+        btnCancel.Text = "Cancel";
+        btnCancel.UseVisualStyleBackColor = true;
         btnCancel.Click += BtnCancel_Click;
 
         AcceptButton = btnSave;
