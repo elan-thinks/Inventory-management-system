@@ -30,8 +30,58 @@ public partial class MainForm : Form
     {
         _currentUser = currentUser;
         InitializeComponent();
+        ApplyRuntimeStyling();
         BuildNavigation();
         NavigateTo("Dashboard");
+    }
+
+    private void ApplyRuntimeStyling()
+    {
+        BackColor = UiTheme.Background;
+        Font = UiTheme.Body;
+        MinimumSize = new Size(UiTheme.MinWindowWidth, UiTheme.MinWindowHeight);
+
+        pnlSidebar.BackColor = UiTheme.SidebarBackground;
+        pnlSidebar.Width = UiTheme.SidebarWidth;
+        flpNav.BackColor = UiTheme.SidebarBackground;
+
+        lblBrand.Font = UiTheme.SectionTitle;
+        lblBrand.ForeColor = Color.White;
+
+        btnLogout.Font = UiTheme.SidebarItem;
+        btnLogout.ForeColor = UiTheme.SidebarText;
+        btnLogout.BackColor = UiTheme.SidebarBackground;
+        btnLogout.FlatAppearance.MouseOverBackColor = Color.FromArgb(40, 255, 255, 255);
+
+        pnlMain.BackColor = UiTheme.Background;
+        pnlHeader.BackColor = UiTheme.Surface;
+        pnlHeader.Paint += (_, e) =>
+        {
+            using var pen = new Pen(UiTheme.Border, 1);
+            e.Graphics.DrawLine(pen, 0, pnlHeader.Height - 1, pnlHeader.Width, pnlHeader.Height - 1);
+        };
+
+        lblBreadcrumb.Font = UiTheme.Label;
+        lblBreadcrumb.ForeColor = UiTheme.TextMuted;
+        lblScreenTitle.Font = UiTheme.ScreenTitle;
+        lblScreenTitle.ForeColor = UiTheme.Text;
+
+        lblRoleBadge.Font = UiTheme.BadgeText;
+        lblRoleBadge.ForeColor = UiTheme.Primary;
+        lblRoleBadge.BackColor = UiTheme.InfoTint;
+        UiTheme.ApplyRoundedRegion(lblRoleBadge, 10);
+
+        pnlContent.BackColor = UiTheme.Background;
+        lblPlaceholderTitle.Font = UiTheme.ScreenTitle;
+        lblPlaceholderTitle.ForeColor = UiTheme.Text;
+        lblPlaceholderBody.Font = UiTheme.Body;
+        lblPlaceholderBody.ForeColor = UiTheme.TextMuted;
+
+        statusStrip.BackColor = UiTheme.StatusStripBackground;
+        statusStrip.Font = UiTheme.StatusStrip;
+        lblUserStatus.ForeColor = UiTheme.Text;
+        lblDateStatus.ForeColor = UiTheme.TextMuted;
+        lblMessageStatus.ForeColor = UiTheme.TextMuted;
     }
 
     private void MainForm_Load(object? sender, EventArgs e)
@@ -141,7 +191,6 @@ public partial class MainForm : Form
     /// <summary>Central navigation used by sidebar and Dashboard quick actions.</summary>
     public void NavigateTo(string key)
     {
-        // Highlight matching nav button if present
         foreach (Control c in flpNav.Controls)
         {
             if (c is Button b && b.Tag is string t && t == key)
