@@ -1,6 +1,5 @@
 using System.Drawing;
 using System.Windows.Forms;
-using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms;
 
@@ -48,7 +47,7 @@ partial class LoginForm
 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        BackColor = UiTheme.Background;
+        BackColor = Color.FromArgb(244, 246, 248);
         ClientSize = new Size(480, 420);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
@@ -56,59 +55,49 @@ partial class LoginForm
         Name = "LoginForm";
         StartPosition = FormStartPosition.CenterScreen;
         Text = "NovaTech IMS — Sign In";
-        Font = UiTheme.Body;
+        Font = new Font("Segoe UI", 10F);
         Load += LoginForm_Load;
 
-        pnlCard.BackColor = UiTheme.Surface;
+        pnlCard.BackColor = Color.White;
         pnlCard.Location = new Point(60, 40);
         pnlCard.Size = new Size(360, 320);
         pnlCard.Name = "pnlCard";
-        pnlCard.Paint += (_, e) =>
-        {
-            using var pen = new Pen(UiTheme.Border, 1);
-            e.Graphics.DrawRectangle(pen, 0, 0, pnlCard.Width - 1, pnlCard.Height - 1);
-        };
-        UiTheme.ApplyRoundedRegion(pnlCard, UiTheme.RadiusLg);
 
         lblBrand.Text = "NovaTech IMS";
-        lblBrand.Font = UiTheme.ScreenTitle;
-        lblBrand.ForeColor = UiTheme.Primary;
+        lblBrand.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+        lblBrand.ForeColor = Color.FromArgb(30, 75, 143);
         lblBrand.AutoSize = true;
         lblBrand.Location = new Point(28, 24);
         lblBrand.Name = "lblBrand";
 
         lblSubtitle.Text = "Inventory Management System";
-        lblSubtitle.Font = UiTheme.Label;
-        lblSubtitle.ForeColor = UiTheme.TextMuted;
+        lblSubtitle.Font = new Font("Segoe UI", 9F);
+        lblSubtitle.ForeColor = Color.FromArgb(107, 119, 133);
         lblSubtitle.AutoSize = true;
         lblSubtitle.Location = new Point(28, 52);
         lblSubtitle.Name = "lblSubtitle";
 
         lblUsername.Text = "Username";
-        lblUsername.Font = UiTheme.Label;
-        lblUsername.ForeColor = UiTheme.Text;
+        lblUsername.Font = new Font("Segoe UI", 9F);
         lblUsername.AutoSize = true;
         lblUsername.Location = new Point(28, 90);
         lblUsername.Name = "lblUsername";
 
         txtUsername.Location = new Point(28, 112);
         txtUsername.Size = new Size(300, 28);
-        txtUsername.Font = UiTheme.Body;
         txtUsername.BorderStyle = BorderStyle.FixedSingle;
         txtUsername.Name = "txtUsername";
         txtUsername.TabIndex = 0;
         txtUsername.AccessibleName = "Username";
 
         lblPassword.Text = "Password";
-        lblPassword.Font = UiTheme.Label;
-        lblPassword.ForeColor = UiTheme.Text;
+        lblPassword.Font = new Font("Segoe UI", 9F);
         lblPassword.AutoSize = true;
         lblPassword.Location = new Point(28, 150);
         lblPassword.Name = "lblPassword";
 
         txtPassword.Location = new Point(28, 172);
         txtPassword.Size = new Size(300, 28);
-        txtPassword.Font = UiTheme.Body;
         txtPassword.BorderStyle = BorderStyle.FixedSingle;
         txtPassword.UseSystemPasswordChar = true;
         txtPassword.Name = "txtPassword";
@@ -116,8 +105,8 @@ partial class LoginForm
         txtPassword.AccessibleName = "Password";
 
         lblError.Text = "";
-        lblError.Font = UiTheme.Label;
-        lblError.ForeColor = UiTheme.Error;
+        lblError.Font = new Font("Segoe UI", 9F);
+        lblError.ForeColor = Color.FromArgb(192, 57, 43);
         lblError.AutoSize = false;
         lblError.Size = new Size(300, 20);
         lblError.Location = new Point(28, 208);
@@ -125,41 +114,26 @@ partial class LoginForm
         lblError.Visible = false;
 
         btnLogin.Text = "Sign In";
-        btnLogin.Font = UiTheme.Button;
-        btnLogin.BackColor = UiTheme.Primary;
-        btnLogin.ForeColor = Color.White;
-        btnLogin.FlatStyle = FlatStyle.Flat;
-        btnLogin.FlatAppearance.BorderSize = 0;
-        btnLogin.FlatAppearance.MouseOverBackColor = UiTheme.PrimaryHover;
         btnLogin.Size = new Size(140, 34);
         btnLogin.Location = new Point(28, 240);
         btnLogin.Name = "btnLogin";
         btnLogin.TabIndex = 2;
-        btnLogin.Cursor = Cursors.Hand;
+        btnLogin.UseVisualStyleBackColor = true;
         btnLogin.Click += BtnLogin_Click;
         btnLogin.AccessibleName = "Sign In";
-        UiTheme.ApplyRoundedRegion(btnLogin, UiTheme.RadiusSm);
 
         btnCancel.Text = "Exit";
-        btnCancel.Font = UiTheme.Button;
-        btnCancel.BackColor = UiTheme.Surface;
-        btnCancel.ForeColor = UiTheme.Text;
-        btnCancel.FlatStyle = FlatStyle.Flat;
-        btnCancel.FlatAppearance.BorderColor = UiTheme.Border;
-        btnCancel.FlatAppearance.BorderSize = 1;
-        btnCancel.FlatAppearance.MouseOverBackColor = UiTheme.RowHover;
         btnCancel.Size = new Size(140, 34);
         btnCancel.Location = new Point(188, 240);
         btnCancel.Name = "btnCancel";
         btnCancel.TabIndex = 3;
-        btnCancel.Cursor = Cursors.Hand;
+        btnCancel.UseVisualStyleBackColor = true;
         btnCancel.Click += BtnCancel_Click;
         btnCancel.AccessibleName = "Exit";
-        UiTheme.ApplyRoundedRegion(btnCancel, UiTheme.RadiusSm);
 
         lblHint.Text = "Enter your NovaTech IMS credentials to continue.";
-        lblHint.Font = UiTheme.HelperText;
-        lblHint.ForeColor = UiTheme.TextMuted;
+        lblHint.Font = new Font("Segoe UI", 8.5F, FontStyle.Italic);
+        lblHint.ForeColor = Color.FromArgb(107, 119, 133);
         lblHint.AutoSize = false;
         lblHint.Size = new Size(300, 32);
         lblHint.Location = new Point(28, 282);
