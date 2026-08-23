@@ -307,4 +307,9 @@ public partial class DashboardForm : Form
         if (lbl is null) return;
         lbl.Text = text;
     }
+
+    private void lblAct_Click(object sender, EventArgs e)
+    {
+
+    }
 }
