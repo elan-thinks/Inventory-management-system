@@ -1,7 +1,5 @@
 using System;
-using System.Drawing;
 using System.Globalization;
-using System.Linq;
 using System.Windows.Forms;
 using NovaTechIMS.Services;
 using NovaTechIMS.Utilities;
@@ -9,33 +7,21 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms.Products;
 
 /// <summary>
-/// SCR-005 Product Add/Edit modal (Milestone 8).
+/// SCR-005 Product Add/Edit modal — Designer-based (partial).
 /// Quantity on hand is display-only; starts at 0 on create.
 /// </summary>
-public class ProductEditForm : Form
+public partial class ProductEditForm : Form
 {
     private readonly ProductService _productService = new();
     private readonly CategoryService _categoryService = new();
     private readonly SupplierService _supplierService = new();
     private readonly int? _productId;
 
-    private TextBox txtName = null!;
-    private ComboBox cboCategory = null!;
-    private ComboBox cboSupplier = null!;
-    private TextBox txtDescription = null!;
-    private TextBox txtPurchase = null!;
-    private TextBox txtSelling = null!;
-    private TextBox txtMinStock = null!;
-    private Label lblQtyValue = null!;
-    private CheckBox chkActive = null!;
-    private Label lblError = null!;
-    private Button btnSave = null!;
-    private Button btnCancel = null!;
-
     public ProductEditForm(int? productId = null)
     {
         _productId = productId;
-        BuildUi();
+        InitializeComponent();
+        ApplyRuntimeStyling();
         LoadLookups();
 
         if (_productId is int id)
@@ -53,162 +39,22 @@ public class ProductEditForm : Form
         }
     }
 
-    private void BuildUi()
+    private void ApplyRuntimeStyling()
     {
-        AutoScaleMode = AutoScaleMode.Font;
-        Font = UiTheme.Body;
-        FormBorderStyle = FormBorderStyle.FixedDialog;
-        MaximizeBox = false;
-        MinimizeBox = false;
-        ShowInTaskbar = false;
-        StartPosition = FormStartPosition.CenterParent;
-        BackColor = UiTheme.Surface;
+        UiTheme.StyleTextBox(txtName);
+        UiTheme.StyleTextBox(txtDescription);
+        UiTheme.StyleTextBox(txtPurchase);
+        UiTheme.StyleTextBox(txtSelling);
+        UiTheme.StyleTextBox(txtMinStock);
+        UiTheme.StyleComboBox(cboCategory);
+        UiTheme.StyleComboBox(cboSupplier);
+        UiTheme.StyleButton(btnSave, UiTheme.ButtonKind.Primary);
+        UiTheme.StyleButton(btnCancel, UiTheme.ButtonKind.Secondary);
+    }
 
-        int y = 16;
-        const int lx = 24;
-        const int fw = 420;
-
-        void Label(string t)
-        {
-            Controls.Add(new Label
-            {
-                Text = t,
-                Font = UiTheme.Label,
-                ForeColor = UiTheme.Text,
-                Location = new Point(lx, y),
-                AutoSize = true
-            });
-            y += 18;
-        }
-
-        TextBox Tb(int max, bool multi = false)
-        {
-            var tb = new TextBox
-            {
-                BorderStyle = BorderStyle.FixedSingle,
-                Location = new Point(lx, y),
-                Width = fw,
-                MaxLength = max,
-                Font = UiTheme.Body
-            };
-            if (multi)
-            {
-                tb.Multiline = true;
-                tb.Height = 52;
-                tb.ScrollBars = ScrollBars.Vertical;
-                y += 58;
-            }
-            else
-            {
-                y += 30;
-            }
-            Controls.Add(tb);
-            return tb;
-        }
-
-        ComboBox Cb()
-        {
-            var cb = new ComboBox
-            {
-                FlatStyle = FlatStyle.Flat,
-                Location = new Point(lx, y),
-                Width = fw,
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = UiTheme.Body
-            };
-            y += 30;
-            Controls.Add(cb);
-            return cb;
-        }
-
-        Label("Product name *");
-        txtName = Tb(100);
-
-        Label("Category *");
-        cboCategory = Cb();
-
-        Label("Default supplier *");
-        cboSupplier = Cb();
-
-        Label("Description");
-        txtDescription = Tb(500, multi: true);
-
-        Label("Purchase price *");
-        txtPurchase = Tb(20);
-
-        Label("Selling price *");
-        txtSelling = Tb(20);
-
-        Label("Minimum stock level *");
-        txtMinStock = Tb(10);
-
-        Label("Quantity on hand");
-        lblQtyValue = new Label
-        {
-            Text = "0",
-            Font = UiTheme.Body,
-            ForeColor = UiTheme.TextMuted,
-            Location = new Point(lx, y),
-            AutoSize = true
-        };
-        Controls.Add(lblQtyValue);
-        y += 20;
-
-        Controls.Add(new Label
-        {
-            Text = "Adjust stock using Stock-In, Stock-Out, or Inventory Adjustment.",
-            Font = UiTheme.Label,
-            ForeColor = UiTheme.TextMuted,
-            Location = new Point(lx, y),
-            AutoSize = true
-        });
-        y += 24;
-
-        chkActive = new CheckBox
-        {
-            Text = "Active",
-            Font = UiTheme.Body,
-            Location = new Point(lx, y),
-            AutoSize = true,
-            Checked = true
-        };
-        Controls.Add(chkActive);
-        y += 28;
-
-        lblError = new Label
-        {
-            ForeColor = UiTheme.Error,
-            Font = UiTheme.Label,
-            Location = new Point(lx, y),
-            Size = new Size(fw, 40),
-            Visible = false
-        };
-        Controls.Add(lblError);
-        y += 44;
-
-        btnSave = UiTheme.StyleButton(new Button
-        {
-            Text = "Save",
-            Size = new Size(100, 32),
-            Location = new Point(lx + fw - 208, y)
-        }, UiTheme.ButtonKind.Primary);
-        btnSave.Click += BtnSave_Click;
-btnSave.Click += BtnSave_Click;
-
-        btnCancel = UiTheme.StyleButton(new Button
-        {
-            Text = "Cancel",
-            Size = new Size(100, 32),
-            Location = new Point(lx + fw - 100, y)
-        }, UiTheme.ButtonKind.Secondary);
-        btnCancel.Click += (_, _) => DialogResult = DialogResult.Cancel;
-
-        AcceptButton = btnSave;
-        CancelButton = btnCancel;
-        Controls.Add(btnSave);
-        Controls.Add(btnCancel);
-
-        ClientSize = new Size(lx * 2 + fw, y + 52);
+    private void BtnCancel_Click(object? sender, EventArgs e)
+    {
+        DialogResult = DialogResult.Cancel;
     }
 
     private void LoadLookups()
