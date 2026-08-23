@@ -1,5 +1,4 @@
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 using NovaTechIMS.Data;
 using NovaTechIMS.Services;
@@ -8,148 +7,50 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms.Categories;
 
 /// <summary>
-/// SCR-006 Category List (Milestone 5).
-/// Hosted inside MainForm content area (TopLevel = false).
+/// SCR-006 Category List — Designer-based (partial). Hosted in MainForm content area.
 /// </summary>
-public class CategoryListForm : Form
+public partial class CategoryListForm : Form
 {
     private readonly CategoryService _service = new();
 
-    private TextBox txtSearch = null!;
-    private ComboBox cboStatus = null!;
-    private Button btnClearFilters = null!;
-    private Button btnAdd = null!;
-    private Button btnRefresh = null!;
-    private DataGridView grid = null!;
-    private Label lblCount = null!;
-    private Label lblEmpty = null!;
-
     public CategoryListForm()
     {
-        BuildUi();
+        InitializeComponent();
+        ApplyRuntimeStyling();
         Load += (_, _) => ReloadGrid();
     }
 
-    private void BuildUi()
+    private void ApplyRuntimeStyling()
     {
-        AutoScaleMode = AutoScaleMode.Font;
-        Font = UiTheme.Body;
-        BackColor = UiTheme.Background;
-        FormBorderStyle = FormBorderStyle.None;
-        Dock = DockStyle.Fill;
-        TopLevel = false;
-
-        var toolbar = new Panel
-        {
-            Dock = DockStyle.Top,
-            Height = 48,
-            BackColor = UiTheme.Background,
-            Padding = new Padding(0, 4, 0, 4)
-        };
-
-        txtSearch = UiTheme.StyleTextBox(new TextBox
-        {
-            Width = 220,
-            Height = 28,
-            Location = new Point(0, 8),
-            PlaceholderText = "Search by name…"
-        });
-        txtSearch.TextChanged += (_, _) => ReloadGrid();
-
-        cboStatus = UiTheme.StyleComboBox(new ComboBox
-        {
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Width = 140,
-            Location = new Point(232, 8)
-        });
-        cboStatus.Items.AddRange(new object[] { "All statuses", "Active", "Inactive" });
-        cboStatus.SelectedIndex = 0;
-        cboStatus.SelectedIndexChanged += (_, _) => ReloadGrid();
-
-        btnClearFilters = UiTheme.StyleButton(new Button
-        {
-            Text = "Clear filters",
-            Location = new Point(384, 6),
-            Size = new Size(100, 30),
-            Visible = false
-        }, UiTheme.ButtonKind.Ghost);
-        btnClearFilters.Click += (_, _) =>
-        {
-            txtSearch.Clear();
-            cboStatus.SelectedIndex = 0;
-            ReloadGrid();
-        };
-
-        btnRefresh = UiTheme.StyleButton(new Button
-        {
-            Text = "Refresh",
-            Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(88, 30)
-        }, UiTheme.ButtonKind.Secondary);
-        btnRefresh.Click += (_, _) => ReloadGrid();
-
-        btnAdd = UiTheme.StyleButton(new Button
-        {
-            Text = "+ Add Category",
-            Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(130, 30)
-        }, UiTheme.ButtonKind.Primary);
-        btnAdd.Click += BtnAdd_Click;
-
-        toolbar.Controls.Add(txtSearch);
-        toolbar.Controls.Add(cboStatus);
-        toolbar.Controls.Add(btnClearFilters);
-        toolbar.Controls.Add(btnRefresh);
-        toolbar.Controls.Add(btnAdd);
-        toolbar.Resize += (_, _) =>
-        {
-            btnAdd.Left = toolbar.ClientSize.Width - btnAdd.Width;
-            btnRefresh.Left = btnAdd.Left - btnRefresh.Width - 8;
-        };
-
-        grid = new DataGridView
-        {
-            Dock = DockStyle.Fill,
-            AllowUserToAddRows = false,
-            AllowUserToDeleteRows = false,
-            ReadOnly = true,
-            MultiSelect = false,
-            SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
-        };
+        UiTheme.StyleTextBox(txtSearch);
+        UiTheme.StyleComboBox(cboStatus);
+        UiTheme.StyleButton(btnClearFilters, UiTheme.ButtonKind.Ghost);
+        UiTheme.StyleButton(btnRefresh, UiTheme.ButtonKind.Secondary);
+        UiTheme.StyleButton(btnAdd, UiTheme.ButtonKind.Primary);
         UiTheme.ApplyGridTheme(grid);
         UiTheme.WireStatusBadgeColumn(grid, "Status", value => (value?.ToString() ?? "") switch
         {
             "Active" => ("Active", UiTheme.BadgeTone.Success, '\u2713'),
             _ => ("Inactive", UiTheme.BadgeTone.Muted, '\u2715')
         });
-        grid.CellContentClick += Grid_CellContentClick;
+        Toolbar_Resize(toolbar, EventArgs.Empty);
+    }
 
-        lblEmpty = new Label
-        {
-            Text = "No categories yet. Add your first category to get started.",
-            Font = UiTheme.Body,
-            ForeColor = UiTheme.TextMuted,
-            AutoSize = false,
-            TextAlign = ContentAlignment.MiddleCenter,
-            Dock = DockStyle.Fill,
-            Visible = false
-        };
+    private void Toolbar_Resize(object? sender, EventArgs e)
+    {
+        btnAdd.Left = toolbar.ClientSize.Width - btnAdd.Width;
+        btnRefresh.Left = btnAdd.Left - btnRefresh.Width - 8;
+    }
 
-        lblCount = new Label
-        {
-            Dock = DockStyle.Bottom,
-            Height = 28,
-            Font = UiTheme.Label,
-            ForeColor = UiTheme.TextMuted,
-            TextAlign = ContentAlignment.MiddleLeft,
-            Text = ""
-        };
+    private void TxtSearch_TextChanged(object? sender, EventArgs e) => ReloadGrid();
+    private void CboStatus_SelectedIndexChanged(object? sender, EventArgs e) => ReloadGrid();
+    private void BtnRefresh_Click(object? sender, EventArgs e) => ReloadGrid();
 
-        Controls.Add(grid);
-        Controls.Add(lblEmpty);
-        Controls.Add(lblCount);
-        Controls.Add(toolbar);
+    private void BtnClearFilters_Click(object? sender, EventArgs e)
+    {
+        txtSearch.Clear();
+        cboStatus.SelectedIndex = 0;
+        ReloadGrid();
     }
 
     private void ReloadGrid()
@@ -184,7 +85,6 @@ public class CategoryListForm : Form
 
             lblEmpty.Visible = false;
             grid.Visible = true;
-
             grid.DataSource = rows;
             ConfigureColumns();
             lblCount.Text = rows.Count == 1 ? "1 category" : $"{rows.Count} categories";
@@ -331,6 +231,5 @@ public class CategoryListForm : Form
         }
     }
 
-    /// <summary>Called by MainForm when the user re-selects Categories.</summary>
     public void RefreshList() => ReloadGrid();
 }
