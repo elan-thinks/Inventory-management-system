@@ -9,89 +9,64 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms;
 
-/// <summary>
-/// SCR-002 Dashboard — metrics, recent activity, quick actions (approved UI §5.2).
-/// Does not invent new features beyond FR-DASH / screen design.
-/// </summary>
-public class DashboardForm : Form
+/// <summary>SCR-002 Dashboard — Designer-based (partial). Quick-action buttons remain runtime (permission-based).</summary>
+public partial class DashboardForm : Form
 {
     private readonly DashboardService _service = new();
     private readonly CurrentUser _user;
     private readonly Action<string>? _navigate;
 
-    private Label lblProducts = null!;
-    private Label lblCategories = null!;
-    private Label lblSuppliers = null!;
-    private Label lblTotalQty = null!;
-    private Label lblLow = null!;
-    private Label lblOut = null!;
-    private DataGridView grid = null!;
-    private Label lblError = null!;
-    private Label lblEmpty = null!;
-
     public DashboardForm(CurrentUser user, Action<string>? navigate = null)
     {
         _user = user;
         _navigate = navigate;
-        BuildUi();
+        InitializeComponent();
+        ApplyRuntimeStyling();
+        BuildQuickActions();
         Load += (_, _) => Reload();
     }
 
-    private void BuildUi()
+    private void ApplyRuntimeStyling()
     {
-        AutoScaleMode = AutoScaleMode.Font;
         Font = UiTheme.Body;
         BackColor = UiTheme.Background;
-        FormBorderStyle = FormBorderStyle.None;
-        Dock = DockStyle.Fill;
-        TopLevel = false;
+        metricsPanel.BackColor = UiTheme.Background;
+        actionsPanel.BackColor = UiTheme.Surface;
+        lblAct.Font = UiTheme.SectionTitle;
+        lblAct.ForeColor = UiTheme.Text;
+        lblQa.Font = UiTheme.SectionTitle;
+        lblQa.ForeColor = UiTheme.Text;
+        lblEmpty.Font = UiTheme.Body;
+        lblEmpty.ForeColor = UiTheme.TextMuted;
+        lblError.Font = UiTheme.Label;
+        lblError.ForeColor = UiTheme.Error;
 
-        var metricsPanel = new FlowLayoutPanel
+        foreach (var tile in new[] { tileProducts, tileCategories, tileSuppliers, tileTotalQty, tileLow, tileOut })
         {
-            Dock = DockStyle.Top,
-            Height = 110,
-            Padding = new Padding(0, 8, 0, 8),
-            WrapContents = false,
-            AutoScroll = true
-        };
+            tile.BackColor = UiTheme.Surface;
+            UiTheme.ApplyRoundedRegion(tile, UiTheme.RadiusLg);
+        }
 
-        metricsPanel.Controls.Add(MakeTile("Active products", out lblProducts, UiTheme.Text));
-        metricsPanel.Controls.Add(MakeTile("Categories", out lblCategories, UiTheme.Text));
-        metricsPanel.Controls.Add(MakeTile("Suppliers", out lblSuppliers, UiTheme.Text));
-        metricsPanel.Controls.Add(MakeTile("Total qty on hand", out lblTotalQty, UiTheme.Text));
-        metricsPanel.Controls.Add(MakeTile("Low stock", out lblLow, UiTheme.Warning));
-        metricsPanel.Controls.Add(MakeTile("Out of stock", out lblOut, UiTheme.Error));
+        lblProducts.ForeColor = UiTheme.Text;
+        lblCategories.ForeColor = UiTheme.Text;
+        lblSuppliers.ForeColor = UiTheme.Text;
+        lblTotalQty.ForeColor = UiTheme.Text;
+        lblLow.ForeColor = UiTheme.Warning;
+        lblOut.ForeColor = UiTheme.Error;
 
-        var bottom = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            ColumnCount = 2,
-            RowCount = 1,
-            Padding = new Padding(0, 8, 0, 0)
-        };
-        bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70f));
-        bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30f));
+        foreach (Control c in tileProducts.Controls)
+            if (c is Label l && l != lblProducts) { l.Font = UiTheme.Label; l.ForeColor = UiTheme.TextMuted; }
+        foreach (Control c in tileCategories.Controls)
+            if (c is Label l && l != lblCategories) { l.Font = UiTheme.Label; l.ForeColor = UiTheme.TextMuted; }
+        foreach (Control c in tileSuppliers.Controls)
+            if (c is Label l && l != lblSuppliers) { l.Font = UiTheme.Label; l.ForeColor = UiTheme.TextMuted; }
+        foreach (Control c in tileTotalQty.Controls)
+            if (c is Label l && l != lblTotalQty) { l.Font = UiTheme.Label; l.ForeColor = UiTheme.TextMuted; }
+        foreach (Control c in tileLow.Controls)
+            if (c is Label l && l != lblLow) { l.Font = UiTheme.Label; l.ForeColor = UiTheme.TextMuted; }
+        foreach (Control c in tileOut.Controls)
+            if (c is Label l && l != lblOut) { l.Font = UiTheme.Label; l.ForeColor = UiTheme.TextMuted; }
 
-        var activityPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(0, 0, 8, 0) };
-        var lblAct = new Label
-        {
-            Text = "Recent activity",
-            Font = UiTheme.SectionTitle,
-            ForeColor = UiTheme.Text,
-            Dock = DockStyle.Top,
-            Height = 28
-        };
-
-        grid = new DataGridView
-        {
-            Dock = DockStyle.Fill,
-            AllowUserToAddRows = false,
-            AllowUserToDeleteRows = false,
-            ReadOnly = true,
-            MultiSelect = false,
-            SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
-        };
         UiTheme.ApplyGridTheme(grid);
         UiTheme.WireStatusBadgeColumn(grid, nameof(TransactionHistoryRow.TypeLabel), value => (value?.ToString() ?? "") switch
         {
@@ -100,40 +75,15 @@ public class DashboardForm : Form
             _ => ("Adjustment", UiTheme.BadgeTone.Info, '!')
         });
 
-        lblEmpty = new Label
-        {
-            Text = "No recent activity yet — record your first Stock-In to get started.",
-            Font = UiTheme.Body,
-            ForeColor = UiTheme.TextMuted,
-            Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.MiddleCenter,
-            Visible = false
-        };
-
-        activityPanel.Controls.Add(grid);
-        activityPanel.Controls.Add(lblEmpty);
-        activityPanel.Controls.Add(lblAct);
-
-        var actionsPanel = new Panel
-        {
-            Dock = DockStyle.Fill,
-            BackColor = UiTheme.Surface,
-            Padding = new Padding(12)
-        };
         actionsPanel.Paint += (_, e) =>
         {
             using var pen = new Pen(UiTheme.Border, 1);
             e.Graphics.DrawRectangle(pen, 0, 0, actionsPanel.Width - 1, actionsPanel.Height - 1);
         };
-        var lblQa = new Label
-        {
-            Text = "Quick actions",
-            Font = UiTheme.SectionTitle,
-            Dock = DockStyle.Top,
-            Height = 28
-        };
-        actionsPanel.Controls.Add(lblQa);
+    }
 
+    private void BuildQuickActions()
+    {
         int ay = 40;
         void AddAction(string text, string navKey)
         {
@@ -159,62 +109,6 @@ public class DashboardForm : Form
             AddAction("Inventory Adjustment", "Inventory Adjustment");
         if (AuthorizationService.HasPermission(_user, Permissions.ManageUsers))
             AddAction("Manage Users", "User Management");
-
-        bottom.Controls.Add(activityPanel, 0, 0);
-        bottom.Controls.Add(actionsPanel, 1, 0);
-
-        lblError = new Label
-        {
-            Dock = DockStyle.Top,
-            Height = 28,
-            ForeColor = UiTheme.Error,
-            Font = UiTheme.Label,
-            Visible = false
-        };
-
-        Controls.Add(bottom);
-        Controls.Add(lblError);
-        Controls.Add(metricsPanel);
-    }
-
-    private static Panel MakeTile(string caption, out Label valueLabel, Color valueColor)
-    {
-        var tile = new Panel
-        {
-            Width = 140,
-            Height = 88,
-            Margin = new Padding(0, 0, 10, 0),
-            BackColor = UiTheme.Surface,
-            Padding = new Padding(10)
-        };
-        tile.Paint += (_, e) =>
-        {
-            using var pen = new Pen(UiTheme.Border, 1);
-            e.Graphics.DrawRectangle(pen, 0, 0, tile.Width - 1, tile.Height - 1);
-        };
-        UiTheme.ApplyRoundedRegion(tile, UiTheme.RadiusLg);
-
-        valueLabel = new Label
-        {
-            Text = "—",
-            Font = new Font("Segoe UI", 18f, FontStyle.Bold),
-            ForeColor = valueColor,
-            Location = new Point(10, 12),
-            AutoSize = true
-        };
-
-        var cap = new Label
-        {
-            Text = caption,
-            Font = UiTheme.Label,
-            ForeColor = UiTheme.TextMuted,
-            Location = new Point(10, 52),
-            AutoSize = true
-        };
-
-        tile.Controls.Add(valueLabel);
-        tile.Controls.Add(cap);
-        return tile;
     }
 
     private void Reload()
