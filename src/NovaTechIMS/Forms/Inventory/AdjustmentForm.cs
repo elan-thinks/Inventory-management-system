@@ -39,7 +39,7 @@ public partial class AdjustmentForm : Form
         foreach (var sec in new[] { secProduct, secMovement, secReason })
         {
             sec.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
-            sec.ForeColor = UiTheme.Secondary;
+            sec.ForeColor = UiTheme.Primary;
         }
 
         foreach (Control c in formPanel.Controls)
@@ -64,10 +64,15 @@ public partial class AdjustmentForm : Form
         lblHint.Font = UiTheme.Label;
         lblHint.ForeColor = UiTheme.TextMuted;
 
+        UiTheme.ApplyDarkInputs(this);
         UiTheme.StyleComboBox(cboProduct);
         UiTheme.StyleTextBox(txtReason);
         UiTheme.StyleTextBox(txtNotes);
         UiTheme.StyleDatePicker(dtpDate);
+
+        nudNewQty.BackColor = UiTheme.Surface;
+        nudNewQty.ForeColor = UiTheme.Text;
+
         UiTheme.StyleButton(btnSave, UiTheme.ButtonKind.Primary);
         UiTheme.ApplyGridTheme(grid);
 
@@ -125,7 +130,7 @@ public partial class AdjustmentForm : Form
         lblDifference.Text = diff >= 0 ? $"+{diff}" : diff.ToString(CultureInfo.InvariantCulture);
         lblDifference.ForeColor = diff == 0
             ? UiTheme.TextMuted
-            : (diff > 0 ? Color.DarkGreen : UiTheme.Error);
+            : (diff > 0 ? UiTheme.Success : UiTheme.Error);
 
         if (cboProduct.SelectedItem is not LookupItem item || item.Value <= 0)
             lblPreview.Text = "  Select a product and set the new quantity.";
