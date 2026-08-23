@@ -171,6 +171,11 @@ public partial class MainForm : Form
         };
         btn.FlatAppearance.BorderSize = 0;
         btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(30, 255, 255, 255);
+
+        var iconFile = AppIcons.FileForNavKey(text);
+        if (iconFile is not null)
+            AppIcons.ApplyToButton(btn, iconFile, 16);
+
         btn.Click += NavItem_Click;
         btn.Paint += NavButton_Paint;
         flpNav.Controls.Add(btn);
