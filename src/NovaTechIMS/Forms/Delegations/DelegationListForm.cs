@@ -8,97 +8,31 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Delegations;
 
-/// <summary>Delegation Management list (SCR-020, Milestone 15).</summary>
-public class DelegationListForm : Form
+/// <summary>Delegation Management list — Designer-based (partial).</summary>
+public partial class DelegationListForm : Form
 {
     private readonly DelegationService _service = new();
 
-    private ComboBox cboStatus = null!;
-    private ComboBox cboResponsibility = null!;
-    private Button btnNew = null!;
-    private Button btnRefresh = null!;
-    private DataGridView grid = null!;
-    private Label lblCount = null!;
-    private Label lblEmpty = null!;
-
     public DelegationListForm()
     {
-        BuildUi();
+        InitializeComponent();
+        ApplyRuntimeStyling();
         Load += (_, _) => ReloadGrid();
     }
 
-    private void BuildUi()
+    private void ApplyRuntimeStyling()
     {
-        AutoScaleMode = AutoScaleMode.Font;
         Font = UiTheme.Body;
         BackColor = UiTheme.Background;
-        FormBorderStyle = FormBorderStyle.None;
-        Dock = DockStyle.Fill;
-        TopLevel = false;
-
-        var toolbar = new Panel { Dock = DockStyle.Top, Height = 48, BackColor = UiTheme.Background };
-
-        cboStatus = UiTheme.StyleComboBox(new ComboBox
-        {
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Width = 130,
-            Location = new Point(0, 8)
-        });
-        cboStatus.Items.AddRange(new object[] { "All statuses", "Active", "Expired", "Revoked" });
-        cboStatus.SelectedIndex = 0;
-        cboStatus.SelectedIndexChanged += (_, _) => ReloadGrid();
-
-        cboResponsibility = UiTheme.StyleComboBox(new ComboBox
-        {
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Width = 140,
-            Location = new Point(140, 8)
-        });
-        cboResponsibility.Items.AddRange(new object[] { "All responsibilities", "Stock-In", "Stock-Out", "Report Access" });
-        cboResponsibility.SelectedIndex = 0;
-        cboResponsibility.SelectedIndexChanged += (_, _) => ReloadGrid();
-
-        btnRefresh = UiTheme.StyleButton(new Button
-        {
-            Text = "Refresh",
-            Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(88, 30)
-        }, UiTheme.ButtonKind.Secondary);
-        btnRefresh.Click += (_, _) => ReloadGrid();
-
-        btnNew = UiTheme.StyleButton(new Button
-        {
-            Text = "+ New Delegation",
-            Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(140, 30)
-        }, UiTheme.ButtonKind.Primary);
-        btnNew.Click += (_, _) =>
-        {
-            using var dlg = new DelegationEditForm();
-            if (dlg.ShowDialog(FindForm()) == DialogResult.OK)
-                ReloadGrid();
-        };
-
-        toolbar.Controls.Add(cboStatus);
-        toolbar.Controls.Add(cboResponsibility);
-        toolbar.Controls.Add(btnRefresh);
-        toolbar.Controls.Add(btnNew);
-        toolbar.Resize += (_, _) =>
-        {
-            btnNew.Left = toolbar.ClientSize.Width - btnNew.Width;
-            btnRefresh.Left = btnNew.Left - btnRefresh.Width - 8;
-        };
-
-        grid = new DataGridView
-        {
-            Dock = DockStyle.Fill,
-            AllowUserToAddRows = false,
-            AllowUserToDeleteRows = false,
-            ReadOnly = true,
-            MultiSelect = false,
-            SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
-        };
+        toolbar.BackColor = UiTheme.Background;
+        lblEmpty.Font = UiTheme.Body;
+        lblEmpty.ForeColor = UiTheme.TextMuted;
+        lblCount.Font = UiTheme.Label;
+        lblCount.ForeColor = UiTheme.TextMuted;
+        UiTheme.StyleComboBox(cboStatus);
+        UiTheme.StyleComboBox(cboResponsibility);
+        UiTheme.StyleButton(btnRefresh, UiTheme.ButtonKind.Secondary);
+        UiTheme.StyleButton(btnNew, UiTheme.ButtonKind.Primary);
         UiTheme.ApplyGridTheme(grid);
         UiTheme.WireStatusBadgeColumn(grid, nameof(DelegationListRow.StatusLabel), value => (value?.ToString() ?? "") switch
         {
@@ -106,23 +40,23 @@ public class DelegationListForm : Form
             "Expired" => ("Expired", UiTheme.BadgeTone.Muted, 'c'),
             _ => ("Revoked", UiTheme.BadgeTone.Error, '\u2715')
         });
-        grid.CellContentClick += Grid_CellContentClick;
+        Toolbar_Resize(toolbar, EventArgs.Empty);
+    }
 
-        lblEmpty = UiTheme.CreateEmptyStateLabel(
-            "No delegations yet. Create one to temporarily extend a Staff member's access.");
+    private void Toolbar_Resize(object? sender, EventArgs e)
+    {
+        btnNew.Left = toolbar.ClientSize.Width - btnNew.Width;
+        btnRefresh.Left = btnNew.Left - btnRefresh.Width - 8;
+    }
 
-        lblCount = new Label
-        {
-            Dock = DockStyle.Bottom,
-            Height = 28,
-            Font = UiTheme.Label,
-            ForeColor = UiTheme.TextMuted
-        };
+    private void CboFilter_SelectedIndexChanged(object? sender, EventArgs e) => ReloadGrid();
+    private void BtnRefresh_Click(object? sender, EventArgs e) => ReloadGrid();
 
-        Controls.Add(grid);
-        Controls.Add(lblEmpty);
-        Controls.Add(lblCount);
-        Controls.Add(toolbar);
+    private void BtnNew_Click(object? sender, EventArgs e)
+    {
+        using var dlg = new DelegationEditForm();
+        if (dlg.ShowDialog(FindForm()) == DialogResult.OK)
+            ReloadGrid();
     }
 
     private void ReloadGrid()
@@ -214,9 +148,8 @@ public class DelegationListForm : Form
         if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
         if (grid.Columns[e.ColumnIndex].Name != "colRevoke") return;
         if (grid.Rows[e.RowIndex].DataBoundItem is not DelegationListRow row) return;
-        if (row.Status == DelegationStatus.Active) return; // let the button paint normally
+        if (row.Status == DelegationStatus.Active) return;
 
-        // Expired/Revoked rows: no action control at all — an em-dash, not a disabled button.
         bool selected = grid.Rows[e.RowIndex].Selected;
         var bg = selected ? UiTheme.RowSelected : (e.RowIndex % 2 == 1 ? UiTheme.RowAlternate : UiTheme.Surface);
         using var brush = new SolidBrush(bg);
@@ -232,9 +165,7 @@ public class DelegationListForm : Form
         if (e.RowIndex < 0) return;
         if (grid.Columns[e.ColumnIndex].Name != "colRevoke") return;
         if (grid.Rows[e.RowIndex].DataBoundItem is not DelegationListRow row) return;
-
-        if (row.Status != DelegationStatus.Active)
-            return; // no action control on this row — nothing to click
+        if (row.Status != DelegationStatus.Active) return;
 
         var confirm = MessageBox.Show(
             FindForm(),
