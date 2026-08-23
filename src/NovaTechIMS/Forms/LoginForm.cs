@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 using NovaTechIMS.Services;
 using NovaTechIMS.Utilities;
@@ -15,6 +16,39 @@ public partial class LoginForm : Form
     public LoginForm()
     {
         InitializeComponent();
+        ApplyRuntimeStyling();
+    }
+
+    private void ApplyRuntimeStyling()
+    {
+        BackColor = UiTheme.Background;
+        Font = UiTheme.Body;
+
+        pnlCard.BackColor = UiTheme.Surface;
+        UiTheme.ApplyRoundedRegion(pnlCard, UiTheme.RadiusLg);
+        pnlCard.Paint += (_, e) =>
+        {
+            using var pen = new Pen(UiTheme.Border, 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, pnlCard.Width - 1, pnlCard.Height - 1);
+        };
+
+        lblBrand.Font = UiTheme.ScreenTitle;
+        lblBrand.ForeColor = UiTheme.Primary;
+        lblSubtitle.Font = UiTheme.Label;
+        lblSubtitle.ForeColor = UiTheme.TextMuted;
+        lblUsername.Font = UiTheme.Label;
+        lblUsername.ForeColor = UiTheme.Text;
+        lblPassword.Font = UiTheme.Label;
+        lblPassword.ForeColor = UiTheme.Text;
+        lblError.Font = UiTheme.Label;
+        lblError.ForeColor = UiTheme.Error;
+        lblHint.Font = UiTheme.HelperText;
+        lblHint.ForeColor = UiTheme.TextMuted;
+
+        UiTheme.StyleTextBox(txtUsername);
+        UiTheme.StyleTextBox(txtPassword);
+        UiTheme.StyleButton(btnLogin, UiTheme.ButtonKind.Primary);
+        UiTheme.StyleButton(btnCancel, UiTheme.ButtonKind.Secondary);
     }
 
     private void LoginForm_Load(object? sender, EventArgs e)
