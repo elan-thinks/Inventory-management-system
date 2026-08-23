@@ -6,42 +6,44 @@ using System.Windows.Forms;
 namespace NovaTechIMS.Utilities;
 
 /// <summary>
-/// Dark-mode design tokens (system-wide).
+/// Light-mode design tokens from UI/02-Design-Tokens.md (approved Visual Design).
+/// System-wide — no dark theme.
 /// </summary>
 internal static class UiTheme
 {
-    // ---- Dark color tokens ------------------------------------------------
-    public static readonly Color Primary = ColorTranslator.FromHtml("#3B82F6");
-    public static readonly Color PrimaryHover = ColorTranslator.FromHtml("#2563EB");
-    public static readonly Color Secondary = ColorTranslator.FromHtml("#38BDF8");
-    public static readonly Color Background = ColorTranslator.FromHtml("#0F1419");
-    public static readonly Color Surface = ColorTranslator.FromHtml("#1A2332");
-    public static readonly Color Text = ColorTranslator.FromHtml("#E8EEF5");
-    public static readonly Color TextMuted = ColorTranslator.FromHtml("#8B9BB4");
+    // ---- Light color tokens (approved) -------------------------------------
+    public static readonly Color Primary = ColorTranslator.FromHtml("#1E4B8F");
+    public static readonly Color PrimaryHover = ColorTranslator.FromHtml("#163A6E");
+    public static readonly Color Secondary = ColorTranslator.FromHtml("#3B7A8F");
+    public static readonly Color Background = ColorTranslator.FromHtml("#F4F6F8");
+    public static readonly Color Surface = ColorTranslator.FromHtml("#FFFFFF");
+    public static readonly Color Text = ColorTranslator.FromHtml("#1F2933");
+    public static readonly Color TextMuted = ColorTranslator.FromHtml("#6B7785");
 
-    public static readonly Color Success = ColorTranslator.FromHtml("#34D399");
-    public static readonly Color SuccessTint = ColorTranslator.FromHtml("#0F2E22");
-    public static readonly Color Warning = ColorTranslator.FromHtml("#FBBF24");
-    public static readonly Color WarningTint = ColorTranslator.FromHtml("#3D2E0A");
-    public static readonly Color Error = ColorTranslator.FromHtml("#F87171");
-    public static readonly Color ErrorTint = ColorTranslator.FromHtml("#3B1515");
-    public static readonly Color Info = ColorTranslator.FromHtml("#60A5FA");
-    public static readonly Color InfoTint = ColorTranslator.FromHtml("#0F2744");
+    public static readonly Color Success = ColorTranslator.FromHtml("#2E8B57");
+    public static readonly Color SuccessTint = ColorTranslator.FromHtml("#E4F3EA");
+    public static readonly Color Warning = ColorTranslator.FromHtml("#C77700");
+    public static readonly Color WarningTint = ColorTranslator.FromHtml("#FBEBD9");
+    public static readonly Color Error = ColorTranslator.FromHtml("#C0392B");
+    public static readonly Color ErrorTint = ColorTranslator.FromHtml("#FBEAE8");
+    public static readonly Color Info = ColorTranslator.FromHtml("#2E6E9E");
+    public static readonly Color InfoTint = ColorTranslator.FromHtml("#E7F0F7");
 
-    public static readonly Color Border = ColorTranslator.FromHtml("#2D3A4F");
-    public static readonly Color BorderFocus = ColorTranslator.FromHtml("#3B82F6");
-    public static readonly Color DisabledBackground = ColorTranslator.FromHtml("#1E2736");
-    public static readonly Color DisabledText = ColorTranslator.FromHtml("#5A6A80");
+    public static readonly Color Border = ColorTranslator.FromHtml("#D7DCE1");
+    public static readonly Color BorderFocus = ColorTranslator.FromHtml("#1E4B8F");
+    public static readonly Color DisabledBackground = ColorTranslator.FromHtml("#ECEEF1");
+    public static readonly Color DisabledText = ColorTranslator.FromHtml("#9AA5B1");
 
-    public static readonly Color RowHover = ColorTranslator.FromHtml("#243044");
-    public static readonly Color RowSelected = ColorTranslator.FromHtml("#1E3A5F");
-    public static readonly Color RowAlternate = ColorTranslator.FromHtml("#151D2A");
+    public static readonly Color RowHover = ColorTranslator.FromHtml("#EAF1F8");
+    public static readonly Color RowSelected = ColorTranslator.FromHtml("#D6E4F5");
+    public static readonly Color RowAlternate = ColorTranslator.FromHtml("#FAFBFC");
 
-    public static readonly Color SidebarBackground = ColorTranslator.FromHtml("#0B1220");
-    public static readonly Color SidebarText = ColorTranslator.FromHtml("#9AADC4");
+    // Sidebar is the one deliberately dark surface (approved design)
+    public static readonly Color SidebarBackground = ColorTranslator.FromHtml("#16324F");
+    public static readonly Color SidebarText = ColorTranslator.FromHtml("#C7D3E0");
     public static readonly Color SidebarTextActive = Color.White;
-    public static readonly Color SidebarAccent = ColorTranslator.FromHtml("#3B82F6");
-    public static readonly Color StatusStripBackground = ColorTranslator.FromHtml("#121A27");
+    public static readonly Color SidebarAccent = ColorTranslator.FromHtml("#5B9BD5");
+    public static readonly Color StatusStripBackground = ColorTranslator.FromHtml("#EEF1F4");
 
     // ---- Typography ---------------------------------------------------
     public static readonly Font ScreenTitle = new("Segoe UI", 14f, FontStyle.Bold);
@@ -117,7 +119,7 @@ internal static class UiTheme
                 baseColor = Primary; hoverColor = PrimaryHover; textColor = Color.White;
                 break;
             case ButtonKind.Danger:
-                baseColor = Error; hoverColor = ColorTranslator.FromHtml("#DC2626"); textColor = Color.White;
+                baseColor = Error; hoverColor = ColorTranslator.FromHtml("#9E2E22"); textColor = Color.White;
                 break;
             case ButtonKind.Secondary:
                 baseColor = Surface; hoverColor = RowHover; textColor = Text;
@@ -133,6 +135,7 @@ internal static class UiTheme
         btn.ForeColor = textColor;
         btn.FlatAppearance.MouseOverBackColor = hoverColor;
         btn.FlatAppearance.MouseDownBackColor = hoverColor;
+        ApplyRoundedRegion(btn, RadiusSm);
         return btn;
     }
 
@@ -148,50 +151,16 @@ internal static class UiTheme
         box.BorderStyle = BorderStyle.FixedSingle;
         box.BackColor = Surface;
         box.ForeColor = Text;
-        // Placeholder color is OS-controlled; dark surface is enough
         return box;
     }
 
-    /// <summary>
-    /// Dark ComboBox — owner-draw so Windows does not force a white face/list.
-    /// </summary>
     public static ComboBox StyleComboBox(ComboBox combo)
     {
         combo.Font = Body;
         combo.FlatStyle = FlatStyle.Flat;
         combo.BackColor = Surface;
         combo.ForeColor = Text;
-        combo.DrawMode = DrawMode.OwnerDrawFixed;
-        combo.ItemHeight = 22;
-
-        // Avoid stacking handlers if StyleComboBox is called more than once
-        combo.DrawItem -= ComboDrawItem;
-        combo.DrawItem += ComboDrawItem;
-
         return combo;
-    }
-
-    private static void ComboDrawItem(object? sender, DrawItemEventArgs e)
-    {
-        if (sender is not ComboBox combo || e.Index < 0)
-            return;
-
-        bool selected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
-        using var bg = new SolidBrush(selected ? RowSelected : Surface);
-        e.Graphics.FillRectangle(bg, e.Bounds);
-
-        string text = combo.GetItemText(combo.Items[e.Index]);
-        using var fg = new SolidBrush(Text);
-        var textRect = new Rectangle(e.Bounds.X + 6, e.Bounds.Y, e.Bounds.Width - 6, e.Bounds.Height);
-        TextRenderer.DrawText(
-            e.Graphics,
-            text,
-            Body,
-            textRect,
-            Text,
-            TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
-
-        e.DrawFocusRectangle();
     }
 
     public static DateTimePicker StyleDatePicker(DateTimePicker picker)
@@ -203,10 +172,12 @@ internal static class UiTheme
     }
 
     /// <summary>
-    /// Walk a form/control tree and force dark TextBox + ComboBox colors.
-    /// Call from any list/edit form ApplyRuntimeStyling.
+    /// Apply light input colors to TextBox / ComboBox / NumericUpDown / DateTimePicker under root.
+    /// Kept name ApplyDarkInputs for call-site compatibility; applies light theme only.
     /// </summary>
-    public static void ApplyDarkInputs(Control root)
+    public static void ApplyDarkInputs(Control root) => ApplyLightInputs(root);
+
+    public static void ApplyLightInputs(Control root)
     {
         foreach (Control c in root.Controls)
         {
@@ -228,7 +199,7 @@ internal static class UiTheme
             }
 
             if (c.HasChildren)
-                ApplyDarkInputs(c);
+                ApplyLightInputs(c);
         }
     }
 
@@ -329,7 +300,7 @@ internal static class UiTheme
     public static void ApplyGridTheme(DataGridView grid)
     {
         grid.BackgroundColor = Surface;
-        grid.BorderStyle = BorderStyle.None;
+        grid.BorderStyle = BorderStyle.FixedSingle;
         grid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
         grid.GridColor = Border;
         grid.RowHeadersVisible = false;
@@ -347,7 +318,7 @@ internal static class UiTheme
             Padding = new Padding(Sp2, 0, 0, 0)
         };
         grid.ColumnHeadersHeight = 34;
-        grid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+        grid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
 
         grid.DefaultCellStyle = new DataGridViewCellStyle
         {
@@ -360,6 +331,7 @@ internal static class UiTheme
         grid.AlternatingRowsDefaultCellStyle = new DataGridViewCellStyle
         {
             BackColor = RowAlternate,
+            ForeColor = Text,
             SelectionBackColor = RowSelected,
             SelectionForeColor = Text
         };

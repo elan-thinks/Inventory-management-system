@@ -1,6 +1,5 @@
 using System.Drawing;
 using System.Windows.Forms;
-using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Categories;
 
@@ -42,7 +41,7 @@ partial class CategoryListForm
         // 
         // toolbar
         // 
-        toolbar.BackColor = Color.FromArgb(15, 20, 25);
+        toolbar.BackColor = Color.FromArgb(244, 246, 248);
         toolbar.Controls.Add(txtSearch);
         toolbar.Controls.Add(cboStatus);
         toolbar.Controls.Add(btnClearFilters);
@@ -52,7 +51,7 @@ partial class CategoryListForm
         toolbar.Location = new Point(0, 0);
         toolbar.Name = "toolbar";
         toolbar.Padding = new Padding(0, 4, 0, 4);
-        toolbar.Size = new Size(1318, 48);
+        toolbar.Size = new Size(900, 48);
         toolbar.TabIndex = 8;
         toolbar.Resize += Toolbar_Resize;
         // 
@@ -61,7 +60,7 @@ partial class CategoryListForm
         txtSearch.Location = new Point(0, 8);
         txtSearch.Name = "txtSearch";
         txtSearch.PlaceholderText = "Search by name…";
-        txtSearch.Size = new Size(220, 30);
+        txtSearch.Size = new Size(220, 27);
         txtSearch.TabIndex = 0;
         txtSearch.TextChanged += TxtSearch_TextChanged;
         // 
@@ -71,7 +70,7 @@ partial class CategoryListForm
         cboStatus.Items.AddRange(new object[] { "All statuses", "Active", "Inactive" });
         cboStatus.Location = new Point(232, 8);
         cboStatus.Name = "cboStatus";
-        cboStatus.Size = new Size(140, 31);
+        cboStatus.Size = new Size(140, 28);
         cboStatus.TabIndex = 1;
         cboStatus.SelectedIndexChanged += CboStatus_SelectedIndexChanged;
         // 
@@ -88,7 +87,7 @@ partial class CategoryListForm
         // btnRefresh
         // 
         btnRefresh.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnRefresh.Location = new Point(1118, 0);
+        btnRefresh.Location = new Point(700, 8);
         btnRefresh.Name = "btnRefresh";
         btnRefresh.Size = new Size(88, 30);
         btnRefresh.TabIndex = 3;
@@ -98,7 +97,7 @@ partial class CategoryListForm
         // btnAdd
         // 
         btnAdd.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnAdd.Location = new Point(1118, 0);
+        btnAdd.Location = new Point(796, 8);
         btnAdd.Name = "btnAdd";
         btnAdd.Size = new Size(130, 30);
         btnAdd.TabIndex = 4;
@@ -110,15 +109,15 @@ partial class CategoryListForm
         grid.AllowUserToAddRows = false;
         grid.AllowUserToDeleteRows = false;
         grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-        grid.ColumnHeadersHeight = 29;
+        grid.ColumnHeadersHeight = 34;
         grid.Dock = DockStyle.Fill;
         grid.Location = new Point(0, 48);
         grid.MultiSelect = false;
         grid.Name = "grid";
         grid.ReadOnly = true;
-        grid.RowHeadersWidth = 51;
+        grid.RowHeadersVisible = false;
         grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        grid.Size = new Size(1318, 512);
+        grid.Size = new Size(900, 424);
         grid.TabIndex = 5;
         grid.CellContentClick += Grid_CellContentClick;
         // 
@@ -126,10 +125,10 @@ partial class CategoryListForm
         // 
         lblCount.Dock = DockStyle.Bottom;
         lblCount.Font = new Font("Segoe UI", 9F);
-        lblCount.ForeColor = Color.FromArgb(139, 155, 180);
-        lblCount.Location = new Point(0, 560);
+        lblCount.ForeColor = Color.FromArgb(107, 119, 133);
+        lblCount.Location = new Point(0, 472);
         lblCount.Name = "lblCount";
-        lblCount.Size = new Size(1318, 28);
+        lblCount.Size = new Size(900, 28);
         lblCount.TabIndex = 7;
         lblCount.TextAlign = ContentAlignment.MiddleLeft;
         // 
@@ -137,10 +136,10 @@ partial class CategoryListForm
         // 
         lblEmpty.Dock = DockStyle.Fill;
         lblEmpty.Font = new Font("Segoe UI", 10F);
-        lblEmpty.ForeColor = Color.FromArgb(139, 155, 180);
+        lblEmpty.ForeColor = Color.FromArgb(107, 119, 133);
         lblEmpty.Location = new Point(0, 48);
         lblEmpty.Name = "lblEmpty";
-        lblEmpty.Size = new Size(1318, 512);
+        lblEmpty.Size = new Size(900, 424);
         lblEmpty.TabIndex = 6;
         lblEmpty.Text = "No categories yet. Add your first category to get started.";
         lblEmpty.TextAlign = ContentAlignment.MiddleCenter;
@@ -148,10 +147,10 @@ partial class CategoryListForm
         // 
         // CategoryListForm
         // 
-        AutoScaleDimensions = new SizeF(9F, 23F);
+        AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        BackColor = Color.FromArgb(15, 20, 25);
-        ClientSize = new Size(1318, 588);
+        BackColor = Color.FromArgb(244, 246, 248);
+        ClientSize = new Size(900, 500);
         Controls.Add(grid);
         Controls.Add(lblEmpty);
         Controls.Add(lblCount);
