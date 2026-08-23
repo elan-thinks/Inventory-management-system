@@ -123,28 +123,9 @@ public partial class CategoryListForm : Form
         if (grid.Columns.Contains("colDelete"))
             grid.Columns.Remove("colDelete");
 
-        var colEdit = new DataGridViewButtonColumn
-        {
-            Name = "colEdit",
-            HeaderText = "",
-            Text = "Edit",
-            UseColumnTextForButtonValue = true,
-            FillWeight = 0.5f,
-            FlatStyle = FlatStyle.Flat,
-            DefaultCellStyle = { ForeColor = UiTheme.Primary, Font = UiTheme.LabelSemibold }
-        };
-        var colDelete = new DataGridViewButtonColumn
-        {
-            Name = "colDelete",
-            HeaderText = "",
-            Text = "Delete",
-            UseColumnTextForButtonValue = true,
-            FillWeight = 0.5f,
-            FlatStyle = FlatStyle.Flat,
-            DefaultCellStyle = { ForeColor = UiTheme.Error, Font = UiTheme.LabelSemibold }
-        };
-        grid.Columns.Add(colEdit);
-        grid.Columns.Add(colDelete);
+        grid.Columns.Add(AppIcons.CreateEditColumn(0.4f));
+        grid.Columns.Add(AppIcons.CreateDeleteColumn(0.4f));
+        AppIcons.FillActionIcons(grid);
     }
 
     private void BtnAdd_Click(object? sender, EventArgs e)
