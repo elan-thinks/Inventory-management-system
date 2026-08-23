@@ -20,6 +20,7 @@ public partial class LoginForm : Form
     private void LoginForm_Load(object? sender, EventArgs e)
     {
         AcceptButton = btnLogin;
+        CancelButton = btnCancel;
         txtUsername.Focus();
         lblError.Visible = false;
     }
@@ -74,6 +75,11 @@ public partial class LoginForm : Form
         {
             btnLogin.Enabled = true;
         }
+    }
+
+    private void BtnCancel_Click(object? sender, EventArgs e)
+    {
+        Close();
     }
 
     private void ShowError(string message)

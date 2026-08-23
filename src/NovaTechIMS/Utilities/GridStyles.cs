@@ -69,8 +69,17 @@ public static class GridStyles
             return;
         if (grid.Tag is not string[] cols)
             return;
+        if (e.ColumnIndex >= grid.Columns.Count)
+            return;
 
-        var colName = grid.Columns[e.ColumnIndex].Name;
+        var column = grid.Columns[e.ColumnIndex];
+        if (column is null)
+            return;
+
+        var colName = column.Name;
+        if (string.IsNullOrEmpty(colName))
+            return;
+
         var match = false;
         foreach (var c in cols)
         {
@@ -84,7 +93,7 @@ public static class GridStyles
         e.CellStyle.BackColor = back;
         e.CellStyle.SelectionForeColor = fore;
         e.CellStyle.SelectionBackColor = back;
-        e.CellStyle.Font = UiTheme.Badge;
+        e.CellStyle.Font = UiTheme.BadgeText;
         e.CellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
     }
 }
