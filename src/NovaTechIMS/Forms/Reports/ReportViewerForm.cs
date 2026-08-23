@@ -7,88 +7,43 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Reports;
 
-/// <summary>
-/// Displays a report grid and supports Print (FR-RPT-003).
-/// </summary>
-public class ReportViewerForm : Form
+/// <summary>Report grid + Print — Designer-based (partial).</summary>
+public partial class ReportViewerForm : Form
 {
     private readonly string _title;
     private readonly object _data;
-    private DataGridView grid = null!;
     private int _printRow;
 
     public ReportViewerForm(string title, object dataSource)
     {
         _title = title;
         _data = dataSource;
-        BuildUi();
+        InitializeComponent();
+        ApplyRuntimeStyling();
+        Text = _title;
+        lblTitle.Text = "  " + _title;
         Load += (_, _) => Bind();
     }
 
-    private void BuildUi()
+    private void ApplyRuntimeStyling()
     {
-        Text = _title;
-        AutoScaleMode = AutoScaleMode.Font;
         Font = UiTheme.Body;
-        StartPosition = FormStartPosition.CenterParent;
-        Size = new Size(900, 560);
-        MinimumSize = new Size(640, 400);
         BackColor = UiTheme.Background;
-
-        var toolbar = new Panel
-        {
-            Dock = DockStyle.Top,
-            Height = 44,
-            BackColor = UiTheme.Surface,
-            Padding = new Padding(8)
-        };
-
-        var btnPrint = UiTheme.StyleButton(new Button
-        {
-            Text = "Print…",
-            Size = new Size(90, 28),
-            Location = new Point(8, 8)
-        }, UiTheme.ButtonKind.Primary);
-        btnPrint.Click += BtnPrint_Click;
-
-        var btnClose = UiTheme.StyleButton(new Button
-        {
-            Text = "Close",
-            Size = new Size(80, 28),
-            Anchor = AnchorStyles.Top | AnchorStyles.Right
-        }, UiTheme.ButtonKind.Secondary);
-        btnClose.Click += (_, _) => Close();
-        toolbar.Resize += (_, _) => btnClose.Left = toolbar.ClientSize.Width - btnClose.Width - 8;
-
-        toolbar.Controls.Add(btnPrint);
-        toolbar.Controls.Add(btnClose);
-
-        var lbl = new Label
-        {
-            Dock = DockStyle.Top,
-            Height = 28,
-            Text = "  " + _title,
-            Font = UiTheme.SectionTitle,
-            ForeColor = UiTheme.Text,
-            TextAlign = ContentAlignment.MiddleLeft
-        };
-
-        grid = new DataGridView
-        {
-            Dock = DockStyle.Fill,
-            AllowUserToAddRows = false,
-            AllowUserToDeleteRows = false,
-            ReadOnly = true,
-            MultiSelect = false,
-            SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
-        };
+        toolbar.BackColor = UiTheme.Surface;
+        lblTitle.Font = UiTheme.SectionTitle;
+        lblTitle.ForeColor = UiTheme.Text;
+        UiTheme.StyleButton(btnPrint, UiTheme.ButtonKind.Primary);
+        UiTheme.StyleButton(btnClose, UiTheme.ButtonKind.Secondary);
         UiTheme.ApplyGridTheme(grid);
-
-        Controls.Add(grid);
-        Controls.Add(lbl);
-        Controls.Add(toolbar);
+        Toolbar_Resize(toolbar, EventArgs.Empty);
     }
+
+    private void Toolbar_Resize(object? sender, EventArgs e)
+    {
+        btnClose.Left = toolbar.ClientSize.Width - btnClose.Width - 8;
+    }
+
+    private void BtnClose_Click(object? sender, EventArgs e) => Close();
 
     private void Bind()
     {
