@@ -101,21 +101,21 @@ partial class DashboardForm
         TopLevel = false;
         Name = "DashboardForm";
         Text = "Dashboard";
-        Padding = new Padding(8, 4, 8, 8);
+        Padding = new Padding(12, 8, 12, 8);
 
-        // Mockup layout: caption on top, large number below
-        ConfigureTile(tileProducts, lblProducts, capProducts, "lblProducts", "Total Active Products");
-        ConfigureTile(tileCategories, lblCategories, capCategories, "lblCategories", "Total Categories");
-        ConfigureTile(tileSuppliers, lblSuppliers, capSuppliers, "lblSuppliers", "Total Suppliers");
-        ConfigureTile(tileTotalQty, lblTotalQty, capTotalQty, "lblTotalQty", "Total Inventory Quantity");
-        ConfigureTile(tileLow, lblLow, capLow, "lblLow", "Low-Stock Products");
-        ConfigureTile(tileOut, lblOut, capOut, "lblOut", "Out-of-Stock Products");
+        BuildMetricTile(tileProducts, lblProducts, capProducts, "lblProducts", "Total Active Products");
+        BuildMetricTile(tileCategories, lblCategories, capCategories, "lblCategories", "Total Categories");
+        BuildMetricTile(tileSuppliers, lblSuppliers, capSuppliers, "lblSuppliers", "Total Suppliers");
+        BuildMetricTile(tileTotalQty, lblTotalQty, capTotalQty, "lblTotalQty", "Total Inventory Quantity");
+        BuildMetricTile(tileLow, lblLow, capLow, "lblLow", "Low-Stock Products");
+        BuildMetricTile(tileOut, lblOut, capOut, "lblOut", "Out-of-Stock Products");
 
         metricsPanel.Dock = DockStyle.Top;
-        metricsPanel.Height = 120;
-        metricsPanel.Padding = new Padding(0, 4, 0, 12);
+        metricsPanel.Height = 130;
+        metricsPanel.Padding = new Padding(0, 0, 0, 12);
         metricsPanel.WrapContents = false;
         metricsPanel.AutoScroll = true;
+        metricsPanel.BackColor = Color.FromArgb(244, 246, 248);
         metricsPanel.Name = "metricsPanel";
         metricsPanel.Controls.Add(tileProducts);
         metricsPanel.Controls.Add(tileCategories);
@@ -158,7 +158,6 @@ partial class DashboardForm
         lnkViewAll.Location = new Point(420, 8);
         lnkViewAll.Name = "lnkViewAll";
         lnkViewAll.LinkColor = Color.FromArgb(30, 75, 143);
-        lnkViewAll.ActiveLinkColor = Color.FromArgb(22, 58, 110);
         lnkViewAll.LinkBehavior = LinkBehavior.HoverUnderline;
         lnkViewAll.Click += LnkViewAll_Click;
 
@@ -201,58 +200,63 @@ partial class DashboardForm
         bottom.Controls.Add(activityCard, 0, 0);
         bottom.Controls.Add(actionsPanel, 1, 0);
 
+        // Order matters for Dock: Fill first, then Top panels
         Controls.Add(bottom);
         Controls.Add(lblError);
         Controls.Add(metricsPanel);
 
-        tileProducts.ResumeLayout(false);
-        tileProducts.PerformLayout();
-        tileCategories.ResumeLayout(false);
-        tileCategories.PerformLayout();
-        tileSuppliers.ResumeLayout(false);
-        tileSuppliers.PerformLayout();
-        tileTotalQty.ResumeLayout(false);
-        tileTotalQty.PerformLayout();
-        tileLow.ResumeLayout(false);
-        tileLow.PerformLayout();
-        tileOut.ResumeLayout(false);
-        tileOut.PerformLayout();
-        metricsPanel.ResumeLayout(false);
+        tileProducts.ResumeLayout(true);
+        tileCategories.ResumeLayout(true);
+        tileSuppliers.ResumeLayout(true);
+        tileTotalQty.ResumeLayout(true);
+        tileLow.ResumeLayout(true);
+        tileOut.ResumeLayout(true);
+        metricsPanel.ResumeLayout(true);
         activityHeader.ResumeLayout(false);
         activityHeader.PerformLayout();
         activityCard.ResumeLayout(false);
         actionsPanel.ResumeLayout(false);
         bottom.ResumeLayout(false);
         ((System.ComponentModel.ISupportInitialize)grid).EndInit();
-        ResumeLayout(false);
+        ResumeLayout(true);
     }
 
-    /// <summary>Caption on top (mockup), large value below. No Region clipping.</summary>
-    private static void ConfigureTile(Panel tile, Label valueLabel, Label capLabel, string valueName, string caption)
+    /// <summary>
+    /// Dock-based tile: caption on top, big number below.
+    /// Uses BorderStyle (always visible) — avoids Region clipping that hid labels.
+    /// </summary>
+    private static void BuildMetricTile(Panel tile, Label valueLabel, Label capLabel, string valueName, string caption)
     {
-        tile.Width = 168;
-        tile.Height = 100;
-        tile.Margin = new Padding(0, 0, 12, 0);
+        tile.Size = new Size(175, 110);
+        tile.Margin = new Padding(0, 0, 10, 0);
         tile.BackColor = Color.White;
-        tile.Padding = new Padding(14, 12, 14, 12);
+        tile.BorderStyle = BorderStyle.FixedSingle;
         tile.Name = "tile" + valueName;
 
-        // Caption first (top) — matches mockup
+        // Caption (top)
         capLabel.Text = caption;
-        capLabel.Font = new Font("Segoe UI", 8.5F);
-        capLabel.ForeColor = Color.FromArgb(107, 119, 133);
-        capLabel.Location = new Point(14, 12);
-        capLabel.AutoSize = true;
-        capLabel.MaximumSize = new Size(140, 0);
+        capLabel.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular);
+        capLabel.ForeColor = Color.FromArgb(90, 100, 110);
+        capLabel.BackColor = Color.White;
+        capLabel.Dock = DockStyle.Top;
+        capLabel.Height = 42;
+        capLabel.AutoSize = false;
+        capLabel.TextAlign = ContentAlignment.BottomLeft;
+        capLabel.Padding = new Padding(12, 0, 8, 2);
         capLabel.Name = "cap" + valueName;
 
-        valueLabel.Text = "—";
-        valueLabel.Font = new Font("Segoe UI", 22F, FontStyle.Bold);
+        // Value (fill remainder)
+        valueLabel.Text = "0";
+        valueLabel.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
         valueLabel.ForeColor = Color.FromArgb(31, 41, 51);
-        valueLabel.Location = new Point(14, 48);
-        valueLabel.AutoSize = true;
+        valueLabel.BackColor = Color.White;
+        valueLabel.Dock = DockStyle.Fill;
+        valueLabel.AutoSize = false;
+        valueLabel.TextAlign = ContentAlignment.TopLeft;
+        valueLabel.Padding = new Padding(12, 4, 8, 8);
         valueLabel.Name = valueName;
 
+        // Dock order: Fill first, then Top
         tile.Controls.Add(valueLabel);
         tile.Controls.Add(capLabel);
     }
