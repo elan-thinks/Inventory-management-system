@@ -41,6 +41,24 @@ public partial class ProductEditForm : Form
 
     private void ApplyRuntimeStyling()
     {
+        Font = UiTheme.Body;
+        BackColor = UiTheme.Surface;
+
+        foreach (var lbl in new[] { lblName, lblCategory, lblSupplier, lblDescription, lblPurchase, lblSelling, lblMinStock, lblQty })
+        {
+            lbl.Font = UiTheme.Label;
+            lbl.ForeColor = UiTheme.Text;
+        }
+
+        lblQtyValue.Font = UiTheme.Body;
+        lblQtyValue.ForeColor = UiTheme.TextMuted;
+        lblQtyHint.Font = UiTheme.Label;
+        lblQtyHint.ForeColor = UiTheme.TextMuted;
+        lblError.Font = UiTheme.Label;
+        lblError.ForeColor = UiTheme.Error;
+        chkActive.Font = UiTheme.Body;
+        chkActive.ForeColor = UiTheme.Text;
+
         UiTheme.StyleTextBox(txtName);
         UiTheme.StyleTextBox(txtDescription);
         UiTheme.StyleTextBox(txtPurchase);
