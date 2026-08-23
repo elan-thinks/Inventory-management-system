@@ -6,20 +6,27 @@ namespace NovaTechIMS.Forms.Reports;
 partial class ReportsHubForm
 {
     private System.ComponentModel.IContainer components = null;
-    private Panel card;
-    private Label lblSelect;
-    private ComboBox cboReport;
+
+    private Panel pnlChooser;
+    private Label lblChoose;
+    private FlowLayoutPanel cardsPanel;
+
+    private Panel pnlResults;
+    private Panel resultsHeader;
+    private Label lblReportTitle;
+    private Label lblFilters;
+    private Button btnBack;
+    private Button btnPrint;
+    private DataGridView grid;
+    private Label lblSummary;
+    private Label lblError;
+
+    // Date filters (shown when needed on chooser)
+    private Panel filterBar;
     private Label lblFrom;
     private DateTimePicker dtpFrom;
     private Label lblTo;
     private DateTimePicker dtpTo;
-    private Label lblType;
-    private ComboBox cboType;
-    private Label lblProduct;
-    private ComboBox cboProduct;
-    private Button btnRun;
-    private Label lblError;
-    private Label lblHint;
 
     protected override void Dispose(bool disposing)
     {
@@ -30,142 +37,166 @@ partial class ReportsHubForm
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container();
-        card = new Panel();
-        lblSelect = new Label();
-        cboReport = new ComboBox();
+
+        pnlChooser = new Panel();
+        lblChoose = new Label();
+        cardsPanel = new FlowLayoutPanel();
+        filterBar = new Panel();
         lblFrom = new Label();
         dtpFrom = new DateTimePicker();
         lblTo = new Label();
         dtpTo = new DateTimePicker();
-        lblType = new Label();
-        cboType = new ComboBox();
-        lblProduct = new Label();
-        cboProduct = new ComboBox();
-        btnRun = new Button();
+
+        pnlResults = new Panel();
+        resultsHeader = new Panel();
+        lblReportTitle = new Label();
+        lblFilters = new Label();
+        btnBack = new Button();
+        btnPrint = new Button();
+        grid = new DataGridView();
+        lblSummary = new Label();
         lblError = new Label();
-        lblHint = new Label();
-        card.SuspendLayout();
+
+        pnlChooser.SuspendLayout();
+        cardsPanel.SuspendLayout();
+        filterBar.SuspendLayout();
+        pnlResults.SuspendLayout();
+        resultsHeader.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)grid).BeginInit();
         SuspendLayout();
 
         AutoScaleMode = AutoScaleMode.Font;
         Font = new Font("Segoe UI", 10F);
-        BackColor = Color.FromArgb(244, 246, 248);
         FormBorderStyle = FormBorderStyle.None;
         Dock = DockStyle.Fill;
         TopLevel = false;
         Name = "ReportsHubForm";
         Text = "Reports";
+        Padding = new Padding(16);
 
-        card.Location = new Point(24, 24);
-        card.Size = new Size(560, 320);
-        card.BackColor = Color.White;
-        card.Padding = new Padding(20);
-        card.Name = "card";
+        // ---- Chooser ----
+        pnlChooser.Dock = DockStyle.Fill;
+        pnlChooser.Name = "pnlChooser";
 
-        lblSelect.AutoSize = true;
-        lblSelect.Location = new Point(20, 16);
-        lblSelect.Name = "lblSelect";
-        lblSelect.Text = "Select report";
+        lblChoose.Text = "Choose a report";
+        lblChoose.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+        lblChoose.AutoSize = true;
+        lblChoose.Location = new Point(4, 4);
+        lblChoose.Name = "lblChoose";
 
-        cboReport.DropDownStyle = ComboBoxStyle.DropDownList;
-        cboReport.Location = new Point(20, 36);
-        cboReport.Name = "cboReport";
-        cboReport.Size = new Size(400, 25);
-        cboReport.TabIndex = 0;
-        cboReport.Items.AddRange(new object[]
-        {
-            "Current Inventory",
-            "Low Stock",
-            "Out of Stock",
-            "Stock-In (date range)",
-            "Stock-Out (date range)",
-            "Inventory Transaction History"
-        });
-        cboReport.SelectedIndex = 0;
-        cboReport.SelectedIndexChanged += CboReport_SelectedIndexChanged;
+        filterBar.Location = new Point(4, 36);
+        filterBar.Size = new Size(900, 36);
+        filterBar.Name = "filterBar";
+        filterBar.Visible = false;
 
-        lblFrom.AutoSize = true;
-        lblFrom.Location = new Point(20, 76);
-        lblFrom.Name = "lblFrom";
         lblFrom.Text = "From";
-
+        lblFrom.AutoSize = true;
+        lblFrom.Location = new Point(0, 8);
+        dtpFrom.Location = new Point(48, 4);
+        dtpFrom.Width = 140;
         dtpFrom.Format = DateTimePickerFormat.Short;
-        dtpFrom.Location = new Point(70, 74);
-        dtpFrom.Name = "dtpFrom";
-        dtpFrom.Size = new Size(130, 25);
-        dtpFrom.TabIndex = 1;
 
-        lblTo.AutoSize = true;
-        lblTo.Location = new Point(220, 76);
-        lblTo.Name = "lblTo";
         lblTo.Text = "To";
-
+        lblTo.AutoSize = true;
+        lblTo.Location = new Point(200, 8);
+        dtpTo.Location = new Point(232, 4);
+        dtpTo.Width = 140;
         dtpTo.Format = DateTimePickerFormat.Short;
-        dtpTo.Location = new Point(250, 74);
-        dtpTo.Name = "dtpTo";
-        dtpTo.Size = new Size(130, 25);
-        dtpTo.TabIndex = 2;
 
-        lblType.AutoSize = true;
-        lblType.Location = new Point(20, 112);
-        lblType.Name = "lblType";
-        lblType.Text = "Type";
+        filterBar.Controls.Add(lblFrom);
+        filterBar.Controls.Add(dtpFrom);
+        filterBar.Controls.Add(lblTo);
+        filterBar.Controls.Add(dtpTo);
 
-        cboType.DropDownStyle = ComboBoxStyle.DropDownList;
-        cboType.Location = new Point(70, 110);
-        cboType.Name = "cboType";
-        cboType.Size = new Size(150, 25);
-        cboType.TabIndex = 3;
-        cboType.Items.AddRange(new object[] { "All", "Stock-In", "Stock-Out", "Adjustment" });
-        cboType.SelectedIndex = 0;
+        cardsPanel.Location = new Point(0, 80);
+        cardsPanel.Dock = DockStyle.Fill;
+        cardsPanel.Padding = new Padding(0, 48, 0, 0);
+        cardsPanel.AutoScroll = true;
+        cardsPanel.WrapContents = true;
+        cardsPanel.Name = "cardsPanel";
 
-        lblProduct.AutoSize = true;
-        lblProduct.Location = new Point(20, 148);
-        lblProduct.Name = "lblProduct";
-        lblProduct.Text = "Product";
-
-        cboProduct.DropDownStyle = ComboBoxStyle.DropDownList;
-        cboProduct.Location = new Point(80, 146);
-        cboProduct.Name = "cboProduct";
-        cboProduct.Size = new Size(280, 25);
-        cboProduct.TabIndex = 4;
-
-        btnRun.Location = new Point(20, 192);
-        btnRun.Name = "btnRun";
-        btnRun.Size = new Size(130, 34);
-        btnRun.TabIndex = 5;
-        btnRun.Text = "Run report";
-        btnRun.Click += BtnRun_Click;
-
-        lblError.Location = new Point(170, 192);
-        lblError.Name = "lblError";
-        lblError.Size = new Size(320, 40);
+        lblError.Dock = DockStyle.Bottom;
+        lblError.Height = 28;
         lblError.Visible = false;
+        lblError.Name = "lblError";
 
-        card.Controls.Add(lblSelect);
-        card.Controls.Add(cboReport);
-        card.Controls.Add(lblFrom);
-        card.Controls.Add(dtpFrom);
-        card.Controls.Add(lblTo);
-        card.Controls.Add(dtpTo);
-        card.Controls.Add(lblType);
-        card.Controls.Add(cboType);
-        card.Controls.Add(lblProduct);
-        card.Controls.Add(cboProduct);
-        card.Controls.Add(btnRun);
-        card.Controls.Add(lblError);
+        pnlChooser.Controls.Add(cardsPanel);
+        pnlChooser.Controls.Add(filterBar);
+        pnlChooser.Controls.Add(lblChoose);
+        pnlChooser.Controls.Add(lblError);
 
-        lblHint.Dock = DockStyle.Bottom;
-        lblHint.Height = 40;
-        lblHint.Text = "  Reports open in a separate window. Use Print… on the viewer if needed. Export is out of MVP scope.";
-        lblHint.TextAlign = ContentAlignment.MiddleLeft;
-        lblHint.Name = "lblHint";
+        // ---- Results ----
+        pnlResults.Dock = DockStyle.Fill;
+        pnlResults.Visible = false;
+        pnlResults.Name = "pnlResults";
 
-        Controls.Add(card);
-        Controls.Add(lblHint);
+        resultsHeader.Dock = DockStyle.Top;
+        resultsHeader.Height = 64;
+        resultsHeader.Name = "resultsHeader";
 
-        card.ResumeLayout(false);
-        card.PerformLayout();
+        lblReportTitle.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+        lblReportTitle.AutoSize = true;
+        lblReportTitle.Location = new Point(8, 8);
+        lblReportTitle.Name = "lblReportTitle";
+
+        lblFilters.AutoSize = true;
+        lblFilters.Location = new Point(8, 36);
+        lblFilters.Name = "lblFilters";
+
+        btnPrint.Text = "  Print";
+        btnPrint.Size = new Size(100, 32);
+        btnPrint.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        btnPrint.Location = new Point(700, 16);
+        btnPrint.Name = "btnPrint";
+        btnPrint.Click += BtnPrint_Click;
+
+        btnBack.Text = "Back to Reports";
+        btnBack.Size = new Size(130, 32);
+        btnBack.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        btnBack.Location = new Point(560, 16);
+        btnBack.Name = "btnBack";
+        btnBack.Click += BtnBack_Click;
+
+        resultsHeader.Controls.Add(lblReportTitle);
+        resultsHeader.Controls.Add(lblFilters);
+        resultsHeader.Controls.Add(btnBack);
+        resultsHeader.Controls.Add(btnPrint);
+        resultsHeader.Resize += (_, _) =>
+        {
+            btnPrint.Left = resultsHeader.ClientSize.Width - btnPrint.Width - 8;
+            btnBack.Left = btnPrint.Left - btnBack.Width - 8;
+        };
+
+        grid.Dock = DockStyle.Fill;
+        grid.AllowUserToAddRows = false;
+        grid.AllowUserToDeleteRows = false;
+        grid.ReadOnly = true;
+        grid.MultiSelect = false;
+        grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        grid.BorderStyle = BorderStyle.None;
+        grid.Name = "grid";
+
+        lblSummary.Dock = DockStyle.Bottom;
+        lblSummary.Height = 28;
+        lblSummary.Name = "lblSummary";
+
+        pnlResults.Controls.Add(grid);
+        pnlResults.Controls.Add(lblSummary);
+        pnlResults.Controls.Add(resultsHeader);
+
+        Controls.Add(pnlResults);
+        Controls.Add(pnlChooser);
+
+        filterBar.ResumeLayout(false);
+        filterBar.PerformLayout();
+        cardsPanel.ResumeLayout(false);
+        pnlChooser.ResumeLayout(false);
+        pnlChooser.PerformLayout();
+        resultsHeader.ResumeLayout(false);
+        resultsHeader.PerformLayout();
+        pnlResults.ResumeLayout(false);
+        ((System.ComponentModel.ISupportInitialize)grid).EndInit();
         ResumeLayout(false);
     }
 }
