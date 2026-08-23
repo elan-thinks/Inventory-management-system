@@ -8,17 +8,25 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms.Products;
 
 /// <summary>
-/// SCR-003 Product List — dark filters + icon actions.
+/// SCR-003 Product List — Designer-compatible; no DB calls at design time.
 /// </summary>
 public partial class ProductListForm : Form
 {
-    private readonly ProductService _service = new();
-    private readonly CategoryService _categoryService = new();
-    private readonly SupplierService _supplierService = new();
+    private ProductService? _service;
+    private CategoryService? _categoryService;
+    private SupplierService? _supplierService;
+
+    private ProductService Service => _service ??= new ProductService();
+    private CategoryService CategoryService => _categoryService ??= new CategoryService();
+    private SupplierService SupplierService => _supplierService ??= new SupplierService();
 
     public ProductListForm()
     {
         InitializeComponent();
+
+        if (DesignTime.IsActive)
+            return;
+
         ApplyRuntimeStyling();
         LoadFilterLookups();
         Load += (_, _) => ReloadGrid();
@@ -82,13 +90,13 @@ public partial class ProductListForm : Form
     {
         cboCategory.Items.Clear();
         cboCategory.Items.Add(new FilterItem(null, "Category: All"));
-        foreach (var c in _categoryService.GetList(isActiveFilter: true))
+        foreach (var c in CategoryService.GetList(isActiveFilter: true))
             cboCategory.Items.Add(new FilterItem(c.CategoryID, c.CategoryName));
         cboCategory.SelectedIndex = 0;
 
         cboSupplier.Items.Clear();
         cboSupplier.Items.Add(new FilterItem(null, "Supplier: All"));
-        foreach (var s in _supplierService.GetList(isActiveFilter: true))
+        foreach (var s in SupplierService.GetList(isActiveFilter: true))
             cboSupplier.Items.Add(new FilterItem(s.SupplierID, s.SupplierName));
         cboSupplier.SelectedIndex = 0;
 
@@ -123,7 +131,7 @@ public partial class ProductListForm : Form
                 || stock is not null || active is not null;
             btnClearFilters.Visible = filtersOn;
 
-            var rows = _service.GetList(search, categoryId, supplierId, stock, active);
+            var rows = Service.GetList(search, categoryId, supplierId, stock, active);
 
             grid.DataSource = null;
             grid.Columns.Clear();
@@ -223,7 +231,7 @@ public partial class ProductListForm : Form
 
         try
         {
-            _service.DeleteOrThrowIfReferenced(row.ProductID);
+            Service.DeleteOrThrowIfReferenced(row.ProductID);
             MessageBox.Show(FindForm(), "Product deleted.", "Products",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
             ReloadGrid();
@@ -241,7 +249,7 @@ public partial class ProductListForm : Form
             {
                 try
                 {
-                    _service.Deactivate(row.ProductID);
+                    Service.Deactivate(row.ProductID);
                     MessageBox.Show(FindForm(), "Product marked Inactive.", "Products",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                     ReloadGrid();

@@ -18,7 +18,7 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms;
 
 /// <summary>
-/// Application shell — Milestone 19 final integration (approved UI only).
+/// Application shell — Designer-compatible (parameterless ctor for View Designer).
 /// </summary>
 public partial class MainForm : Form
 {
@@ -26,10 +26,20 @@ public partial class MainForm : Form
     private Button? _activeNavButton;
     private Form? _hostedContent;
 
+    /// <summary>Required by the WinForms designer.</summary>
+    public MainForm()
+        : this(DesignTime.PlaceholderUser)
+    {
+    }
+
     public MainForm(CurrentUser currentUser)
     {
-        _currentUser = currentUser;
+        _currentUser = currentUser ?? DesignTime.PlaceholderUser;
         InitializeComponent();
+
+        if (DesignTime.IsActive)
+            return;
+
         ApplyRuntimeStyling();
         BuildNavigation();
         NavigateTo("Dashboard");
@@ -86,6 +96,8 @@ public partial class MainForm : Form
 
     private void MainForm_Load(object? sender, EventArgs e)
     {
+        if (DesignTime.IsActive) return;
+
         var roleLabel = _currentUser.Role == UserRole.Administrator
             ? "Administrator"
             : "Inventory Staff";
@@ -193,7 +205,6 @@ public partial class MainForm : Form
         NavigateTo(key);
     }
 
-    /// <summary>Central navigation used by sidebar and Dashboard quick actions.</summary>
     public void NavigateTo(string key)
     {
         foreach (Control c in flpNav.Controls)

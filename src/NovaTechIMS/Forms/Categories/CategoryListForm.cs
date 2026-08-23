@@ -7,15 +7,20 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms.Categories;
 
 /// <summary>
-/// SCR-006 Category List — Designer-based (partial). Hosted in MainForm content area.
+/// SCR-006 Category List — Designer-based; design-time safe constructor.
 /// </summary>
 public partial class CategoryListForm : Form
 {
-    private readonly CategoryService _service = new();
+    private CategoryService? _service;
+    private CategoryService Service => _service ??= new CategoryService();
 
     public CategoryListForm()
     {
         InitializeComponent();
+
+        if (DesignTime.IsActive)
+            return;
+
         ApplyRuntimeStyling();
         Load += (_, _) => ReloadGrid();
     }
@@ -67,7 +72,7 @@ public partial class CategoryListForm : Form
 
             btnClearFilters.Visible = search is not null || activeFilter is not null;
 
-            var rows = _service.GetList(search, activeFilter);
+            var rows = Service.GetList(search, activeFilter);
 
             grid.DataSource = null;
             grid.Columns.Clear();
@@ -170,7 +175,7 @@ public partial class CategoryListForm : Form
 
         try
         {
-            _service.DeleteOrThrowIfReferenced(row.CategoryID);
+            Service.DeleteOrThrowIfReferenced(row.CategoryID);
             MessageBox.Show(FindForm(), "Category deleted.", "Categories",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
             ReloadGrid();
@@ -188,7 +193,7 @@ public partial class CategoryListForm : Form
             {
                 try
                 {
-                    _service.Deactivate(row.CategoryID);
+                    Service.Deactivate(row.CategoryID);
                     MessageBox.Show(FindForm(), "Category marked Inactive.", "Categories",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                     ReloadGrid();

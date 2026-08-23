@@ -7,15 +7,21 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms;
 
 /// <summary>
-/// SCR-001 Login — real authentication; approved presentation (M19).
+/// SCR-001 Login — Designer-compatible (no runtime work at design time).
 /// </summary>
 public partial class LoginForm : Form
 {
-    private readonly AuthService _auth = new();
+    private AuthService? _auth;
+
+    private AuthService Auth => _auth ??= new AuthService();
 
     public LoginForm()
     {
         InitializeComponent();
+
+        if (DesignTime.IsActive)
+            return;
+
         ApplyRuntimeStyling();
     }
 
@@ -53,6 +59,8 @@ public partial class LoginForm : Form
 
     private void LoginForm_Load(object? sender, EventArgs e)
     {
+        if (DesignTime.IsActive) return;
+
         AcceptButton = btnLogin;
         CancelButton = btnCancel;
         txtUsername.Focus();
@@ -80,7 +88,7 @@ public partial class LoginForm : Form
 
         try
         {
-            var current = _auth.Authenticate(username, password);
+            var current = Auth.Authenticate(username, password);
             SessionContext.SignIn(current);
 
             Hide();
