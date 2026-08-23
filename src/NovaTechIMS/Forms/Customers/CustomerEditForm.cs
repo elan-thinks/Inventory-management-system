@@ -1,5 +1,4 @@
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 using NovaTechIMS.Services;
 using NovaTechIMS.Utilities;
@@ -7,26 +6,18 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms.Customers;
 
 /// <summary>
-/// SCR-011 Customer Add/Edit modal (Milestone 7).
+/// SCR-011 Customer Add/Edit modal — Designer-based (partial).
 /// </summary>
-public class CustomerEditForm : Form
+public partial class CustomerEditForm : Form
 {
     private readonly CustomerService _service = new();
     private readonly int? _customerId;
 
-    private TextBox txtName = null!;
-    private TextBox txtPhone = null!;
-    private TextBox txtEmail = null!;
-    private TextBox txtAddress = null!;
-    private CheckBox chkActive = null!;
-    private Label lblError = null!;
-    private Button btnSave = null!;
-    private Button btnCancel = null!;
-
     public CustomerEditForm(int? customerId = null)
     {
         _customerId = customerId;
-        BuildUi();
+        InitializeComponent();
+        ApplyRuntimeStyling();
 
         if (_customerId is int id)
         {
@@ -42,119 +33,19 @@ public class CustomerEditForm : Form
         }
     }
 
-    private void BuildUi()
+    private void ApplyRuntimeStyling()
     {
-        AutoScaleMode = AutoScaleMode.Font;
-        Font = UiTheme.Body;
-        FormBorderStyle = FormBorderStyle.FixedDialog;
-        MaximizeBox = false;
-        MinimizeBox = false;
-        ShowInTaskbar = false;
-        StartPosition = FormStartPosition.CenterParent;
-        ClientSize = new Size(460, 360);
-        BackColor = UiTheme.Surface;
+        UiTheme.StyleTextBox(txtName);
+        UiTheme.StyleTextBox(txtPhone);
+        UiTheme.StyleTextBox(txtEmail);
+        UiTheme.StyleTextBox(txtAddress);
+        UiTheme.StyleButton(btnSave, UiTheme.ButtonKind.Primary);
+        UiTheme.StyleButton(btnCancel, UiTheme.ButtonKind.Secondary);
+    }
 
-        int y = 20;
-        const int labelX = 24;
-        const int fieldX = 24;
-        const int fieldW = 412;
-
-        void AddLabel(string text)
-        {
-            Controls.Add(new Label
-            {
-                Text = text,
-                Font = UiTheme.Label,
-                ForeColor = UiTheme.Text,
-                Location = new Point(labelX, y),
-                AutoSize = true
-            });
-            y += 20;
-        }
-
-        TextBox AddTextBox(int maxLen, bool multiline = false)
-        {
-            var tb = new TextBox
-            {
-                BorderStyle = BorderStyle.FixedSingle,
-                Location = new Point(fieldX, y),
-                Width = fieldW,
-                MaxLength = maxLen,
-                Font = UiTheme.Body
-            };
-            if (multiline)
-            {
-                tb.Multiline = true;
-                tb.Height = 56;
-                tb.ScrollBars = ScrollBars.Vertical;
-                y += 64;
-            }
-            else
-            {
-                y += 32;
-            }
-            Controls.Add(tb);
-            return tb;
-        }
-
-        AddLabel("Name *");
-        txtName = AddTextBox(150);
-
-        AddLabel("Phone");
-        txtPhone = AddTextBox(30);
-
-        AddLabel("Email");
-        txtEmail = AddTextBox(100);
-
-        AddLabel("Address");
-        txtAddress = AddTextBox(250, multiline: true);
-
-        chkActive = new CheckBox
-        {
-            Text = "Active",
-            Font = UiTheme.Body,
-            ForeColor = UiTheme.Text,
-            Location = new Point(fieldX, y),
-            AutoSize = true,
-            Checked = true
-        };
-        Controls.Add(chkActive);
-        y += 28;
-
-        lblError = new Label
-        {
-            ForeColor = UiTheme.Error,
-            Font = UiTheme.Label,
-            Location = new Point(fieldX, y),
-            Size = new Size(fieldW, 36),
-            Visible = false
-        };
-        Controls.Add(lblError);
-        y += 40;
-
-        btnSave = UiTheme.StyleButton(new Button
-        {
-            Text = "Save",
-            Size = new Size(100, 32),
-            Location = new Point(232, y)
-        }, UiTheme.ButtonKind.Primary);
-        btnSave.Click += BtnSave_Click;
-btnSave.Click += BtnSave_Click;
-
-        btnCancel = UiTheme.StyleButton(new Button
-        {
-            Text = "Cancel",
-            Size = new Size(100, 32),
-            Location = new Point(336, y)
-        }, UiTheme.ButtonKind.Secondary);
-        btnCancel.Click += (_, _) => DialogResult = DialogResult.Cancel;
-
-        AcceptButton = btnSave;
-        CancelButton = btnCancel;
-        Controls.Add(btnSave);
-        Controls.Add(btnCancel);
-
-        ClientSize = new Size(460, y + 52);
+    private void BtnCancel_Click(object? sender, EventArgs e)
+    {
+        DialogResult = DialogResult.Cancel;
     }
 
     private void LoadExisting(int id)
