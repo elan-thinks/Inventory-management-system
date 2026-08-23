@@ -1,5 +1,4 @@
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 using NovaTechIMS.Models.Enums;
 using NovaTechIMS.Services;
@@ -7,137 +6,41 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Delegations;
 
-/// <summary>Create Delegation modal (SCR-020).</summary>
-public class DelegationEditForm : Form
+/// <summary>Create Delegation modal — Designer-based (partial).</summary>
+public partial class DelegationEditForm : Form
 {
     private readonly DelegationService _service = new();
 
-    private ComboBox cboRecipient = null!;
-    private ComboBox cboResponsibility = null!;
-    private DateTimePicker dtpStart = null!;
-    private DateTimePicker dtpEnd = null!;
-    private TextBox txtReason = null!;
-    private Label lblError = null!;
-    private Button btnSave = null!;
-
     public DelegationEditForm()
     {
-        BuildUi();
+        InitializeComponent();
+        ApplyRuntimeStyling();
         Load += (_, _) => LoadRecipients();
     }
 
-    private void BuildUi()
+    private void ApplyRuntimeStyling()
     {
-        Text = "New Delegation";
-        AutoScaleMode = AutoScaleMode.Font;
         Font = UiTheme.Body;
-        FormBorderStyle = FormBorderStyle.FixedDialog;
-        MaximizeBox = false;
-        MinimizeBox = false;
-        ShowInTaskbar = false;
-        StartPosition = FormStartPosition.CenterParent;
         BackColor = UiTheme.Surface;
-
-        int y = 20;
-        const int lx = 24;
-        const int fw = 340;
-
-        void L(string t)
+        foreach (var lbl in new[] { lblRecipient, lblResponsibility, lblStart, lblEnd, lblReason })
         {
-            Controls.Add(new Label { Text = t, Font = UiTheme.Label, Location = new Point(lx, y), AutoSize = true });
-            y += 18;
+            lbl.Font = UiTheme.Label;
+            lbl.ForeColor = UiTheme.Text;
         }
-
-        L("Recipient (Inventory Staff) *");
-        cboRecipient = UiTheme.StyleComboBox(new ComboBox
-        {
-            Location = new Point(lx, y),
-            Width = fw,
-            DropDownStyle = ComboBoxStyle.DropDownList
-        });
-        Controls.Add(cboRecipient);
-        y += 32;
-
-        L("Responsibility *");
-        cboResponsibility = UiTheme.StyleComboBox(new ComboBox
-        {
-            Location = new Point(lx, y),
-            Width = fw,
-            DropDownStyle = ComboBoxStyle.DropDownList
-        });
-        cboResponsibility.Items.AddRange(new object[] { "Stock-In", "Stock-Out", "Report Access" });
-        cboResponsibility.SelectedIndex = 0;
-        Controls.Add(cboResponsibility);
-        y += 32;
-
-        L("Start date *");
-        dtpStart = UiTheme.StyleDatePicker(new DateTimePicker
-        {
-            Location = new Point(lx, y),
-            Width = 160,
-            Format = DateTimePickerFormat.Short,
-            Value = DateTime.Today
-        });
-        Controls.Add(dtpStart);
-        y += 32;
-
-        L("End date *");
-        dtpEnd = UiTheme.StyleDatePicker(new DateTimePicker
-        {
-            Location = new Point(lx, y),
-            Width = 160,
-            Format = DateTimePickerFormat.Short,
-            Value = DateTime.Today.AddDays(7)
-        });
-        Controls.Add(dtpEnd);
-        y += 32;
-
-        L("Reason *");
-        txtReason = UiTheme.StyleTextBox(new TextBox
-        {
-            Location = new Point(lx, y),
-            Width = fw,
-            Height = 60,
-            Multiline = true,
-            MaxLength = 500,
-            ScrollBars = ScrollBars.Vertical
-        });
-        Controls.Add(txtReason);
-        y += 72;
-
-        lblError = new Label
-        {
-            ForeColor = UiTheme.Error,
-            Font = UiTheme.ErrorText,
-            Location = new Point(lx, y),
-            Size = new Size(fw, 40),
-            Visible = false
-        };
-        Controls.Add(lblError);
-        y += 44;
-
-        btnSave = UiTheme.StyleButton(new Button
-        {
-            Text = "Create",
-            Size = new Size(100, 32),
-            Location = new Point(lx + fw - 208, y)
-        }, UiTheme.ButtonKind.Primary);
-        btnSave.Click += BtnSave_Click;
-
-        var btnCancel = UiTheme.StyleButton(new Button
-        {
-            Text = "Cancel",
-            Size = new Size(100, 32),
-            Location = new Point(lx + fw - 100, y)
-        }, UiTheme.ButtonKind.Secondary);
-        btnCancel.Click += (_, _) => DialogResult = DialogResult.Cancel;
-
-        AcceptButton = btnSave;
-        CancelButton = btnCancel;
-        Controls.Add(btnSave);
-        Controls.Add(btnCancel);
-        ClientSize = new Size(lx * 2 + fw, y + 52);
+        lblError.Font = UiTheme.ErrorText;
+        lblError.ForeColor = UiTheme.Error;
+        UiTheme.StyleComboBox(cboRecipient);
+        UiTheme.StyleComboBox(cboResponsibility);
+        UiTheme.StyleDatePicker(dtpStart);
+        UiTheme.StyleDatePicker(dtpEnd);
+        UiTheme.StyleTextBox(txtReason);
+        UiTheme.StyleButton(btnSave, UiTheme.ButtonKind.Primary);
+        UiTheme.StyleButton(btnCancel, UiTheme.ButtonKind.Secondary);
+        dtpStart.Value = DateTime.Today;
+        dtpEnd.Value = DateTime.Today.AddDays(7);
     }
+
+    private void BtnCancel_Click(object? sender, EventArgs e) => DialogResult = DialogResult.Cancel;
 
     private void LoadRecipients()
     {
@@ -160,7 +63,6 @@ public class DelegationEditForm : Form
     {
         lblError.Visible = false;
         btnSave.Enabled = false;
-
         try
         {
             if (cboRecipient.SelectedItem is not LookupItem rec || rec.Value <= 0)
@@ -173,13 +75,7 @@ public class DelegationEditForm : Form
                 _ => DelegatableResponsibility.ReportAccess
             };
 
-            var id = _service.Create(
-                rec.Value,
-                resp,
-                dtpStart.Value.Date,
-                dtpEnd.Value.Date,
-                txtReason.Text);
-
+            var id = _service.Create(rec.Value, resp, dtpStart.Value.Date, dtpEnd.Value.Date, txtReason.Text);
             MessageBox.Show(this, $"Delegation created (ID {id}).", "Delegations",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;
