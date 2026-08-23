@@ -1,59 +1,57 @@
 # UI Designer Conversion
 
 **Branch:** `version1.3`  
-**Goal:** Every user-facing Form opens in Visual Studio **View Designer** with real controls (not empty / BuildUi-only).
-
----
-
-## Audit (version1.3)
-
-| Form | Before | After (this work) |
-|------|--------|-------------------|
-| LoginForm | Designer (.cs + .Designer.cs + .resx) | Unchanged |
-| MainForm | Designer | Unchanged |
-| CategoryListForm | Programmatic `BuildUi()` | **Converted** |
-| CategoryEditForm | Programmatic `BuildUi()` | **Converted** |
-| SupplierListForm / SupplierEditForm | Programmatic | Pending |
-| CustomerListForm / CustomerEditForm | Programmatic | Pending |
-| ProductListForm / ProductEditForm | Programmatic | Pending |
-| StockInForm / StockOutForm | Programmatic | Pending |
-| AdjustmentForm / InventoryHistoryForm | Programmatic | Pending |
-| UserListForm / UserEditForm | Programmatic | Pending |
-| DelegationListForm / DelegationEditForm | Programmatic | Pending |
-| DashboardForm | Programmatic | Pending |
-| ReportsHubForm / ReportViewerForm | Programmatic | Pending |
-| PlaceholderForm | Programmatic (legacy) | Optional |
-
----
-
-## Conversion pattern (applied to Categories)
-
-1. `public partial class XForm : Form`
-2. Controls declared + created in `XForm.Designer.cs` → `InitializeComponent()`
-3. `XForm.resx` present
-4. Constructor: `InitializeComponent()` then `ApplyRuntimeStyling()` (UiTheme) then data/events
-5. **No** DB/services inside `InitializeComponent()`
-6. Business logic stays in `.cs` + existing Services
-
----
-
-## How to verify in Visual Studio
-
-1. `git pull origin version1.3`
-2. Open `NovaTechIMS.sln`
-3. Rebuild
-4. Right-click `CategoryEditForm.cs` → **View Designer** → controls visible
-5. Same for `CategoryListForm.cs`
-6. Run app → Categories CRUD still works
+**Goal:** Every user-facing Form opens in Visual Studio **View Designer** with real controls.
 
 ---
 
 ## Status
 
-| Check | Result |
-|-------|--------|
-| Categories converted | Yes |
-| Full solution all forms Designer-ready | **In progress** (pattern proven; remaining screens same pattern) |
-| Services / DB / tests modified | No |
+| Form | Status |
+|------|--------|
+| LoginForm, MainForm | Already Designer-based |
+| CategoryListForm, CategoryEditForm | **Converted** |
+| SupplierListForm, SupplierEditForm | **Converted** |
+| CustomerListForm, CustomerEditForm | **Converted** |
+| Products, Inventory, Users, Delegations, Dashboard, Reports | Pending |
 
-**Next:** Continue same conversion for Suppliers, Customers, Products, Inventory, Users, Delegations, Dashboard, Reports.
+---
+
+## Pattern
+
+1. `public partial class XForm : Form`
+2. Controls in `XForm.Designer.cs` → `InitializeComponent()`
+3. `XForm.resx` present
+4. Constructor: `InitializeComponent()` → `ApplyRuntimeStyling()` → data/events
+5. No DB/services in `InitializeComponent()`
+6. Business logic unchanged (existing Services)
+
+---
+
+## Batch: Suppliers + Customers (this session)
+
+**Converted:**
+- SupplierListForm (.cs + .Designer.cs + .resx)
+- SupplierEditForm (.cs + .Designer.cs + .resx)
+- CustomerListForm (.cs + .Designer.cs + .resx)
+- CustomerEditForm (.cs + .Designer.cs + .resx)
+
+**Also fixed:** duplicate `btnSave.Click += BtnSave_Click` that existed in original Edit `BuildUi` methods (single subscription now).
+
+**Not modified:** Services, repositories, database, authorization, tests.
+
+---
+
+## Local verification (Windows + VS)
+
+```powershell
+git pull origin version1.3
+# Open src/NovaTechIMS.sln
+# Build → Rebuild Solution
+# Right-click SupplierListForm.cs / CustomerEditForm.cs → View Designer
+# F5 → test Suppliers + Customers CRUD
+dotnet build src/NovaTechIMS.sln
+dotnet test src/NovaTechIMS.Tests/NovaTechIMS.Tests.csproj
+```
+
+Designer success = controls visible and selectable on the design surface (not an empty form).
