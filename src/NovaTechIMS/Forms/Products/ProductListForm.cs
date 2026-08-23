@@ -8,7 +8,7 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms.Products;
 
 /// <summary>
-/// SCR-003 Product List — Designer-based (partial).
+/// SCR-003 Product List — dark filters + mockup-aligned grid.
 /// </summary>
 public partial class ProductListForm : Form
 {
@@ -26,6 +26,9 @@ public partial class ProductListForm : Form
 
     private void ApplyRuntimeStyling()
     {
+        BackColor = UiTheme.Background;
+        UiTheme.ApplyDarkInputs(this);
+
         UiTheme.StyleTextBox(txtSearch);
         UiTheme.StyleComboBox(cboCategory);
         UiTheme.StyleComboBox(cboSupplier);
@@ -34,6 +37,12 @@ public partial class ProductListForm : Form
         UiTheme.StyleButton(btnClearFilters, UiTheme.ButtonKind.Ghost);
         UiTheme.StyleButton(btnRefresh, UiTheme.ButtonKind.Secondary);
         UiTheme.StyleButton(btnAdd, UiTheme.ButtonKind.Primary);
+
+        toolbar.BackColor = UiTheme.Background;
+        lblCount.ForeColor = UiTheme.TextMuted;
+        lblEmpty.ForeColor = UiTheme.TextMuted;
+        lblEmpty.BackColor = UiTheme.Background;
+
         UiTheme.ApplyGridTheme(grid);
         UiTheme.WireStatusBadgeColumn(grid, nameof(ProductListRow.StockStatusLabel), value => (value?.ToString() ?? "") switch
         {
@@ -72,26 +81,26 @@ public partial class ProductListForm : Form
     private void LoadFilterLookups()
     {
         cboCategory.Items.Clear();
-        cboCategory.Items.Add(new FilterItem(null, "All categories"));
+        cboCategory.Items.Add(new FilterItem(null, "Category: All"));
         foreach (var c in _categoryService.GetList(isActiveFilter: true))
             cboCategory.Items.Add(new FilterItem(c.CategoryID, c.CategoryName));
         cboCategory.SelectedIndex = 0;
 
         cboSupplier.Items.Clear();
-        cboSupplier.Items.Add(new FilterItem(null, "All suppliers"));
+        cboSupplier.Items.Add(new FilterItem(null, "Supplier: All"));
         foreach (var s in _supplierService.GetList(isActiveFilter: true))
             cboSupplier.Items.Add(new FilterItem(s.SupplierID, s.SupplierName));
         cboSupplier.SelectedIndex = 0;
 
         cboStock.Items.Clear();
-        cboStock.Items.Add(new StockFilterItem(null, "All stock"));
+        cboStock.Items.Add(new StockFilterItem(null, "Stock Status: All"));
         cboStock.Items.Add(new StockFilterItem(StockStatus.InStock, "In Stock"));
         cboStock.Items.Add(new StockFilterItem(StockStatus.LowStock, "Low Stock"));
         cboStock.Items.Add(new StockFilterItem(StockStatus.OutOfStock, "Out of Stock"));
         cboStock.SelectedIndex = 0;
 
         cboStatus.Items.Clear();
-        cboStatus.Items.AddRange(new object[] { "All statuses", "Active", "Inactive" });
+        cboStatus.Items.AddRange(new object[] { "Status: All", "Active", "Inactive" });
         cboStatus.SelectedIndex = 0;
     }
 
@@ -134,7 +143,7 @@ public partial class ProductListForm : Form
             grid.Visible = true;
             grid.DataSource = rows;
             ConfigureColumns();
-            lblCount.Text = rows.Count == 1 ? "1 product" : $"{rows.Count} products";
+            lblCount.Text = rows.Count == 1 ? "Showing 1 of 1 products" : $"Showing {rows.Count} of {rows.Count} products";
         }
         catch (Exception ex)
         {
@@ -158,37 +167,56 @@ public partial class ProductListForm : Form
             c.FillWeight = w;
         }
 
-        Show(nameof(ProductListRow.ProductID), "ID", 0.4f);
-        Show(nameof(ProductListRow.ProductName), "Name", 1.4f);
-        Show(nameof(ProductListRow.CategoryName), "Category", 1.0f);
-        Show(nameof(ProductListRow.SupplierName), "Supplier", 1.0f);
-        Show(nameof(ProductListRow.QuantityOnHand), "Qty", 0.5f);
-        Show(nameof(ProductListRow.MinimumStockLevel), "Min", 0.4f);
-        Show(nameof(ProductListRow.StockStatusLabel), "Stock", 0.8f);
-        Show(nameof(ProductListRow.SellingPrice), "Sell", 0.6f);
-        Show(nameof(ProductListRow.StatusLabel), "Status", 0.6f);
+        // Order closer to mockup: ID, Name, Category, Supplier, Qty, Min, Status, Price, Actions
+        Show(nameof(ProductListRow.ProductID), "Product ID", 0.55f);
+        Show(nameof(ProductListRow.ProductName), "Name", 1.5f);
+        Show(nameof(ProductListRow.CategoryName), "Category", 1.1f);
+        Show(nameof(ProductListRow.SupplierName), "Default Supplier", 1.2f);
+        Show(nameof(ProductListRow.QuantityOnHand), "Qty on Hand", 0.7f);
+        Show(nameof(ProductListRow.MinimumStockLevel), "Min Level", 0.6f);
+        Show(nameof(ProductListRow.StockStatusLabel), "Status", 0.9f);
+        Show(nameof(ProductListRow.SellingPrice), "Selling Price", 0.75f);
+        Show(nameof(ProductListRow.StatusLabel), "Active", 0.7f);
 
         if (grid.Columns.Contains("colEdit")) grid.Columns.Remove("colEdit");
         if (grid.Columns.Contains("colDelete")) grid.Columns.Remove("colDelete");
 
-        grid.Columns.Add(new DataGridViewButtonColumn
+        var editCol = new DataGridViewButtonColumn
         {
             Name = "colEdit",
+            HeaderText = "Actions",
             Text = "Edit",
-            UseColumnTextForButtonValue = true,
-            FillWeight = 0.45f,
-            FlatStyle = FlatStyle.Flat,
-            DefaultCellStyle = { ForeColor = UiTheme.Primary, Font = UiTheme.LabelSemibold }
-        });
-        grid.Columns.Add(new DataGridViewButtonColumn
-        {
-            Name = "colDelete",
-            Text = "Delete",
             UseColumnTextForButtonValue = true,
             FillWeight = 0.5f,
             FlatStyle = FlatStyle.Flat,
-            DefaultCellStyle = { ForeColor = UiTheme.Error, Font = UiTheme.LabelSemibold }
-        });
+            DefaultCellStyle =
+            {
+                ForeColor = UiTheme.Primary,
+                BackColor = UiTheme.Surface,
+                SelectionBackColor = UiTheme.RowSelected,
+                Font = UiTheme.LabelSemibold,
+                Alignment = DataGridViewContentAlignment.MiddleCenter
+            }
+        };
+        var delCol = new DataGridViewButtonColumn
+        {
+            Name = "colDelete",
+            HeaderText = "",
+            Text = "Delete",
+            UseColumnTextForButtonValue = true,
+            FillWeight = 0.55f,
+            FlatStyle = FlatStyle.Flat,
+            DefaultCellStyle =
+            {
+                ForeColor = UiTheme.Error,
+                BackColor = UiTheme.Surface,
+                SelectionBackColor = UiTheme.RowSelected,
+                Font = UiTheme.LabelSemibold,
+                Alignment = DataGridViewContentAlignment.MiddleCenter
+            }
+        };
+        grid.Columns.Add(editCol);
+        grid.Columns.Add(delCol);
     }
 
     private void BtnAdd_Click(object? sender, EventArgs e)
