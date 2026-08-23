@@ -15,10 +15,11 @@ public partial class DashboardForm : Form
     private readonly DashboardService _service = new();
     private readonly CurrentUser _user;
     private readonly Action<string>? _navigate;
+    private bool _badgeWired;
 
     public DashboardForm(CurrentUser user, Action<string>? navigate = null)
     {
-        _user = user;
+        _user = user ?? throw new ArgumentNullException(nameof(user));
         _navigate = navigate;
         InitializeComponent();
         ApplyRuntimeStyling();
@@ -30,60 +31,80 @@ public partial class DashboardForm : Form
     {
         Font = UiTheme.Body;
         BackColor = UiTheme.Background;
-        metricsPanel.BackColor = UiTheme.Background;
-        actionsPanel.BackColor = UiTheme.Surface;
-        lblAct.Font = UiTheme.SectionTitle;
-        lblAct.ForeColor = UiTheme.Text;
-        lblQa.Font = UiTheme.SectionTitle;
-        lblQa.ForeColor = UiTheme.Text;
-        lblEmpty.Font = UiTheme.Body;
-        lblEmpty.ForeColor = UiTheme.TextMuted;
-        lblError.Font = UiTheme.Label;
-        lblError.ForeColor = UiTheme.Error;
 
-        foreach (var tile in new[] { tileProducts, tileCategories, tileSuppliers, tileTotalQty, tileLow, tileOut })
+        if (metricsPanel is not null)
+            metricsPanel.BackColor = UiTheme.Background;
+        if (actionsPanel is not null)
+            actionsPanel.BackColor = UiTheme.Surface;
+
+        if (lblAct is not null)
         {
-            tile.BackColor = UiTheme.Surface;
-            UiTheme.ApplyRoundedRegion(tile, UiTheme.RadiusLg);
+            lblAct.Font = UiTheme.SectionTitle;
+            lblAct.ForeColor = UiTheme.Text;
         }
 
-        lblProducts.ForeColor = UiTheme.Text;
-        lblCategories.ForeColor = UiTheme.Text;
-        lblSuppliers.ForeColor = UiTheme.Text;
-        lblTotalQty.ForeColor = UiTheme.Text;
-        lblLow.ForeColor = UiTheme.Warning;
-        lblOut.ForeColor = UiTheme.Error;
-
-        foreach (Control c in tileProducts.Controls)
-            if (c is Label l && l != lblProducts) { l.Font = UiTheme.Label; l.ForeColor = UiTheme.TextMuted; }
-        foreach (Control c in tileCategories.Controls)
-            if (c is Label l && l != lblCategories) { l.Font = UiTheme.Label; l.ForeColor = UiTheme.TextMuted; }
-        foreach (Control c in tileSuppliers.Controls)
-            if (c is Label l && l != lblSuppliers) { l.Font = UiTheme.Label; l.ForeColor = UiTheme.TextMuted; }
-        foreach (Control c in tileTotalQty.Controls)
-            if (c is Label l && l != lblTotalQty) { l.Font = UiTheme.Label; l.ForeColor = UiTheme.TextMuted; }
-        foreach (Control c in tileLow.Controls)
-            if (c is Label l && l != lblLow) { l.Font = UiTheme.Label; l.ForeColor = UiTheme.TextMuted; }
-        foreach (Control c in tileOut.Controls)
-            if (c is Label l && l != lblOut) { l.Font = UiTheme.Label; l.ForeColor = UiTheme.TextMuted; }
-
-        UiTheme.ApplyGridTheme(grid);
-        UiTheme.WireStatusBadgeColumn(grid, nameof(TransactionHistoryRow.TypeLabel), value => (value?.ToString() ?? "") switch
+        if (lblQa is not null)
         {
-            "Stock-In" => ("Stock-In", UiTheme.BadgeTone.Success, '\u2713'),
-            "Stock-Out" => ("Stock-Out", UiTheme.BadgeTone.Error, '\u2715'),
-            _ => ("Adjustment", UiTheme.BadgeTone.Info, '!')
-        });
+            lblQa.Font = UiTheme.SectionTitle;
+            lblQa.ForeColor = UiTheme.Text;
+        }
 
-        actionsPanel.Paint += (_, e) =>
+        if (lblEmpty is not null)
         {
-            using var pen = new Pen(UiTheme.Border, 1);
-            e.Graphics.DrawRectangle(pen, 0, 0, actionsPanel.Width - 1, actionsPanel.Height - 1);
-        };
+            lblEmpty.Font = UiTheme.Body;
+            lblEmpty.ForeColor = UiTheme.TextMuted;
+        }
+
+        if (lblError is not null)
+        {
+            lblError.Font = UiTheme.Label;
+            lblError.ForeColor = UiTheme.Error;
+        }
+
+        StyleMetricTile(tileProducts, lblProducts, UiTheme.Text);
+        StyleMetricTile(tileCategories, lblCategories, UiTheme.Text);
+        StyleMetricTile(tileSuppliers, lblSuppliers, UiTheme.Text);
+        StyleMetricTile(tileTotalQty, lblTotalQty, UiTheme.Text);
+        StyleMetricTile(tileLow, lblLow, UiTheme.Warning);
+        StyleMetricTile(tileOut, lblOut, UiTheme.Error);
+
+        if (grid is not null)
+            UiTheme.ApplyGridTheme(grid);
+
+        if (actionsPanel is not null)
+        {
+            actionsPanel.Paint += (_, e) =>
+            {
+                using var pen = new Pen(UiTheme.Border, 1);
+                e.Graphics.DrawRectangle(pen, 0, 0, actionsPanel.Width - 1, actionsPanel.Height - 1);
+            };
+        }
+    }
+
+    private static void StyleMetricTile(Panel? tile, Label? valueLabel, Color valueColor)
+    {
+        if (tile is null) return;
+
+        tile.BackColor = UiTheme.Surface;
+        UiTheme.ApplyRoundedRegion(tile, UiTheme.RadiusLg);
+
+        if (valueLabel is not null)
+            valueLabel.ForeColor = valueColor;
+
+        foreach (Control c in tile.Controls)
+        {
+            if (c is Label l && l != valueLabel)
+            {
+                l.Font = UiTheme.Label;
+                l.ForeColor = UiTheme.TextMuted;
+            }
+        }
     }
 
     private void BuildQuickActions()
     {
+        if (actionsPanel is null || _user is null) return;
+
         int ay = 40;
         void AddAction(string text, string navKey)
         {
@@ -113,27 +134,30 @@ public partial class DashboardForm : Form
 
     private void Reload()
     {
-        lblError.Visible = false;
+        if (lblError is not null)
+            lblError.Visible = false;
 
         try
         {
             var m = _service.GetMetrics();
-            lblProducts.Text = m.ActiveProductCount.ToString();
-            lblCategories.Text = m.CategoryCount.ToString();
-            lblSuppliers.Text = m.SupplierCount.ToString();
-            lblTotalQty.Text = m.TotalQuantityOnHand.ToString();
-            lblLow.Text = m.LowStockCount.ToString();
-            lblOut.Text = m.OutOfStockCount.ToString();
+            if (lblProducts is not null) lblProducts.Text = m.ActiveProductCount.ToString();
+            if (lblCategories is not null) lblCategories.Text = m.CategoryCount.ToString();
+            if (lblSuppliers is not null) lblSuppliers.Text = m.SupplierCount.ToString();
+            if (lblTotalQty is not null) lblTotalQty.Text = m.TotalQuantityOnHand.ToString();
+            if (lblLow is not null) lblLow.Text = m.LowStockCount.ToString();
+            if (lblOut is not null) lblOut.Text = m.OutOfStockCount.ToString();
 
             var rows = _service.GetRecentActivity(10);
+            if (grid is null) return;
+
             if (rows.Count == 0)
             {
                 grid.Visible = false;
-                lblEmpty.Visible = true;
+                if (lblEmpty is not null) lblEmpty.Visible = true;
             }
             else
             {
-                lblEmpty.Visible = false;
+                if (lblEmpty is not null) lblEmpty.Visible = false;
                 grid.Visible = true;
                 grid.DataSource = null;
                 grid.Columns.Clear();
@@ -155,12 +179,27 @@ public partial class DashboardForm : Form
                 Show(nameof(TransactionHistoryRow.ProductName), "Product", 1.4f);
                 Show(nameof(TransactionHistoryRow.Quantity), "Qty", 0.5f);
                 Show(nameof(TransactionHistoryRow.UserFullName), "User", 1.0f);
+
+                if (!_badgeWired)
+                {
+                    UiTheme.WireStatusBadgeColumn(grid, nameof(TransactionHistoryRow.TypeLabel),
+                        value => (value?.ToString() ?? "") switch
+                        {
+                            "Stock-In" => ("Stock-In", UiTheme.BadgeTone.Success, '\u2713'),
+                            "Stock-Out" => ("Stock-Out", UiTheme.BadgeTone.Error, '\u2715'),
+                            _ => ("Adjustment", UiTheme.BadgeTone.Info, '!')
+                        });
+                    _badgeWired = true;
+                }
             }
         }
         catch (Exception ex)
         {
-            lblError.Text = "Unable to load dashboard data. " + ErrorPresenter.ToUserMessage(ex);
-            lblError.Visible = true;
+            if (lblError is not null)
+            {
+                lblError.Text = "Unable to load dashboard data. " + ErrorPresenter.ToUserMessage(ex);
+                lblError.Visible = true;
+            }
         }
     }
 }
