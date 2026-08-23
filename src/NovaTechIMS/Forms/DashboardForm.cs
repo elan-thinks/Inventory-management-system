@@ -51,11 +51,13 @@ public partial class DashboardForm : Form
 
     private void PositionViewAllLink()
     {
+        if (lnkViewAll is null || activityHeader is null) return;
         lnkViewAll.Left = Math.Max(80, activityHeader.ClientSize.Width - lnkViewAll.Width - 4);
     }
 
     private void ResizeQuickActionButtons()
     {
+        if (actionsPanel is null) return;
         int w = Math.Max(160, actionsPanel.ClientSize.Width - 24);
         foreach (Control c in actionsPanel.Controls)
         {
@@ -64,7 +66,6 @@ public partial class DashboardForm : Form
         }
     }
 
-    /// <summary>Light theme polish only — does not rebuild layout.</summary>
     private void ApplyRuntimeTouches()
     {
         Font = UiTheme.Body;
@@ -105,7 +106,6 @@ public partial class DashboardForm : Form
         btnQaAdjustment.Visible = AuthorizationService.HasPermission(_user, Permissions.PerformAdjustment);
         btnQaUsers.Visible = AuthorizationService.HasPermission(_user, Permissions.ManageUsers);
 
-        // Stack visible buttons so gaps from hidden ones collapse
         int y = 48;
         foreach (Control c in actionsPanel.Controls)
         {
@@ -118,6 +118,12 @@ public partial class DashboardForm : Form
     }
 
     private void Navigate(string key) => _navigate?.Invoke(key);
+
+    private void BtnQaStockIn_Click(object? sender, EventArgs e) => Navigate("Stock In");
+    private void BtnQaStockOut_Click(object? sender, EventArgs e) => Navigate("Stock Out");
+    private void BtnQaProducts_Click(object? sender, EventArgs e) => Navigate("Products");
+    private void BtnQaAdjustment_Click(object? sender, EventArgs e) => Navigate("Inventory Adjustment");
+    private void BtnQaUsers_Click(object? sender, EventArgs e) => Navigate("User Management");
 
     private void LnkViewAll_Click(object? sender, EventArgs e)
     {
@@ -199,7 +205,11 @@ public partial class DashboardForm : Form
             lblTotalQty.Text = "0";
             lblLow.Text = "0";
             lblOut.Text = "0";
-            lblError.Text = "Unable to load dashboard data. " + ErrorPresenter.ToUserMessage(ex);
+
+            // Safe user message (no stack / SQL)
+            var mapped = DbExceptionMapper.Map(ex);
+            var friendly = ErrorPresenter.Classify(mapped).Message;
+            lblError.Text = "Unable to load dashboard data. " + friendly;
             lblError.Visible = true;
         }
     }

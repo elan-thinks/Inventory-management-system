@@ -5,7 +5,6 @@ namespace NovaTechIMS.Forms;
 
 /// <summary>
 /// Dashboard layout — all primary controls are on the design surface (drag/drop).
-/// Metric values and data load at runtime only.
 /// </summary>
 partial class DashboardForm
 {
@@ -106,7 +105,6 @@ partial class DashboardForm
         actionsPanel.SuspendLayout();
         SuspendLayout();
 
-        // ---- metrics row ----
         metricsPanel.AutoScroll = true;
         metricsPanel.BackColor = Color.FromArgb(244, 246, 248);
         metricsPanel.Controls.Add(tileProducts);
@@ -136,7 +134,6 @@ partial class DashboardForm
         ConfigureMetricTile(tileOut, "tileOut", capOut, "capOut", "Out-of-Stock Products",
             lblOut, "lblOut", 5, Color.FromArgb(192, 57, 43));
 
-        // ---- error ----
         lblError.Dock = DockStyle.Top;
         lblError.ForeColor = Color.FromArgb(192, 57, 43);
         lblError.Font = new Font("Segoe UI", 9F);
@@ -146,7 +143,6 @@ partial class DashboardForm
         lblError.TabIndex = 1;
         lblError.Visible = false;
 
-        // ---- bottom split ----
         bottom.ColumnCount = 2;
         bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70F));
         bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
@@ -160,7 +156,6 @@ partial class DashboardForm
         bottom.Size = new Size(960, 340);
         bottom.TabIndex = 2;
 
-        // activity card
         activityCard.BackColor = Color.White;
         activityCard.BorderStyle = BorderStyle.FixedSingle;
         activityCard.Controls.Add(grid);
@@ -218,7 +213,6 @@ partial class DashboardForm
         lblEmpty.TextAlign = ContentAlignment.MiddleCenter;
         lblEmpty.Visible = false;
 
-        // quick actions
         actionsPanel.BackColor = Color.White;
         actionsPanel.BorderStyle = BorderStyle.FixedSingle;
         actionsPanel.Controls.Add(btnQaUsers);
@@ -246,13 +240,13 @@ partial class DashboardForm
         ConfigureQaButton(btnQaAdjustment, "btnQaAdjustment", "Inventory Adjustment", 168, false);
         ConfigureQaButton(btnQaUsers, "btnQaUsers", "Manage Users", 208, false);
 
-        btnQaStockIn.Click += (_, _) => Navigate("Stock In");
-        btnQaStockOut.Click += (_, _) => Navigate("Stock Out");
-        btnQaProducts.Click += (_, _) => Navigate("Products");
-        btnQaAdjustment.Click += (_, _) => Navigate("Inventory Adjustment");
-        btnQaUsers.Click += (_, _) => Navigate("User Management");
+        // Named handlers in DashboardForm.cs (designer-safe)
+        btnQaStockIn.Click += BtnQaStockIn_Click;
+        btnQaStockOut.Click += BtnQaStockOut_Click;
+        btnQaProducts.Click += BtnQaProducts_Click;
+        btnQaAdjustment.Click += BtnQaAdjustment_Click;
+        btnQaUsers.Click += BtnQaUsers_Click;
 
-        // form
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.FromArgb(244, 246, 248);
