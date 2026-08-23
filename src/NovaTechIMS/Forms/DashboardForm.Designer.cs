@@ -29,8 +29,10 @@ partial class DashboardForm
 
     private Label lblError;
     private TableLayoutPanel bottom;
-    private Panel activityPanel;
+    private Panel activityCard;
+    private Panel activityHeader;
     private Label lblAct;
+    private LinkLabel lnkViewAll;
     private DataGridView grid;
     private Label lblEmpty;
     private Panel actionsPanel;
@@ -67,8 +69,10 @@ partial class DashboardForm
         capOut = new Label();
 
         bottom = new TableLayoutPanel();
-        activityPanel = new Panel();
+        activityCard = new Panel();
+        activityHeader = new Panel();
         lblAct = new Label();
+        lnkViewAll = new LinkLabel();
         grid = new DataGridView();
         lblEmpty = new Label();
         actionsPanel = new Panel();
@@ -83,7 +87,8 @@ partial class DashboardForm
         tileLow.SuspendLayout();
         tileOut.SuspendLayout();
         bottom.SuspendLayout();
-        activityPanel.SuspendLayout();
+        activityCard.SuspendLayout();
+        activityHeader.SuspendLayout();
         actionsPanel.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)grid).BeginInit();
         SuspendLayout();
@@ -96,18 +101,19 @@ partial class DashboardForm
         TopLevel = false;
         Name = "DashboardForm";
         Text = "Dashboard";
+        Padding = new Padding(8, 4, 8, 8);
 
-        // ---- Metric tiles (explicit, Designer-safe) ----
-        ConfigureTile(tileProducts, lblProducts, capProducts, "lblProducts", "Active products");
-        ConfigureTile(tileCategories, lblCategories, capCategories, "lblCategories", "Categories");
-        ConfigureTile(tileSuppliers, lblSuppliers, capSuppliers, "lblSuppliers", "Suppliers");
-        ConfigureTile(tileTotalQty, lblTotalQty, capTotalQty, "lblTotalQty", "Total qty on hand");
-        ConfigureTile(tileLow, lblLow, capLow, "lblLow", "Low stock");
-        ConfigureTile(tileOut, lblOut, capOut, "lblOut", "Out of stock");
+        // Mockup layout: caption on top, large number below
+        ConfigureTile(tileProducts, lblProducts, capProducts, "lblProducts", "Total Active Products");
+        ConfigureTile(tileCategories, lblCategories, capCategories, "lblCategories", "Total Categories");
+        ConfigureTile(tileSuppliers, lblSuppliers, capSuppliers, "lblSuppliers", "Total Suppliers");
+        ConfigureTile(tileTotalQty, lblTotalQty, capTotalQty, "lblTotalQty", "Total Inventory Quantity");
+        ConfigureTile(tileLow, lblLow, capLow, "lblLow", "Low-Stock Products");
+        ConfigureTile(tileOut, lblOut, capOut, "lblOut", "Out-of-Stock Products");
 
         metricsPanel.Dock = DockStyle.Top;
-        metricsPanel.Height = 110;
-        metricsPanel.Padding = new Padding(0, 8, 0, 8);
+        metricsPanel.Height = 120;
+        metricsPanel.Padding = new Padding(0, 4, 0, 12);
         metricsPanel.WrapContents = false;
         metricsPanel.AutoScroll = true;
         metricsPanel.Name = "metricsPanel";
@@ -126,19 +132,38 @@ partial class DashboardForm
         bottom.Dock = DockStyle.Fill;
         bottom.ColumnCount = 2;
         bottom.RowCount = 1;
-        bottom.Padding = new Padding(0, 8, 0, 0);
-        bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70F));
-        bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
+        bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 72F));
+        bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28F));
         bottom.Name = "bottom";
 
-        activityPanel.Dock = DockStyle.Fill;
-        activityPanel.Padding = new Padding(0, 0, 8, 0);
-        activityPanel.Name = "activityPanel";
+        activityCard.Dock = DockStyle.Fill;
+        activityCard.BackColor = Color.White;
+        activityCard.Padding = new Padding(16);
+        activityCard.Margin = new Padding(0, 0, 12, 0);
+        activityCard.Name = "activityCard";
 
-        lblAct.Text = "Recent activity";
-        lblAct.Dock = DockStyle.Top;
-        lblAct.Height = 28;
+        activityHeader.Dock = DockStyle.Top;
+        activityHeader.Height = 36;
+        activityHeader.Name = "activityHeader";
+
+        lblAct.Text = "Recent Activity";
+        lblAct.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+        lblAct.AutoSize = true;
+        lblAct.Location = new Point(0, 6);
         lblAct.Name = "lblAct";
+
+        lnkViewAll.Text = "View all  >";
+        lnkViewAll.AutoSize = true;
+        lnkViewAll.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        lnkViewAll.Location = new Point(420, 8);
+        lnkViewAll.Name = "lnkViewAll";
+        lnkViewAll.LinkColor = Color.FromArgb(30, 75, 143);
+        lnkViewAll.ActiveLinkColor = Color.FromArgb(22, 58, 110);
+        lnkViewAll.LinkBehavior = LinkBehavior.HoverUnderline;
+        lnkViewAll.Click += LnkViewAll_Click;
+
+        activityHeader.Controls.Add(lblAct);
+        activityHeader.Controls.Add(lnkViewAll);
 
         grid.Dock = DockStyle.Fill;
         grid.AllowUserToAddRows = false;
@@ -148,6 +173,8 @@ partial class DashboardForm
         grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         grid.Name = "grid";
+        grid.BackgroundColor = Color.White;
+        grid.BorderStyle = BorderStyle.None;
 
         lblEmpty.Text = "No recent activity yet — record your first Stock-In to get started.";
         lblEmpty.Dock = DockStyle.Fill;
@@ -155,22 +182,23 @@ partial class DashboardForm
         lblEmpty.Visible = false;
         lblEmpty.Name = "lblEmpty";
 
-        activityPanel.Controls.Add(grid);
-        activityPanel.Controls.Add(lblEmpty);
-        activityPanel.Controls.Add(lblAct);
+        activityCard.Controls.Add(grid);
+        activityCard.Controls.Add(lblEmpty);
+        activityCard.Controls.Add(activityHeader);
 
         actionsPanel.Dock = DockStyle.Fill;
         actionsPanel.BackColor = Color.White;
-        actionsPanel.Padding = new Padding(12);
+        actionsPanel.Padding = new Padding(16);
         actionsPanel.Name = "actionsPanel";
 
-        lblQa.Text = "Quick actions";
+        lblQa.Text = "Quick Actions";
+        lblQa.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
         lblQa.Dock = DockStyle.Top;
-        lblQa.Height = 28;
+        lblQa.Height = 36;
         lblQa.Name = "lblQa";
         actionsPanel.Controls.Add(lblQa);
 
-        bottom.Controls.Add(activityPanel, 0, 0);
+        bottom.Controls.Add(activityCard, 0, 0);
         bottom.Controls.Add(actionsPanel, 1, 0);
 
         Controls.Add(bottom);
@@ -190,33 +218,40 @@ partial class DashboardForm
         tileOut.ResumeLayout(false);
         tileOut.PerformLayout();
         metricsPanel.ResumeLayout(false);
-        activityPanel.ResumeLayout(false);
+        activityHeader.ResumeLayout(false);
+        activityHeader.PerformLayout();
+        activityCard.ResumeLayout(false);
         actionsPanel.ResumeLayout(false);
         bottom.ResumeLayout(false);
         ((System.ComponentModel.ISupportInitialize)grid).EndInit();
         ResumeLayout(false);
     }
 
+    /// <summary>Caption on top (mockup), large value below. No Region clipping.</summary>
     private static void ConfigureTile(Panel tile, Label valueLabel, Label capLabel, string valueName, string caption)
     {
-        tile.Width = 140;
-        tile.Height = 88;
-        tile.Margin = new Padding(0, 0, 10, 0);
+        tile.Width = 168;
+        tile.Height = 100;
+        tile.Margin = new Padding(0, 0, 12, 0);
         tile.BackColor = Color.White;
-        tile.Padding = new Padding(10);
+        tile.Padding = new Padding(14, 12, 14, 12);
         tile.Name = "tile" + valueName;
 
+        // Caption first (top) — matches mockup
+        capLabel.Text = caption;
+        capLabel.Font = new Font("Segoe UI", 8.5F);
+        capLabel.ForeColor = Color.FromArgb(107, 119, 133);
+        capLabel.Location = new Point(14, 12);
+        capLabel.AutoSize = true;
+        capLabel.MaximumSize = new Size(140, 0);
+        capLabel.Name = "cap" + valueName;
+
         valueLabel.Text = "—";
-        valueLabel.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
-        valueLabel.Location = new Point(10, 12);
+        valueLabel.Font = new Font("Segoe UI", 22F, FontStyle.Bold);
+        valueLabel.ForeColor = Color.FromArgb(31, 41, 51);
+        valueLabel.Location = new Point(14, 48);
         valueLabel.AutoSize = true;
         valueLabel.Name = valueName;
-
-        capLabel.Text = caption;
-        capLabel.Font = new Font("Segoe UI", 9F);
-        capLabel.Location = new Point(10, 52);
-        capLabel.AutoSize = true;
-        capLabel.Name = "cap" + valueName;
 
         tile.Controls.Add(valueLabel);
         tile.Controls.Add(capLabel);
