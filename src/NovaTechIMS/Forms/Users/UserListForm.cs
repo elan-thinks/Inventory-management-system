@@ -103,18 +103,14 @@ public partial class UserListForm : Form
             Show(nameof(UserListRow.RoleLabel), "Role", 1.0f);
             Show(nameof(UserListRow.Status), "Status", 0.6f);
 
-            grid.Columns.Add(new DataGridViewButtonColumn
-            {
-                Name = "colEdit",
-                Text = "Edit",
-                UseColumnTextForButtonValue = true,
-                FillWeight = 0.5f,
-                FlatStyle = FlatStyle.Flat,
-                DefaultCellStyle = { ForeColor = UiTheme.Primary, Font = UiTheme.LabelSemibold }
-            });
+            if (grid.Columns.Contains("colEdit")) grid.Columns.Remove("colEdit");
+            grid.Columns.Add(AppIcons.CreateEditColumn(0.4f));
+            AppIcons.FillActionIcons(grid);
+
             grid.Columns.Add(new DataGridViewButtonColumn
             {
                 Name = "colDeactivate",
+                HeaderText = "",
                 Text = "Deactivate",
                 UseColumnTextForButtonValue = true,
                 FillWeight = 0.7f,
