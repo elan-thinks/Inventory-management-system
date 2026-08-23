@@ -76,6 +76,7 @@ public class StockInForm : Form
         L("Product *", lx, ref yL);
         cboProduct = new ComboBox
         {
+            FlatStyle = FlatStyle.Flat,
             Location = new Point(lx, yL),
             Width = fw,
             DropDownStyle = ComboBoxStyle.DropDownList,
@@ -88,6 +89,7 @@ public class StockInForm : Form
         L("Actual supplier *", lx, ref yL);
         cboSupplier = new ComboBox
         {
+            FlatStyle = FlatStyle.Flat,
             Location = new Point(lx, yL),
             Width = fw,
             DropDownStyle = ComboBoxStyle.DropDownList,
@@ -128,6 +130,7 @@ public class StockInForm : Form
         L("Purchase price (at receipt) *", xR, ref yR);
         txtUnitPrice = new TextBox
         {
+            BorderStyle = BorderStyle.FixedSingle,
             Location = new Point(xR, yR),
             Width = 120,
             Font = UiTheme.Body,
@@ -151,6 +154,7 @@ public class StockInForm : Form
         L("Notes", lx, ref yL);
         txtNotes = new TextBox
         {
+            BorderStyle = BorderStyle.FixedSingle,
             Location = new Point(lx, yL),
             Width = fw + 240,
             Height = 48,
@@ -172,18 +176,12 @@ public class StockInForm : Form
         };
         formPanel.Controls.Add(lblError);
 
-        btnSave = new Button
+        btnSave = UiTheme.StyleButton(new Button
         {
             Text = "Record Stock-In",
-            Font = UiTheme.Button,
-            BackColor = UiTheme.Primary,
-            ForeColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
             Size = new Size(150, 34),
-            Location = new Point(xR + 50, yL),
-            Cursor = Cursors.Hand
-        };
-        btnSave.FlatAppearance.BorderSize = 0;
+            Location = new Point(xR + 50, yL)
+        }, UiTheme.ButtonKind.Primary);
         btnSave.Click += BtnSave_Click;
         formPanel.Controls.Add(btnSave);
 

@@ -38,52 +38,40 @@ public class DelegationListForm : Form
 
         var toolbar = new Panel { Dock = DockStyle.Top, Height = 48, BackColor = UiTheme.Background };
 
-        cboStatus = new ComboBox
+        cboStatus = UiTheme.StyleComboBox(new ComboBox
         {
             DropDownStyle = ComboBoxStyle.DropDownList,
             Width = 130,
-            Location = new Point(0, 8),
-            Font = UiTheme.Body
-        };
+            Location = new Point(0, 8)
+        });
         cboStatus.Items.AddRange(new object[] { "All statuses", "Active", "Expired", "Revoked" });
         cboStatus.SelectedIndex = 0;
         cboStatus.SelectedIndexChanged += (_, _) => ReloadGrid();
 
-        cboResponsibility = new ComboBox
+        cboResponsibility = UiTheme.StyleComboBox(new ComboBox
         {
             DropDownStyle = ComboBoxStyle.DropDownList,
             Width = 140,
-            Location = new Point(140, 8),
-            Font = UiTheme.Body
-        };
+            Location = new Point(140, 8)
+        });
         cboResponsibility.Items.AddRange(new object[] { "All responsibilities", "Stock-In", "Stock-Out", "Report Access" });
         cboResponsibility.SelectedIndex = 0;
         cboResponsibility.SelectedIndexChanged += (_, _) => ReloadGrid();
 
-        btnRefresh = new Button
+        btnRefresh = UiTheme.StyleButton(new Button
         {
             Text = "Refresh",
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(88, 30),
-            FlatStyle = FlatStyle.Flat,
-            Font = UiTheme.Label,
-            BackColor = UiTheme.Surface
-        };
-        btnRefresh.FlatAppearance.BorderColor = UiTheme.Border;
+            Size = new Size(88, 30)
+        }, UiTheme.ButtonKind.Secondary);
         btnRefresh.Click += (_, _) => ReloadGrid();
 
-        btnNew = new Button
+        btnNew = UiTheme.StyleButton(new Button
         {
             Text = "+ New Delegation",
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(140, 30),
-            FlatStyle = FlatStyle.Flat,
-            Font = UiTheme.Button,
-            BackColor = UiTheme.Primary,
-            ForeColor = Color.White,
-            Cursor = Cursors.Hand
-        };
-        btnNew.FlatAppearance.BorderSize = 0;
+            Size = new Size(140, 30)
+        }, UiTheme.ButtonKind.Primary);
         btnNew.Click += (_, _) =>
         {
             using var dlg = new DelegationEditForm();
@@ -104,36 +92,24 @@ public class DelegationListForm : Form
         grid = new DataGridView
         {
             Dock = DockStyle.Fill,
-            BackgroundColor = UiTheme.Surface,
-            BorderStyle = BorderStyle.FixedSingle,
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
-            AllowUserToResizeRows = false,
             ReadOnly = true,
             MultiSelect = false,
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-            RowHeadersVisible = false,
-            Font = UiTheme.Body,
-            ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-            {
-                Font = UiTheme.Label,
-                BackColor = UiTheme.StatusStripBackground,
-                ForeColor = UiTheme.Text
-            },
-            EnableHeadersVisualStyles = false
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
         };
+        UiTheme.ApplyGridTheme(grid);
+        UiTheme.WireStatusBadgeColumn(grid, nameof(DelegationListRow.StatusLabel), value => (value?.ToString() ?? "") switch
+        {
+            "Active" => ("Active", UiTheme.BadgeTone.Success, '\u2713'),
+            "Expired" => ("Expired", UiTheme.BadgeTone.Muted, 'c'),
+            _ => ("Revoked", UiTheme.BadgeTone.Error, '\u2715')
+        });
         grid.CellContentClick += Grid_CellContentClick;
 
-        lblEmpty = new Label
-        {
-            Text = "No delegations found.",
-            Font = UiTheme.Body,
-            ForeColor = UiTheme.TextMuted,
-            Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.MiddleCenter,
-            Visible = false
-        };
+        lblEmpty = UiTheme.CreateEmptyStateLabel(
+            "No delegations yet. Create one to temporarily extend a Staff member's access.");
 
         lblCount = new Label
         {
@@ -177,6 +153,10 @@ public class DelegationListForm : Form
             {
                 grid.Visible = false;
                 lblEmpty.Visible = true;
+                bool filtersOn = cboStatus.SelectedIndex != 0 || cboResponsibility.SelectedIndex != 0;
+                lblEmpty.Text = filtersOn
+                    ? "No delegations match your filters."
+                    : "No delegations yet. Create one to temporarily extend a Staff member's access.";
                 lblCount.Text = "0 delegations";
                 return;
             }
@@ -211,8 +191,11 @@ public class DelegationListForm : Form
                 Text = "Revoke",
                 UseColumnTextForButtonValue = true,
                 FillWeight = 0.6f,
-                FlatStyle = FlatStyle.Flat
+                FlatStyle = FlatStyle.Flat,
+                DefaultCellStyle = { ForeColor = UiTheme.Error, Font = UiTheme.LabelSemibold }
             });
+            grid.CellPainting -= Grid_MaskRevokeForNonActive;
+            grid.CellPainting += Grid_MaskRevokeForNonActive;
 
             lblCount.Text = rows.Count == 1 ? "1 delegation" : $"{rows.Count} delegations";
         }
@@ -226,6 +209,24 @@ public class DelegationListForm : Form
         }
     }
 
+    private void Grid_MaskRevokeForNonActive(object? sender, DataGridViewCellPaintingEventArgs e)
+    {
+        if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+        if (grid.Columns[e.ColumnIndex].Name != "colRevoke") return;
+        if (grid.Rows[e.RowIndex].DataBoundItem is not DelegationListRow row) return;
+        if (row.Status == DelegationStatus.Active) return; // let the button paint normally
+
+        // Expired/Revoked rows: no action control at all — an em-dash, not a disabled button.
+        bool selected = grid.Rows[e.RowIndex].Selected;
+        var bg = selected ? UiTheme.RowSelected : (e.RowIndex % 2 == 1 ? UiTheme.RowAlternate : UiTheme.Surface);
+        using var brush = new SolidBrush(bg);
+        e.Graphics?.FillRectangle(brush, e.CellBounds);
+        using var textBrush = new SolidBrush(UiTheme.DisabledText);
+        using var sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+        e.Graphics?.DrawString("—", UiTheme.Body, textBrush, e.CellBounds, sf);
+        e.Handled = true;
+    }
+
     private void Grid_CellContentClick(object? sender, DataGridViewCellEventArgs e)
     {
         if (e.RowIndex < 0) return;
@@ -233,16 +234,12 @@ public class DelegationListForm : Form
         if (grid.Rows[e.RowIndex].DataBoundItem is not DelegationListRow row) return;
 
         if (row.Status != DelegationStatus.Active)
-        {
-            MessageBox.Show(FindForm(), "Only active delegations can be revoked.", "Delegations",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-            return;
-        }
+            return; // no action control on this row — nothing to click
 
         var confirm = MessageBox.Show(
             FindForm(),
-            $"Revoke delegation of {row.ResponsibilityLabel} to {row.DelegatedToName}?",
-            "Revoke Delegation",
+            $"This will immediately end {row.DelegatedToName}'s access to {row.ResponsibilityLabel}.",
+            "Revoke Delegation?",
             MessageBoxButtons.YesNo,
             MessageBoxIcon.Question);
 

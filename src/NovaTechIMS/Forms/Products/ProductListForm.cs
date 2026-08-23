@@ -53,37 +53,31 @@ public class ProductListForm : Form
             BackColor = UiTheme.Background
         };
 
-        txtSearch = new TextBox
+        txtSearch = UiTheme.StyleTextBox(new TextBox
         {
             Width = 200,
             Location = new Point(0, 8),
-            PlaceholderText = "Search by name or ID…",
-            Font = UiTheme.Body
-        };
+            PlaceholderText = "Search by name or ID…"
+        });
         txtSearch.TextChanged += (_, _) => ReloadGrid();
 
-        cboCategory = MakeFilterCombo(210, 8, 160);
-        cboSupplier = MakeFilterCombo(380, 8, 160);
-        cboStock = MakeFilterCombo(550, 8, 130);
-        cboStatus = MakeFilterCombo(690, 8, 120);
+        cboCategory = UiTheme.StyleComboBox(MakeFilterCombo(210, 8, 160));
+        cboSupplier = UiTheme.StyleComboBox(MakeFilterCombo(380, 8, 160));
+        cboStock = UiTheme.StyleComboBox(MakeFilterCombo(550, 8, 130));
+        cboStatus = UiTheme.StyleComboBox(MakeFilterCombo(690, 8, 120));
 
         cboCategory.SelectedIndexChanged += (_, _) => ReloadGrid();
         cboSupplier.SelectedIndexChanged += (_, _) => ReloadGrid();
         cboStock.SelectedIndexChanged += (_, _) => ReloadGrid();
         cboStatus.SelectedIndexChanged += (_, _) => ReloadGrid();
 
-        btnClearFilters = new Button
+        btnClearFilters = UiTheme.StyleButton(new Button
         {
             Text = "Clear filters",
             Location = new Point(0, 44),
             Size = new Size(100, 28),
-            FlatStyle = FlatStyle.Flat,
-            Font = UiTheme.Label,
-            ForeColor = UiTheme.Primary,
-            Cursor = Cursors.Hand,
             Visible = false
-        };
-        btnClearFilters.FlatAppearance.BorderSize = 0;
+        }, UiTheme.ButtonKind.Ghost);
         btnClearFilters.Click += (_, _) =>
         {
             txtSearch.Clear();
@@ -94,32 +88,22 @@ public class ProductListForm : Form
             ReloadGrid();
         };
 
-        btnRefresh = new Button
+        btnRefresh = UiTheme.StyleButton(new Button
         {
             Text = "Refresh",
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
             Size = new Size(88, 30),
-            FlatStyle = FlatStyle.Flat,
-            Font = UiTheme.Label,
-            BackColor = UiTheme.Surface,
             Location = new Point(600, 44)
-        };
-        btnRefresh.FlatAppearance.BorderColor = UiTheme.Border;
+        }, UiTheme.ButtonKind.Secondary);
         btnRefresh.Click += (_, _) => ReloadGrid();
 
-        btnAdd = new Button
+        btnAdd = UiTheme.StyleButton(new Button
         {
             Text = "+ Add Product",
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
             Size = new Size(130, 30),
-            FlatStyle = FlatStyle.Flat,
-            Font = UiTheme.Button,
-            BackColor = UiTheme.Primary,
-            ForeColor = Color.White,
-            Location = new Point(696, 44),
-            Cursor = Cursors.Hand
-        };
-        btnAdd.FlatAppearance.BorderSize = 0;
+            Location = new Point(696, 44)
+        }, UiTheme.ButtonKind.Primary);
         btnAdd.Click += BtnAdd_Click;
 
         toolbar.Controls.Add(txtSearch);
@@ -139,37 +123,28 @@ public class ProductListForm : Form
         grid = new DataGridView
         {
             Dock = DockStyle.Fill,
-            BackgroundColor = UiTheme.Surface,
-            BorderStyle = BorderStyle.FixedSingle,
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
-            AllowUserToResizeRows = false,
             ReadOnly = true,
             MultiSelect = false,
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-            RowHeadersVisible = false,
-            Font = UiTheme.Body,
-            ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-            {
-                Font = UiTheme.Label,
-                BackColor = UiTheme.StatusStripBackground,
-                ForeColor = UiTheme.Text
-            },
-            EnableHeadersVisualStyles = false
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
         };
+        UiTheme.ApplyGridTheme(grid);
+        UiTheme.WireStatusBadgeColumn(grid, nameof(ProductListRow.StockStatusLabel), value => (value?.ToString() ?? "") switch
+        {
+            "In Stock" => ("In Stock", UiTheme.BadgeTone.Success, '\u2713'),
+            "Low Stock" => ("Low Stock", UiTheme.BadgeTone.Warning, '!'),
+            _ => ("Out of Stock", UiTheme.BadgeTone.Error, '\u2715')
+        });
+        UiTheme.WireStatusBadgeColumn(grid, nameof(ProductListRow.StatusLabel), value => (value?.ToString() ?? "") switch
+        {
+            "Active" => ("Active", UiTheme.BadgeTone.Success, '\u2713'),
+            _ => ("Inactive", UiTheme.BadgeTone.Muted, '\u2715')
+        });
         grid.CellContentClick += Grid_CellContentClick;
 
-        lblEmpty = new Label
-        {
-            Text = "No products yet. Add your first product to get started.",
-            Font = UiTheme.Body,
-            ForeColor = UiTheme.TextMuted,
-            AutoSize = false,
-            TextAlign = ContentAlignment.MiddleCenter,
-            Dock = DockStyle.Fill,
-            Visible = false
-        };
+        lblEmpty = UiTheme.CreateEmptyStateLabel("No products yet. Add your first product to get started.");
 
         lblCount = new Label
         {
@@ -305,7 +280,8 @@ public class ProductListForm : Form
             Text = "Edit",
             UseColumnTextForButtonValue = true,
             FillWeight = 0.45f,
-            FlatStyle = FlatStyle.Flat
+            FlatStyle = FlatStyle.Flat,
+            DefaultCellStyle = { ForeColor = UiTheme.Primary, Font = UiTheme.LabelSemibold }
         });
         grid.Columns.Add(new DataGridViewButtonColumn
         {
@@ -313,7 +289,8 @@ public class ProductListForm : Form
             Text = "Delete",
             UseColumnTextForButtonValue = true,
             FillWeight = 0.5f,
-            FlatStyle = FlatStyle.Flat
+            FlatStyle = FlatStyle.Flat,
+            DefaultCellStyle = { ForeColor = UiTheme.Error, Font = UiTheme.LabelSemibold }
         });
     }
 

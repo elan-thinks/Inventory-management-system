@@ -47,39 +47,32 @@ public class SupplierListForm : Form
             Padding = new Padding(0, 4, 0, 4)
         };
 
-        txtSearch = new TextBox
+        txtSearch = UiTheme.StyleTextBox(new TextBox
         {
             Width = 220,
             Height = 28,
             Location = new Point(0, 8),
-            PlaceholderText = "Search by name…",
-            Font = UiTheme.Body
-        };
+            PlaceholderText = "Search by name…"
+        });
         txtSearch.TextChanged += (_, _) => ReloadGrid();
 
-        cboStatus = new ComboBox
+        cboStatus = UiTheme.StyleComboBox(new ComboBox
         {
             DropDownStyle = ComboBoxStyle.DropDownList,
             Width = 140,
-            Location = new Point(232, 8),
-            Font = UiTheme.Body
-        };
+            Location = new Point(232, 8)
+        });
         cboStatus.Items.AddRange(new object[] { "All statuses", "Active", "Inactive" });
         cboStatus.SelectedIndex = 0;
         cboStatus.SelectedIndexChanged += (_, _) => ReloadGrid();
 
-        btnClearFilters = new Button
+        btnClearFilters = UiTheme.StyleButton(new Button
         {
             Text = "Clear filters",
             Location = new Point(384, 6),
             Size = new Size(100, 30),
-            FlatStyle = FlatStyle.Flat,
-            Font = UiTheme.Label,
-            ForeColor = UiTheme.Primary,
-            Cursor = Cursors.Hand,
             Visible = false
-        };
-        btnClearFilters.FlatAppearance.BorderSize = 0;
+        }, UiTheme.ButtonKind.Ghost);
         btnClearFilters.Click += (_, _) =>
         {
             txtSearch.Clear();
@@ -87,32 +80,20 @@ public class SupplierListForm : Form
             ReloadGrid();
         };
 
-        btnRefresh = new Button
+        btnRefresh = UiTheme.StyleButton(new Button
         {
             Text = "Refresh",
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(88, 30),
-            FlatStyle = FlatStyle.Flat,
-            Font = UiTheme.Label,
-            BackColor = UiTheme.Surface,
-            ForeColor = UiTheme.Text,
-            Cursor = Cursors.Hand
-        };
-        btnRefresh.FlatAppearance.BorderColor = UiTheme.Border;
+            Size = new Size(88, 30)
+        }, UiTheme.ButtonKind.Secondary);
         btnRefresh.Click += (_, _) => ReloadGrid();
 
-        btnAdd = new Button
+        btnAdd = UiTheme.StyleButton(new Button
         {
             Text = "+ Add Supplier",
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(130, 30),
-            FlatStyle = FlatStyle.Flat,
-            Font = UiTheme.Button,
-            BackColor = UiTheme.Primary,
-            ForeColor = Color.White,
-            Cursor = Cursors.Hand
-        };
-        btnAdd.FlatAppearance.BorderSize = 0;
+            Size = new Size(130, 30)
+        }, UiTheme.ButtonKind.Primary);
         btnAdd.Click += BtnAdd_Click;
 
         toolbar.Controls.Add(txtSearch);
@@ -129,25 +110,19 @@ public class SupplierListForm : Form
         grid = new DataGridView
         {
             Dock = DockStyle.Fill,
-            BackgroundColor = UiTheme.Surface,
-            BorderStyle = BorderStyle.FixedSingle,
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
-            AllowUserToResizeRows = false,
             ReadOnly = true,
             MultiSelect = false,
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-            RowHeadersVisible = false,
-            Font = UiTheme.Body,
-            ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-            {
-                Font = UiTheme.Label,
-                BackColor = UiTheme.StatusStripBackground,
-                ForeColor = UiTheme.Text
-            },
-            EnableHeadersVisualStyles = false
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
         };
+        UiTheme.ApplyGridTheme(grid);
+        UiTheme.WireStatusBadgeColumn(grid, "Status", value => (value?.ToString() ?? "") switch
+        {
+            "Active" => ("Active", UiTheme.BadgeTone.Success, '\u2713'),
+            _ => ("Inactive", UiTheme.BadgeTone.Muted, '\u2715')
+        });
         grid.CellContentClick += Grid_CellContentClick;
 
         lblEmpty = new Label
@@ -255,7 +230,8 @@ public class SupplierListForm : Form
             Text = "Edit",
             UseColumnTextForButtonValue = true,
             FillWeight = 0.45f,
-            FlatStyle = FlatStyle.Flat
+            FlatStyle = FlatStyle.Flat,
+            DefaultCellStyle = { ForeColor = UiTheme.Primary, Font = UiTheme.LabelSemibold }
         });
         grid.Columns.Add(new DataGridViewButtonColumn
         {
@@ -264,7 +240,8 @@ public class SupplierListForm : Form
             Text = "Delete",
             UseColumnTextForButtonValue = true,
             FillWeight = 0.5f,
-            FlatStyle = FlatStyle.Flat
+            FlatStyle = FlatStyle.Flat,
+            DefaultCellStyle = { ForeColor = UiTheme.Error, Font = UiTheme.LabelSemibold }
         });
     }
 

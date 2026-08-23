@@ -37,50 +37,38 @@ public class UserListForm : Form
 
         var toolbar = new Panel { Dock = DockStyle.Top, Height = 48, BackColor = UiTheme.Background };
 
-        txtSearch = new TextBox
+        txtSearch = UiTheme.StyleTextBox(new TextBox
         {
             Width = 220,
             Location = new Point(0, 8),
-            PlaceholderText = "Search username or name…",
-            Font = UiTheme.Body
-        };
+            PlaceholderText = "Search username or name…"
+        });
         txtSearch.TextChanged += (_, _) => ReloadGrid();
 
-        cboStatus = new ComboBox
+        cboStatus = UiTheme.StyleComboBox(new ComboBox
         {
             DropDownStyle = ComboBoxStyle.DropDownList,
             Width = 140,
-            Location = new Point(232, 8),
-            Font = UiTheme.Body
-        };
+            Location = new Point(232, 8)
+        });
         cboStatus.Items.AddRange(new object[] { "All statuses", "Active", "Inactive" });
         cboStatus.SelectedIndex = 0;
         cboStatus.SelectedIndexChanged += (_, _) => ReloadGrid();
 
-        btnRefresh = new Button
+        btnRefresh = UiTheme.StyleButton(new Button
         {
             Text = "Refresh",
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(88, 30),
-            FlatStyle = FlatStyle.Flat,
-            Font = UiTheme.Label,
-            BackColor = UiTheme.Surface
-        };
-        btnRefresh.FlatAppearance.BorderColor = UiTheme.Border;
+            Size = new Size(88, 30)
+        }, UiTheme.ButtonKind.Secondary);
         btnRefresh.Click += (_, _) => ReloadGrid();
 
-        btnAdd = new Button
+        btnAdd = UiTheme.StyleButton(new Button
         {
             Text = "+ Add User",
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(110, 30),
-            FlatStyle = FlatStyle.Flat,
-            Font = UiTheme.Button,
-            BackColor = UiTheme.Primary,
-            ForeColor = Color.White,
-            Cursor = Cursors.Hand
-        };
-        btnAdd.FlatAppearance.BorderSize = 0;
+            Size = new Size(110, 30)
+        }, UiTheme.ButtonKind.Primary);
         btnAdd.Click += (_, _) =>
         {
             using var dlg = new UserEditForm();
@@ -101,25 +89,19 @@ public class UserListForm : Form
         grid = new DataGridView
         {
             Dock = DockStyle.Fill,
-            BackgroundColor = UiTheme.Surface,
-            BorderStyle = BorderStyle.FixedSingle,
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
-            AllowUserToResizeRows = false,
             ReadOnly = true,
             MultiSelect = false,
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-            RowHeadersVisible = false,
-            Font = UiTheme.Body,
-            ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-            {
-                Font = UiTheme.Label,
-                BackColor = UiTheme.StatusStripBackground,
-                ForeColor = UiTheme.Text
-            },
-            EnableHeadersVisualStyles = false
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
         };
+        UiTheme.ApplyGridTheme(grid);
+        UiTheme.WireStatusBadgeColumn(grid, "Status", value => (value?.ToString() ?? "") switch
+        {
+            "Active" => ("Active", UiTheme.BadgeTone.Success, '\u2713'),
+            _ => ("Inactive", UiTheme.BadgeTone.Muted, '\u2715')
+        });
         grid.CellContentClick += Grid_CellContentClick;
 
         lblEmpty = new Label
@@ -197,7 +179,8 @@ public class UserListForm : Form
                 Text = "Edit",
                 UseColumnTextForButtonValue = true,
                 FillWeight = 0.5f,
-                FlatStyle = FlatStyle.Flat
+                FlatStyle = FlatStyle.Flat,
+                DefaultCellStyle = { ForeColor = UiTheme.Primary, Font = UiTheme.LabelSemibold }
             });
             grid.Columns.Add(new DataGridViewButtonColumn
             {
@@ -205,7 +188,8 @@ public class UserListForm : Form
                 Text = "Deactivate",
                 UseColumnTextForButtonValue = true,
                 FillWeight = 0.7f,
-                FlatStyle = FlatStyle.Flat
+                FlatStyle = FlatStyle.Flat,
+                DefaultCellStyle = { ForeColor = UiTheme.Warning, Font = UiTheme.LabelSemibold }
             });
 
             lblCount.Text = rows.Count == 1 ? "1 user" : $"{rows.Count} users";

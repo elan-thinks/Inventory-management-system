@@ -54,69 +54,54 @@ public class InventoryHistoryForm : Form
             Padding = new Padding(0, 8, 0, 8)
         };
 
-        var lblFrom = new Label { Text = "From", Location = new Point(0, 14), AutoSize = true, Font = UiTheme.Label };
-        dtpFrom = new DateTimePicker
+        var lblFrom = new Label { Text = "From", Location = new Point(0, 14), AutoSize = true, Font = UiTheme.Label, ForeColor = UiTheme.TextMuted };
+        dtpFrom = UiTheme.StyleDatePicker(new DateTimePicker
         {
             Location = new Point(40, 10),
             Width = 120,
-            Format = DateTimePickerFormat.Short,
-            Font = UiTheme.Body
-        };
+            Format = DateTimePickerFormat.Short
+        });
 
-        var lblTo = new Label { Text = "To", Location = new Point(170, 14), AutoSize = true, Font = UiTheme.Label };
-        dtpTo = new DateTimePicker
+        var lblTo = new Label { Text = "To", Location = new Point(170, 14), AutoSize = true, Font = UiTheme.Label, ForeColor = UiTheme.TextMuted };
+        dtpTo = UiTheme.StyleDatePicker(new DateTimePicker
         {
             Location = new Point(195, 10),
             Width = 120,
-            Format = DateTimePickerFormat.Short,
-            Font = UiTheme.Body
-        };
+            Format = DateTimePickerFormat.Short
+        });
 
-        var lblType = new Label { Text = "Type", Location = new Point(330, 14), AutoSize = true, Font = UiTheme.Label };
-        cboType = new ComboBox
+        var lblType = new Label { Text = "Type", Location = new Point(330, 14), AutoSize = true, Font = UiTheme.Label, ForeColor = UiTheme.TextMuted };
+        cboType = UiTheme.StyleComboBox(new ComboBox
         {
             Location = new Point(365, 10),
             Width = 120,
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Font = UiTheme.Body
-        };
+            DropDownStyle = ComboBoxStyle.DropDownList
+        });
         cboType.Items.AddRange(new object[] { "All", "Stock-In", "Stock-Out", "Adjustment" });
         cboType.SelectedIndex = 0;
 
-        var lblProd = new Label { Text = "Product", Location = new Point(500, 14), AutoSize = true, Font = UiTheme.Label };
-        cboProduct = new ComboBox
+        var lblProd = new Label { Text = "Product", Location = new Point(500, 14), AutoSize = true, Font = UiTheme.Label, ForeColor = UiTheme.TextMuted };
+        cboProduct = UiTheme.StyleComboBox(new ComboBox
         {
             Location = new Point(555, 10),
             Width = 200,
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Font = UiTheme.Body
-        };
+            DropDownStyle = ComboBoxStyle.DropDownList
+        });
 
-        btnApply = new Button
+        btnApply = UiTheme.StyleButton(new Button
         {
             Text = "Apply",
             Location = new Point(770, 8),
-            Size = new Size(80, 30),
-            FlatStyle = FlatStyle.Flat,
-            Font = UiTheme.Button,
-            BackColor = UiTheme.Primary,
-            ForeColor = Color.White,
-            Cursor = Cursors.Hand
-        };
-        btnApply.FlatAppearance.BorderSize = 0;
+            Size = new Size(80, 30)
+        }, UiTheme.ButtonKind.Primary);
         btnApply.Click += (_, _) => ReloadGrid();
 
-        btnClear = new Button
+        btnClear = UiTheme.StyleButton(new Button
         {
             Text = "Clear",
             Location = new Point(858, 8),
-            Size = new Size(70, 30),
-            FlatStyle = FlatStyle.Flat,
-            Font = UiTheme.Label,
-            BackColor = UiTheme.Surface,
-            Cursor = Cursors.Hand
-        };
-        btnClear.FlatAppearance.BorderColor = UiTheme.Border;
+            Size = new Size(70, 30)
+        }, UiTheme.ButtonKind.Secondary);
         btnClear.Click += (_, _) =>
         {
             dtpFrom.Value = DateTime.Today.AddDays(-30);
@@ -141,35 +126,22 @@ public class InventoryHistoryForm : Form
         grid = new DataGridView
         {
             Dock = DockStyle.Fill,
-            BackgroundColor = UiTheme.Surface,
-            BorderStyle = BorderStyle.FixedSingle,
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
-            AllowUserToResizeRows = false,
             ReadOnly = true,
             MultiSelect = false,
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-            RowHeadersVisible = false,
-            Font = UiTheme.Body,
-            ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-            {
-                Font = UiTheme.Label,
-                BackColor = UiTheme.StatusStripBackground,
-                ForeColor = UiTheme.Text
-            },
-            EnableHeadersVisualStyles = false
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
         };
-
-        lblEmpty = new Label
+        UiTheme.ApplyGridTheme(grid);
+        UiTheme.WireStatusBadgeColumn(grid, nameof(TransactionHistoryRow.TypeLabel), value => (value?.ToString() ?? "") switch
         {
-            Text = "No transactions match the current filters.",
-            Font = UiTheme.Body,
-            ForeColor = UiTheme.TextMuted,
-            Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.MiddleCenter,
-            Visible = false
-        };
+            "Stock-In" => ("Stock-In", UiTheme.BadgeTone.Success, '\u2713'),
+            "Stock-Out" => ("Stock-Out", UiTheme.BadgeTone.Error, '\u2715'),
+            _ => ("Adjustment", UiTheme.BadgeTone.Info, '!')
+        });
+
+        lblEmpty = UiTheme.CreateEmptyStateLabel("No transactions match the current filters.");
 
         lblCount = new Label
         {

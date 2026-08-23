@@ -123,6 +123,11 @@ partial class MainForm
         pnlHeader.BackColor = UiTheme.Surface;
         pnlHeader.Padding = new Padding(24, 12, 24, 12);
         pnlHeader.Name = "pnlHeader";
+        pnlHeader.Paint += (_, e) =>
+        {
+            using var pen = new Pen(UiTheme.Border, 1);
+            e.Graphics.DrawLine(pen, 0, pnlHeader.Height - 1, pnlHeader.Width, pnlHeader.Height - 1);
+        };
 
         lblBreadcrumb.Text = "Home";
         lblBreadcrumb.Font = UiTheme.Label;
@@ -138,13 +143,17 @@ partial class MainForm
         lblScreenTitle.Location = new Point(24, 32);
         lblScreenTitle.Name = "lblScreenTitle";
 
-        lblRoleBadge.Text = "Shell · Milestone 1";
-        lblRoleBadge.Font = UiTheme.Label;
+        lblRoleBadge.Text = "v1.3";
+        lblRoleBadge.Font = UiTheme.BadgeText;
         lblRoleBadge.ForeColor = UiTheme.Primary;
-        lblRoleBadge.AutoSize = true;
+        lblRoleBadge.BackColor = UiTheme.InfoTint;
+        lblRoleBadge.AutoSize = false;
+        lblRoleBadge.Size = new Size(44, 20);
+        lblRoleBadge.TextAlign = ContentAlignment.MiddleCenter;
         lblRoleBadge.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         lblRoleBadge.Location = new Point(900, 28);
         lblRoleBadge.Name = "lblRoleBadge";
+        UiTheme.ApplyRoundedRegion(lblRoleBadge, 10);
 
         pnlHeader.Controls.Add(lblBreadcrumb);
         pnlHeader.Controls.Add(lblScreenTitle);

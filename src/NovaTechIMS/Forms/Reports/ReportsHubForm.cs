@@ -53,6 +53,7 @@ public class ReportsHubForm : Form
             BackColor = UiTheme.Surface,
             Padding = new Padding(20)
         };
+        UiTheme.ApplyRoundedRegion(card, UiTheme.RadiusLg);
 
         int y = 16;
         const int lx = 20;
@@ -66,13 +67,12 @@ public class ReportsHubForm : Form
         });
         y += 20;
 
-        cboReport = new ComboBox
+        cboReport = UiTheme.StyleComboBox(new ComboBox
         {
             Location = new Point(lx, y),
             Width = 400,
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Font = UiTheme.Body
-        };
+            DropDownStyle = ComboBoxStyle.DropDownList
+        });
         cboReport.Items.AddRange(new object[]
         {
             "Current Inventory",
@@ -87,69 +87,59 @@ public class ReportsHubForm : Form
         card.Controls.Add(cboReport);
         y += 40;
 
-        lblFrom = new Label { Text = "From", Font = UiTheme.Label, Location = new Point(lx, y), AutoSize = true };
+        lblFrom = new Label { Text = "From", Font = UiTheme.Label, ForeColor = UiTheme.TextMuted, Location = new Point(lx, y), AutoSize = true };
         card.Controls.Add(lblFrom);
-        dtpFrom = new DateTimePicker
+        dtpFrom = UiTheme.StyleDatePicker(new DateTimePicker
         {
             Location = new Point(lx + 50, y - 2),
             Width = 130,
             Format = DateTimePickerFormat.Short,
-            Value = DateTime.Today.AddDays(-30),
-            Font = UiTheme.Body
-        };
+            Value = DateTime.Today.AddDays(-30)
+        });
         card.Controls.Add(dtpFrom);
 
-        lblTo = new Label { Text = "To", Font = UiTheme.Label, Location = new Point(lx + 200, y), AutoSize = true };
+        lblTo = new Label { Text = "To", Font = UiTheme.Label, ForeColor = UiTheme.TextMuted, Location = new Point(lx + 200, y), AutoSize = true };
         card.Controls.Add(lblTo);
-        dtpTo = new DateTimePicker
+        dtpTo = UiTheme.StyleDatePicker(new DateTimePicker
         {
             Location = new Point(lx + 230, y - 2),
             Width = 130,
             Format = DateTimePickerFormat.Short,
-            Value = DateTime.Today,
-            Font = UiTheme.Body
-        };
+            Value = DateTime.Today
+        });
         card.Controls.Add(dtpTo);
         y += 36;
 
-        lblType = new Label { Text = "Type", Font = UiTheme.Label, Location = new Point(lx, y), AutoSize = true };
+        lblType = new Label { Text = "Type", Font = UiTheme.Label, ForeColor = UiTheme.TextMuted, Location = new Point(lx, y), AutoSize = true };
         card.Controls.Add(lblType);
-        cboType = new ComboBox
+        cboType = UiTheme.StyleComboBox(new ComboBox
         {
             Location = new Point(lx + 50, y - 2),
             Width = 150,
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Font = UiTheme.Body
-        };
+            DropDownStyle = ComboBoxStyle.DropDownList
+        });
         cboType.Items.AddRange(new object[] { "All", "Stock-In", "Stock-Out", "Adjustment" });
         cboType.SelectedIndex = 0;
         card.Controls.Add(cboType);
         y += 36;
 
-        lblProduct = new Label { Text = "Product", Font = UiTheme.Label, Location = new Point(lx, y), AutoSize = true };
+        lblProduct = new Label { Text = "Product", Font = UiTheme.Label, ForeColor = UiTheme.TextMuted, Location = new Point(lx, y), AutoSize = true };
         card.Controls.Add(lblProduct);
-        cboProduct = new ComboBox
+        cboProduct = UiTheme.StyleComboBox(new ComboBox
         {
             Location = new Point(lx + 60, y - 2),
             Width = 280,
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Font = UiTheme.Body
-        };
+            DropDownStyle = ComboBoxStyle.DropDownList
+        });
         card.Controls.Add(cboProduct);
         y += 44;
 
-        btnRun = new Button
+        btnRun = UiTheme.StyleButton(new Button
         {
             Text = "Run report",
             Location = new Point(lx, y),
-            Size = new Size(130, 34),
-            FlatStyle = FlatStyle.Flat,
-            Font = UiTheme.Button,
-            BackColor = UiTheme.Primary,
-            ForeColor = Color.White,
-            Cursor = Cursors.Hand
-        };
-        btnRun.FlatAppearance.BorderSize = 0;
+            Size = new Size(130, 34)
+        }, UiTheme.ButtonKind.Primary);
         btnRun.Click += BtnRun_Click;
         card.Controls.Add(btnRun);
 

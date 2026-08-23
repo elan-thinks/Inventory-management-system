@@ -74,6 +74,7 @@ public class AdjustmentForm : Form
         L("Product *");
         cboProduct = new ComboBox
         {
+            FlatStyle = FlatStyle.Flat,
             Location = new Point(lx, y),
             Width = fw,
             DropDownStyle = ComboBoxStyle.DropDownList,
@@ -153,6 +154,7 @@ public class AdjustmentForm : Form
         yR += 18;
         txtReason = new TextBox
         {
+            BorderStyle = BorderStyle.FixedSingle,
             Location = new Point(xR, yR),
             Width = 280,
             MaxLength = 250,
@@ -171,6 +173,7 @@ public class AdjustmentForm : Form
         yR += 18;
         txtNotes = new TextBox
         {
+            BorderStyle = BorderStyle.FixedSingle,
             Location = new Point(xR, yR),
             Width = 280,
             Height = 48,
@@ -191,18 +194,12 @@ public class AdjustmentForm : Form
         };
         formPanel.Controls.Add(lblError);
 
-        btnSave = new Button
+        btnSave = UiTheme.StyleButton(new Button
         {
             Text = "Record Adjustment",
-            Font = UiTheme.Button,
-            BackColor = UiTheme.Primary,
-            ForeColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
             Size = new Size(160, 34),
-            Location = new Point(xR + 120, y),
-            Cursor = Cursors.Hand
-        };
-        btnSave.FlatAppearance.BorderSize = 0;
+            Location = new Point(xR + 120, y)
+        }, UiTheme.ButtonKind.Primary);
         btnSave.Click += BtnSave_Click;
         formPanel.Controls.Add(btnSave);
 
