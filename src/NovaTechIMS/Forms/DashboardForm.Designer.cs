@@ -9,22 +9,24 @@ partial class DashboardForm
 
     private FlowLayoutPanel metricsPanel;
     private Panel tileProducts;
-    private Label lblProducts;
-    private Label capProducts;
     private Panel tileCategories;
-    private Label lblCategories;
-    private Label capCategories;
     private Panel tileSuppliers;
-    private Label lblSuppliers;
-    private Label capSuppliers;
     private Panel tileTotalQty;
-    private Label lblTotalQty;
-    private Label capTotalQty;
     private Panel tileLow;
-    private Label lblLow;
-    private Label capLow;
     private Panel tileOut;
+
+    // Kept for compatibility with existing code references (hidden; values painted on panels)
+    private Label lblProducts;
+    private Label lblCategories;
+    private Label lblSuppliers;
+    private Label lblTotalQty;
+    private Label lblLow;
     private Label lblOut;
+    private Label capProducts;
+    private Label capCategories;
+    private Label capSuppliers;
+    private Label capTotalQty;
+    private Label capLow;
     private Label capOut;
 
     private Label lblError;
@@ -50,22 +52,23 @@ partial class DashboardForm
 
         metricsPanel = new FlowLayoutPanel();
         tileProducts = new Panel();
-        lblProducts = new Label();
-        capProducts = new Label();
         tileCategories = new Panel();
-        lblCategories = new Label();
-        capCategories = new Label();
         tileSuppliers = new Panel();
-        lblSuppliers = new Label();
-        capSuppliers = new Label();
         tileTotalQty = new Panel();
-        lblTotalQty = new Label();
-        capTotalQty = new Label();
         tileLow = new Panel();
-        lblLow = new Label();
-        capLow = new Label();
         tileOut = new Panel();
+
+        lblProducts = new Label();
+        lblCategories = new Label();
+        lblSuppliers = new Label();
+        lblTotalQty = new Label();
+        lblLow = new Label();
         lblOut = new Label();
+        capProducts = new Label();
+        capCategories = new Label();
+        capSuppliers = new Label();
+        capTotalQty = new Label();
+        capLow = new Label();
         capOut = new Label();
 
         bottom = new TableLayoutPanel();
@@ -80,12 +83,6 @@ partial class DashboardForm
         lblError = new Label();
 
         metricsPanel.SuspendLayout();
-        tileProducts.SuspendLayout();
-        tileCategories.SuspendLayout();
-        tileSuppliers.SuspendLayout();
-        tileTotalQty.SuspendLayout();
-        tileLow.SuspendLayout();
-        tileOut.SuspendLayout();
         bottom.SuspendLayout();
         activityCard.SuspendLayout();
         activityHeader.SuspendLayout();
@@ -95,7 +92,6 @@ partial class DashboardForm
 
         AutoScaleMode = AutoScaleMode.Font;
         Font = new Font("Segoe UI", 10F);
-        BackColor = Color.FromArgb(244, 246, 248);
         FormBorderStyle = FormBorderStyle.None;
         Dock = DockStyle.Fill;
         TopLevel = false;
@@ -103,19 +99,27 @@ partial class DashboardForm
         Text = "Dashboard";
         Padding = new Padding(12, 8, 12, 8);
 
-        BuildMetricTile(tileProducts, lblProducts, capProducts, "lblProducts", "Total Active Products");
-        BuildMetricTile(tileCategories, lblCategories, capCategories, "lblCategories", "Total Categories");
-        BuildMetricTile(tileSuppliers, lblSuppliers, capSuppliers, "lblSuppliers", "Total Suppliers");
-        BuildMetricTile(tileTotalQty, lblTotalQty, capTotalQty, "lblTotalQty", "Total Inventory Quantity");
-        BuildMetricTile(tileLow, lblLow, capLow, "lblLow", "Low-Stock Products");
-        BuildMetricTile(tileOut, lblOut, capOut, "lblOut", "Out-of-Stock Products");
+        // Empty panels — content drawn in Paint (bulletproof visibility)
+        InitTile(tileProducts, "tileProducts");
+        InitTile(tileCategories, "tileCategories");
+        InitTile(tileSuppliers, "tileSuppliers");
+        InitTile(tileTotalQty, "tileTotalQty");
+        InitTile(tileLow, "tileLow");
+        InitTile(tileOut, "tileOut");
+
+        // Hidden labels still hold string values for SetMetric
+        HideValueLabel(lblProducts, "lblProducts");
+        HideValueLabel(lblCategories, "lblCategories");
+        HideValueLabel(lblSuppliers, "lblSuppliers");
+        HideValueLabel(lblTotalQty, "lblTotalQty");
+        HideValueLabel(lblLow, "lblLow");
+        HideValueLabel(lblOut, "lblOut");
 
         metricsPanel.Dock = DockStyle.Top;
-        metricsPanel.Height = 130;
+        metricsPanel.Height = 128;
         metricsPanel.Padding = new Padding(0, 0, 0, 12);
         metricsPanel.WrapContents = false;
         metricsPanel.AutoScroll = true;
-        metricsPanel.BackColor = Color.FromArgb(244, 246, 248);
         metricsPanel.Name = "metricsPanel";
         metricsPanel.Controls.Add(tileProducts);
         metricsPanel.Controls.Add(tileCategories);
@@ -137,7 +141,6 @@ partial class DashboardForm
         bottom.Name = "bottom";
 
         activityCard.Dock = DockStyle.Fill;
-        activityCard.BackColor = Color.White;
         activityCard.Padding = new Padding(16);
         activityCard.Margin = new Padding(0, 0, 12, 0);
         activityCard.Name = "activityCard";
@@ -157,7 +160,6 @@ partial class DashboardForm
         lnkViewAll.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         lnkViewAll.Location = new Point(420, 8);
         lnkViewAll.Name = "lnkViewAll";
-        lnkViewAll.LinkColor = Color.FromArgb(30, 75, 143);
         lnkViewAll.LinkBehavior = LinkBehavior.HoverUnderline;
         lnkViewAll.Click += LnkViewAll_Click;
 
@@ -172,7 +174,6 @@ partial class DashboardForm
         grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         grid.Name = "grid";
-        grid.BackgroundColor = Color.White;
         grid.BorderStyle = BorderStyle.None;
 
         lblEmpty.Text = "No recent activity yet — record your first Stock-In to get started.";
@@ -186,7 +187,6 @@ partial class DashboardForm
         activityCard.Controls.Add(activityHeader);
 
         actionsPanel.Dock = DockStyle.Fill;
-        actionsPanel.BackColor = Color.White;
         actionsPanel.Padding = new Padding(16);
         actionsPanel.Name = "actionsPanel";
 
@@ -200,17 +200,10 @@ partial class DashboardForm
         bottom.Controls.Add(activityCard, 0, 0);
         bottom.Controls.Add(actionsPanel, 1, 0);
 
-        // Order matters for Dock: Fill first, then Top panels
         Controls.Add(bottom);
         Controls.Add(lblError);
         Controls.Add(metricsPanel);
 
-        tileProducts.ResumeLayout(true);
-        tileCategories.ResumeLayout(true);
-        tileSuppliers.ResumeLayout(true);
-        tileTotalQty.ResumeLayout(true);
-        tileLow.ResumeLayout(true);
-        tileOut.ResumeLayout(true);
         metricsPanel.ResumeLayout(true);
         activityHeader.ResumeLayout(false);
         activityHeader.PerformLayout();
@@ -221,43 +214,18 @@ partial class DashboardForm
         ResumeLayout(true);
     }
 
-    /// <summary>
-    /// Dock-based tile: caption on top, big number below.
-    /// Uses BorderStyle (always visible) — avoids Region clipping that hid labels.
-    /// </summary>
-    private static void BuildMetricTile(Panel tile, Label valueLabel, Label capLabel, string valueName, string caption)
+    private static void InitTile(Panel tile, string name)
     {
         tile.Size = new Size(175, 110);
         tile.Margin = new Padding(0, 0, 10, 0);
-        tile.BackColor = Color.White;
-        tile.BorderStyle = BorderStyle.FixedSingle;
-        tile.Name = "tile" + valueName;
+        tile.Name = name;
+    }
 
-        // Caption (top)
-        capLabel.Text = caption;
-        capLabel.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular);
-        capLabel.ForeColor = Color.FromArgb(90, 100, 110);
-        capLabel.BackColor = Color.White;
-        capLabel.Dock = DockStyle.Top;
-        capLabel.Height = 42;
-        capLabel.AutoSize = false;
-        capLabel.TextAlign = ContentAlignment.BottomLeft;
-        capLabel.Padding = new Padding(12, 0, 8, 2);
-        capLabel.Name = "cap" + valueName;
-
-        // Value (fill remainder)
-        valueLabel.Text = "0";
-        valueLabel.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
-        valueLabel.ForeColor = Color.FromArgb(31, 41, 51);
-        valueLabel.BackColor = Color.White;
-        valueLabel.Dock = DockStyle.Fill;
-        valueLabel.AutoSize = false;
-        valueLabel.TextAlign = ContentAlignment.TopLeft;
-        valueLabel.Padding = new Padding(12, 4, 8, 8);
-        valueLabel.Name = valueName;
-
-        // Dock order: Fill first, then Top
-        tile.Controls.Add(valueLabel);
-        tile.Controls.Add(capLabel);
+    private static void HideValueLabel(Label lbl, string name)
+    {
+        lbl.Text = "0";
+        lbl.Visible = false;
+        lbl.Name = name;
+        lbl.Size = new Size(1, 1);
     }
 }
