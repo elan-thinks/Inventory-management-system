@@ -1,5 +1,4 @@
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 using NovaTechIMS.Data;
 using NovaTechIMS.Models.Enums;
@@ -9,127 +8,32 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms.Products;
 
 /// <summary>
-/// SCR-003 Product List (Milestone 8).
-/// Hosted inside MainForm content area.
+/// SCR-003 Product List — Designer-based (partial).
 /// </summary>
-public class ProductListForm : Form
+public partial class ProductListForm : Form
 {
     private readonly ProductService _service = new();
     private readonly CategoryService _categoryService = new();
     private readonly SupplierService _supplierService = new();
 
-    private TextBox txtSearch = null!;
-    private ComboBox cboCategory = null!;
-    private ComboBox cboSupplier = null!;
-    private ComboBox cboStock = null!;
-    private ComboBox cboStatus = null!;
-    private Button btnClearFilters = null!;
-    private Button btnAdd = null!;
-    private Button btnRefresh = null!;
-    private DataGridView grid = null!;
-    private Label lblCount = null!;
-    private Label lblEmpty = null!;
-
     public ProductListForm()
     {
-        BuildUi();
+        InitializeComponent();
+        ApplyRuntimeStyling();
         LoadFilterLookups();
         Load += (_, _) => ReloadGrid();
     }
 
-    private void BuildUi()
+    private void ApplyRuntimeStyling()
     {
-        AutoScaleMode = AutoScaleMode.Font;
-        Font = UiTheme.Body;
-        BackColor = UiTheme.Background;
-        FormBorderStyle = FormBorderStyle.None;
-        Dock = DockStyle.Fill;
-        TopLevel = false;
-
-        var toolbar = new Panel
-        {
-            Dock = DockStyle.Top,
-            Height = 84,
-            BackColor = UiTheme.Background
-        };
-
-        txtSearch = UiTheme.StyleTextBox(new TextBox
-        {
-            Width = 200,
-            Location = new Point(0, 8),
-            PlaceholderText = "Search by name or ID…"
-        });
-        txtSearch.TextChanged += (_, _) => ReloadGrid();
-
-        cboCategory = UiTheme.StyleComboBox(MakeFilterCombo(210, 8, 160));
-        cboSupplier = UiTheme.StyleComboBox(MakeFilterCombo(380, 8, 160));
-        cboStock = UiTheme.StyleComboBox(MakeFilterCombo(550, 8, 130));
-        cboStatus = UiTheme.StyleComboBox(MakeFilterCombo(690, 8, 120));
-
-        cboCategory.SelectedIndexChanged += (_, _) => ReloadGrid();
-        cboSupplier.SelectedIndexChanged += (_, _) => ReloadGrid();
-        cboStock.SelectedIndexChanged += (_, _) => ReloadGrid();
-        cboStatus.SelectedIndexChanged += (_, _) => ReloadGrid();
-
-        btnClearFilters = UiTheme.StyleButton(new Button
-        {
-            Text = "Clear filters",
-            Location = new Point(0, 44),
-            Size = new Size(100, 28),
-            Visible = false
-        }, UiTheme.ButtonKind.Ghost);
-        btnClearFilters.Click += (_, _) =>
-        {
-            txtSearch.Clear();
-            cboCategory.SelectedIndex = 0;
-            cboSupplier.SelectedIndex = 0;
-            cboStock.SelectedIndex = 0;
-            cboStatus.SelectedIndex = 0;
-            ReloadGrid();
-        };
-
-        btnRefresh = UiTheme.StyleButton(new Button
-        {
-            Text = "Refresh",
-            Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(88, 30),
-            Location = new Point(600, 44)
-        }, UiTheme.ButtonKind.Secondary);
-        btnRefresh.Click += (_, _) => ReloadGrid();
-
-        btnAdd = UiTheme.StyleButton(new Button
-        {
-            Text = "+ Add Product",
-            Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(130, 30),
-            Location = new Point(696, 44)
-        }, UiTheme.ButtonKind.Primary);
-        btnAdd.Click += BtnAdd_Click;
-
-        toolbar.Controls.Add(txtSearch);
-        toolbar.Controls.Add(cboCategory);
-        toolbar.Controls.Add(cboSupplier);
-        toolbar.Controls.Add(cboStock);
-        toolbar.Controls.Add(cboStatus);
-        toolbar.Controls.Add(btnClearFilters);
-        toolbar.Controls.Add(btnRefresh);
-        toolbar.Controls.Add(btnAdd);
-        toolbar.Resize += (_, _) =>
-        {
-            btnAdd.Left = toolbar.ClientSize.Width - btnAdd.Width;
-            btnRefresh.Left = btnAdd.Left - btnRefresh.Width - 8;
-        };
-
-        grid = new DataGridView
-        {
-            Dock = DockStyle.Fill,
-            AllowUserToAddRows = false,
-            AllowUserToDeleteRows = false,
-            ReadOnly = true,
-            MultiSelect = false,
-            SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
-        };
+        UiTheme.StyleTextBox(txtSearch);
+        UiTheme.StyleComboBox(cboCategory);
+        UiTheme.StyleComboBox(cboSupplier);
+        UiTheme.StyleComboBox(cboStock);
+        UiTheme.StyleComboBox(cboStatus);
+        UiTheme.StyleButton(btnClearFilters, UiTheme.ButtonKind.Ghost);
+        UiTheme.StyleButton(btnRefresh, UiTheme.ButtonKind.Secondary);
+        UiTheme.StyleButton(btnAdd, UiTheme.ButtonKind.Primary);
         UiTheme.ApplyGridTheme(grid);
         UiTheme.WireStatusBadgeColumn(grid, nameof(ProductListRow.StockStatusLabel), value => (value?.ToString() ?? "") switch
         {
@@ -142,34 +46,27 @@ public class ProductListForm : Form
             "Active" => ("Active", UiTheme.BadgeTone.Success, '\u2713'),
             _ => ("Inactive", UiTheme.BadgeTone.Muted, '\u2715')
         });
-        grid.CellContentClick += Grid_CellContentClick;
-
-        lblEmpty = UiTheme.CreateEmptyStateLabel("No products yet. Add your first product to get started.");
-
-        lblCount = new Label
-        {
-            Dock = DockStyle.Bottom,
-            Height = 28,
-            Font = UiTheme.Label,
-            ForeColor = UiTheme.TextMuted,
-            TextAlign = ContentAlignment.MiddleLeft
-        };
-
-        Controls.Add(grid);
-        Controls.Add(lblEmpty);
-        Controls.Add(lblCount);
-        Controls.Add(toolbar);
+        Toolbar_Resize(toolbar, EventArgs.Empty);
     }
 
-    private static ComboBox MakeFilterCombo(int x, int y, int width)
+    private void Toolbar_Resize(object? sender, EventArgs e)
     {
-        return new ComboBox
-        {
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Location = new Point(x, y),
-            Width = width,
-            Font = UiTheme.Body
-        };
+        btnAdd.Left = toolbar.ClientSize.Width - btnAdd.Width;
+        btnRefresh.Left = btnAdd.Left - btnRefresh.Width - 8;
+    }
+
+    private void TxtSearch_TextChanged(object? sender, EventArgs e) => ReloadGrid();
+    private void CboFilter_SelectedIndexChanged(object? sender, EventArgs e) => ReloadGrid();
+    private void BtnRefresh_Click(object? sender, EventArgs e) => ReloadGrid();
+
+    private void BtnClearFilters_Click(object? sender, EventArgs e)
+    {
+        txtSearch.Clear();
+        cboCategory.SelectedIndex = 0;
+        cboSupplier.SelectedIndex = 0;
+        cboStock.SelectedIndex = 0;
+        cboStatus.SelectedIndex = 0;
+        ReloadGrid();
     }
 
     private void LoadFilterLookups()
