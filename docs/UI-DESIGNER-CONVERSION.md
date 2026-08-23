@@ -1,4 +1,4 @@
-# UI Designer Conversion
+# UI Designer Conversion — COMPLETE
 
 **Branch:** `version1.3`
 
@@ -10,19 +10,29 @@
 | Category / Supplier / Customer / Product | **Converted** |
 | Stock-In / Stock-Out / Adjustment / History | **Converted** |
 | UserListForm, UserEditForm | **Converted** |
-| DelegationList/Edit | In progress |
-| Dashboard, Reports | In progress |
+| DelegationListForm, DelegationEditForm | **Converted** |
+| ReportsHubForm, ReportViewerForm | **Converted** |
+| DashboardForm | **Converted** |
 
 ## Pattern (Designer-safe)
 
-1. `InitializeComponent()` — **BCL only** (no `UiTheme`)
-2. `ApplyRuntimeStyling()` — theme at runtime
-3. Services/DB never run in Designer
+1. `InitializeComponent()` uses **only BCL** (`Font`, `Color`, sizes) — **no `UiTheme`**
+2. `ApplyRuntimeStyling()` applies UiTheme at runtime
+3. Lookups / services never run in Designer
+4. Dashboard: metric tiles in Designer; quick-action buttons still runtime (permission-based)
 
-## Verify Users
+## Verify
 
 ```powershell
 git fetch origin
 git reset --hard origin/version1.3
-# Rebuild → View Designer on UserListForm / UserEditForm → F5
+# Rebuild Solution
+# Open any Form → View Designer → see controls
+# F5 → full app
 ```
+
+## Confirmation
+
+- Services / repositories / database **not** modified for this conversion
+- Business logic preserved
+- Goal: open every form in Visual Studio Designer and edit controls
