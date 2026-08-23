@@ -8,7 +8,7 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms.Products;
 
 /// <summary>
-/// SCR-003 Product List — dark filters + mockup-aligned grid.
+/// SCR-003 Product List — dark filters + icon actions.
 /// </summary>
 public partial class ProductListForm : Form
 {
@@ -167,7 +167,6 @@ public partial class ProductListForm : Form
             c.FillWeight = w;
         }
 
-        // Order closer to mockup: ID, Name, Category, Supplier, Qty, Min, Status, Price, Actions
         Show(nameof(ProductListRow.ProductID), "Product ID", 0.55f);
         Show(nameof(ProductListRow.ProductName), "Name", 1.5f);
         Show(nameof(ProductListRow.CategoryName), "Category", 1.1f);
@@ -181,42 +180,9 @@ public partial class ProductListForm : Form
         if (grid.Columns.Contains("colEdit")) grid.Columns.Remove("colEdit");
         if (grid.Columns.Contains("colDelete")) grid.Columns.Remove("colDelete");
 
-        var editCol = new DataGridViewButtonColumn
-        {
-            Name = "colEdit",
-            HeaderText = "Actions",
-            Text = "Edit",
-            UseColumnTextForButtonValue = true,
-            FillWeight = 0.5f,
-            FlatStyle = FlatStyle.Flat,
-            DefaultCellStyle =
-            {
-                ForeColor = UiTheme.Primary,
-                BackColor = UiTheme.Surface,
-                SelectionBackColor = UiTheme.RowSelected,
-                Font = UiTheme.LabelSemibold,
-                Alignment = DataGridViewContentAlignment.MiddleCenter
-            }
-        };
-        var delCol = new DataGridViewButtonColumn
-        {
-            Name = "colDelete",
-            HeaderText = "",
-            Text = "Delete",
-            UseColumnTextForButtonValue = true,
-            FillWeight = 0.55f,
-            FlatStyle = FlatStyle.Flat,
-            DefaultCellStyle =
-            {
-                ForeColor = UiTheme.Error,
-                BackColor = UiTheme.Surface,
-                SelectionBackColor = UiTheme.RowSelected,
-                Font = UiTheme.LabelSemibold,
-                Alignment = DataGridViewContentAlignment.MiddleCenter
-            }
-        };
-        grid.Columns.Add(editCol);
-        grid.Columns.Add(delCol);
+        grid.Columns.Add(AppIcons.CreateEditColumn(0.4f));
+        grid.Columns.Add(AppIcons.CreateDeleteColumn(0.4f));
+        AppIcons.FillActionIcons(grid);
     }
 
     private void BtnAdd_Click(object? sender, EventArgs e)
