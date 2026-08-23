@@ -10,7 +10,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms;
 
-/// <summary>SCR-002 Dashboard — metric tiles + activity + quick actions + icons.</summary>
+/// <summary>SCR-002 Dashboard — dark theme, painted metric tiles, icons.</summary>
 public partial class DashboardForm : Form
 {
     private readonly DashboardService _service = new();
@@ -23,6 +23,7 @@ public partial class DashboardForm : Form
         _user = user ?? throw new ArgumentNullException(nameof(user));
         _navigate = navigate;
         InitializeComponent();
+        WireMetricPaints();
         ApplyRuntimeStyling();
         BuildQuickActions();
         Load += (_, _) =>
@@ -37,6 +38,51 @@ public partial class DashboardForm : Form
                 if (lnkViewAll is not null)
                     lnkViewAll.Left = Math.Max(80, activityHeader.ClientSize.Width - lnkViewAll.Width - 4);
             };
+    }
+
+    private void WireMetricPaints()
+    {
+        WireTile(tileProducts, "Total Active Products", "icons-totalProduct.png", UiTheme.Text, () => lblProducts?.Text ?? "0");
+        WireTile(tileCategories, "Total Categories", "icons-catagory-tag.png", UiTheme.Text, () => lblCategories?.Text ?? "0");
+        WireTile(tileSuppliers, "Total Suppliers", "icons-suppliers.png", UiTheme.Text, () => lblSuppliers?.Text ?? "0");
+        WireTile(tileTotalQty, "Total Inventory Quantity", "icons-totalProduct.png", UiTheme.Text, () => lblTotalQty?.Text ?? "0");
+        WireTile(tileLow, "Low-Stock Products", "icons-warning.png", UiTheme.Warning, () => lblLow?.Text ?? "0");
+        WireTile(tileOut, "Out-of-Stock Products", "icons-x-error.png", UiTheme.Error, () => lblOut?.Text ?? "0");
+    }
+
+    private static void WireTile(Panel? tile, string caption, string iconFile, Color valueColor, Func<string> getValue)
+    {
+        if (tile is null) return;
+
+        tile.BackColor = UiTheme.Surface;
+        tile.Paint += (_, e) =>
+        {
+            var g = e.Graphics;
+            g.Clear(UiTheme.Surface);
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
+            using (var pen = new Pen(UiTheme.Border, 1))
+                g.DrawRectangle(pen, 0, 0, tile.Width - 1, tile.Height - 1);
+
+            int x = 12;
+            int y = 12;
+
+            var icon = AppIcons.Get(iconFile, 16);
+            if (icon is not null)
+            {
+                g.DrawImage(icon, x, y, 16, 16);
+                x += 22;
+            }
+
+            using (var brush = new SolidBrush(UiTheme.TextMuted))
+            using (var font = new Font("Segoe UI", 8.25f))
+                g.DrawString(caption, font, brush, x, y + 1);
+
+            var value = getValue();
+            using (var brush = new SolidBrush(valueColor))
+            using (var font = new Font("Segoe UI", 22f, FontStyle.Bold))
+                g.DrawString(value, font, brush, 12, 48);
+        };
     }
 
     private void ApplyRuntimeStyling()
@@ -54,18 +100,21 @@ public partial class DashboardForm : Form
         {
             lblAct.Font = UiTheme.SectionTitle;
             lblAct.ForeColor = UiTheme.Text;
+            lblAct.BackColor = UiTheme.Surface;
         }
 
         if (lblQa is not null)
         {
             lblQa.Font = UiTheme.SectionTitle;
             lblQa.ForeColor = UiTheme.Text;
+            lblQa.BackColor = UiTheme.Surface;
         }
 
         if (lblEmpty is not null)
         {
             lblEmpty.Font = UiTheme.Body;
             lblEmpty.ForeColor = UiTheme.TextMuted;
+            lblEmpty.BackColor = UiTheme.Surface;
         }
 
         if (lblError is not null)
@@ -78,61 +127,28 @@ public partial class DashboardForm : Form
         {
             lnkViewAll.LinkColor = UiTheme.Primary;
             lnkViewAll.ActiveLinkColor = UiTheme.PrimaryHover;
+            lnkViewAll.BackColor = UiTheme.Surface;
         }
 
-        StyleValue(lblProducts, Color.FromArgb(31, 41, 51));
-        StyleValue(lblCategories, Color.FromArgb(31, 41, 51));
-        StyleValue(lblSuppliers, Color.FromArgb(31, 41, 51));
-        StyleValue(lblTotalQty, Color.FromArgb(31, 41, 51));
-        StyleValue(lblLow, Color.FromArgb(199, 119, 0));
-        StyleValue(lblOut, Color.FromArgb(192, 57, 43));
-
-        StyleCaption(capProducts, "icons-totalProduct.png");
-        StyleCaption(capCategories, "icons-catagory-tag.png");
-        StyleCaption(capSuppliers, "icons-suppliers.png");
-        StyleCaption(capTotalQty, "icons-totalProduct.png");
-        StyleCaption(capLow, "icons-warning.png");
-        StyleCaption(capOut, "icons-x-error.png");
-
-        foreach (var tile in new[] { tileProducts, tileCategories, tileSuppliers, tileTotalQty, tileLow, tileOut })
-        {
-            if (tile is null) continue;
-            tile.BackColor = Color.White;
-            tile.BorderStyle = BorderStyle.FixedSingle;
-        }
+        if (activityHeader is not null)
+            activityHeader.BackColor = UiTheme.Surface;
 
         if (grid is not null)
+        {
+            grid.BackgroundColor = UiTheme.Surface;
             UiTheme.ApplyGridTheme(grid);
+        }
     }
 
     private static void StyleCard(Panel? card)
     {
         if (card is null) return;
-        card.BackColor = Color.White;
+        card.BackColor = UiTheme.Surface;
         card.Paint += (_, e) =>
         {
-            using var pen = new Pen(Color.FromArgb(215, 220, 225), 1);
+            using var pen = new Pen(UiTheme.Border, 1);
             e.Graphics.DrawRectangle(pen, 0, 0, card.Width - 1, card.Height - 1);
         };
-    }
-
-    private static void StyleValue(Label? lbl, Color color)
-    {
-        if (lbl is null) return;
-        lbl.ForeColor = color;
-        lbl.BackColor = Color.White;
-        lbl.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
-        lbl.Visible = true;
-    }
-
-    private static void StyleCaption(Label? lbl, string iconFile)
-    {
-        if (lbl is null) return;
-        lbl.ForeColor = Color.FromArgb(90, 100, 110);
-        lbl.BackColor = Color.White;
-        lbl.Font = new Font("Segoe UI", 8.25F);
-        lbl.Visible = true;
-        AppIcons.ApplyToLabel(lbl, iconFile, 14);
     }
 
     private void BuildQuickActions()
@@ -215,7 +231,6 @@ public partial class DashboardForm : Form
 
             foreach (var t in new[] { tileProducts, tileCategories, tileSuppliers, tileTotalQty, tileLow, tileOut })
                 t?.Invalidate();
-            metricsPanel?.Refresh();
 
             var rows = _service.GetRecentActivity(10);
             if (grid is null) return;
@@ -276,6 +291,8 @@ public partial class DashboardForm : Form
             SetMetric(lblTotalQty, "0");
             SetMetric(lblLow, "0");
             SetMetric(lblOut, "0");
+            foreach (var t in new[] { tileProducts, tileCategories, tileSuppliers, tileTotalQty, tileLow, tileOut })
+                t?.Invalidate();
 
             if (lblError is not null)
             {
@@ -289,7 +306,5 @@ public partial class DashboardForm : Form
     {
         if (lbl is null) return;
         lbl.Text = text;
-        lbl.Visible = true;
-        lbl.BringToFront();
     }
 }
