@@ -1,5 +1,4 @@
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 using NovaTechIMS.Data;
 using NovaTechIMS.Services;
@@ -7,125 +6,55 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Users;
 
-/// <summary>User Management list (FR-USR, Administrator only).</summary>
-public class UserListForm : Form
+/// <summary>User Management list — Designer-based (partial).</summary>
+public partial class UserListForm : Form
 {
     private readonly UserService _service = new();
 
-    private TextBox txtSearch = null!;
-    private ComboBox cboStatus = null!;
-    private Button btnAdd = null!;
-    private Button btnRefresh = null!;
-    private DataGridView grid = null!;
-    private Label lblCount = null!;
-    private Label lblEmpty = null!;
-
     public UserListForm()
     {
-        BuildUi();
+        InitializeComponent();
+        ApplyRuntimeStyling();
         Load += (_, _) => ReloadGrid();
     }
 
-    private void BuildUi()
+    private void ApplyRuntimeStyling()
     {
-        AutoScaleMode = AutoScaleMode.Font;
         Font = UiTheme.Body;
         BackColor = UiTheme.Background;
-        FormBorderStyle = FormBorderStyle.None;
-        Dock = DockStyle.Fill;
-        TopLevel = false;
-
-        var toolbar = new Panel { Dock = DockStyle.Top, Height = 48, BackColor = UiTheme.Background };
-
-        txtSearch = UiTheme.StyleTextBox(new TextBox
-        {
-            Width = 220,
-            Location = new Point(0, 8),
-            PlaceholderText = "Search username or name…"
-        });
-        txtSearch.TextChanged += (_, _) => ReloadGrid();
-
-        cboStatus = UiTheme.StyleComboBox(new ComboBox
-        {
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Width = 140,
-            Location = new Point(232, 8)
-        });
-        cboStatus.Items.AddRange(new object[] { "All statuses", "Active", "Inactive" });
-        cboStatus.SelectedIndex = 0;
-        cboStatus.SelectedIndexChanged += (_, _) => ReloadGrid();
-
-        btnRefresh = UiTheme.StyleButton(new Button
-        {
-            Text = "Refresh",
-            Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(88, 30)
-        }, UiTheme.ButtonKind.Secondary);
-        btnRefresh.Click += (_, _) => ReloadGrid();
-
-        btnAdd = UiTheme.StyleButton(new Button
-        {
-            Text = "+ Add User",
-            Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(110, 30)
-        }, UiTheme.ButtonKind.Primary);
-        btnAdd.Click += (_, _) =>
-        {
-            using var dlg = new UserEditForm();
-            if (dlg.ShowDialog(FindForm()) == DialogResult.OK)
-                ReloadGrid();
-        };
-
-        toolbar.Controls.Add(txtSearch);
-        toolbar.Controls.Add(cboStatus);
-        toolbar.Controls.Add(btnRefresh);
-        toolbar.Controls.Add(btnAdd);
-        toolbar.Resize += (_, _) =>
-        {
-            btnAdd.Left = toolbar.ClientSize.Width - btnAdd.Width;
-            btnRefresh.Left = btnAdd.Left - btnRefresh.Width - 8;
-        };
-
-        grid = new DataGridView
-        {
-            Dock = DockStyle.Fill,
-            AllowUserToAddRows = false,
-            AllowUserToDeleteRows = false,
-            ReadOnly = true,
-            MultiSelect = false,
-            SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
-        };
+        toolbar.BackColor = UiTheme.Background;
+        lblEmpty.Font = UiTheme.Body;
+        lblEmpty.ForeColor = UiTheme.TextMuted;
+        lblCount.Font = UiTheme.Label;
+        lblCount.ForeColor = UiTheme.TextMuted;
+        UiTheme.StyleTextBox(txtSearch);
+        UiTheme.StyleComboBox(cboStatus);
+        UiTheme.StyleButton(btnRefresh, UiTheme.ButtonKind.Secondary);
+        UiTheme.StyleButton(btnAdd, UiTheme.ButtonKind.Primary);
         UiTheme.ApplyGridTheme(grid);
         UiTheme.WireStatusBadgeColumn(grid, "Status", value => (value?.ToString() ?? "") switch
         {
             "Active" => ("Active", UiTheme.BadgeTone.Success, '\u2713'),
             _ => ("Inactive", UiTheme.BadgeTone.Muted, '\u2715')
         });
-        grid.CellContentClick += Grid_CellContentClick;
+        Toolbar_Resize(toolbar, EventArgs.Empty);
+    }
 
-        lblEmpty = new Label
-        {
-            Text = "No users found.",
-            Font = UiTheme.Body,
-            ForeColor = UiTheme.TextMuted,
-            Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.MiddleCenter,
-            Visible = false
-        };
+    private void Toolbar_Resize(object? sender, EventArgs e)
+    {
+        btnAdd.Left = toolbar.ClientSize.Width - btnAdd.Width;
+        btnRefresh.Left = btnAdd.Left - btnRefresh.Width - 8;
+    }
 
-        lblCount = new Label
-        {
-            Dock = DockStyle.Bottom,
-            Height = 28,
-            Font = UiTheme.Label,
-            ForeColor = UiTheme.TextMuted
-        };
+    private void TxtSearch_TextChanged(object? sender, EventArgs e) => ReloadGrid();
+    private void CboStatus_SelectedIndexChanged(object? sender, EventArgs e) => ReloadGrid();
+    private void BtnRefresh_Click(object? sender, EventArgs e) => ReloadGrid();
 
-        Controls.Add(grid);
-        Controls.Add(lblEmpty);
-        Controls.Add(lblCount);
-        Controls.Add(toolbar);
+    private void BtnAdd_Click(object? sender, EventArgs e)
+    {
+        using var dlg = new UserEditForm();
+        if (dlg.ShowDialog(FindForm()) == DialogResult.OK)
+            ReloadGrid();
     }
 
     private void ReloadGrid()
@@ -148,6 +77,7 @@ public class UserListForm : Form
             {
                 grid.Visible = false;
                 lblEmpty.Visible = true;
+                lblEmpty.Text = "No users found.";
                 lblCount.Text = "0 users";
                 return;
             }
