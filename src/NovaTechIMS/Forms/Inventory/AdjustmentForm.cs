@@ -8,29 +8,16 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>
-/// Inventory Adjustment (FR-ADJ, Milestone 14). Administrator only.
-/// </summary>
-public class AdjustmentForm : Form
+/// <summary>Inventory Adjustment (FR-ADJ) — Designer-based (partial).</summary>
+public partial class AdjustmentForm : Form
 {
     private readonly AdjustmentService _service = new();
-
-    private ComboBox cboProduct = null!;
-    private Label lblPreviousQty = null!;
-    private NumericUpDown nudNewQty = null!;
-    private Label lblDifference = null!;
-    private DateTimePicker dtpDate = null!;
-    private TextBox txtReason = null!;
-    private TextBox txtNotes = null!;
-    private Label lblError = null!;
-    private Button btnSave = null!;
-    private DataGridView grid = null!;
-
     private int _previousQty;
 
     public AdjustmentForm()
     {
-        BuildUi();
+        InitializeComponent();
+        ApplyRuntimeStyling();
         Load += (_, _) =>
         {
             LoadProducts();
@@ -38,208 +25,37 @@ public class AdjustmentForm : Form
         };
     }
 
-    private void BuildUi()
+    private void ApplyRuntimeStyling()
     {
-        AutoScaleMode = AutoScaleMode.Font;
         Font = UiTheme.Body;
         BackColor = UiTheme.Background;
-        FormBorderStyle = FormBorderStyle.None;
-        Dock = DockStyle.Fill;
-        TopLevel = false;
-
-        var formPanel = new Panel
+        formPanel.BackColor = UiTheme.Surface;
+        foreach (Control c in formPanel.Controls)
         {
-            Dock = DockStyle.Top,
-            Height = 300,
-            BackColor = UiTheme.Surface,
-            Padding = new Padding(16)
-        };
-
-        const int lx = 16;
-        const int fw = 300;
-        var y = 12;
-
-        void L(string t)
-        {
-            formPanel.Controls.Add(new Label
+            if (c is Label lbl && lbl != lblError && lbl != lblPreviousQty && lbl != lblDifference)
             {
-                Text = t,
-                Font = UiTheme.Label,
-                Location = new Point(lx, y),
-                AutoSize = true
-            });
-            y += 18;
+                lbl.Font = UiTheme.Label;
+                lbl.ForeColor = UiTheme.Text;
+            }
         }
-
-        L("Product *");
-        cboProduct = new ComboBox
-        {
-            FlatStyle = FlatStyle.Flat,
-            Location = new Point(lx, y),
-            Width = fw,
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Font = UiTheme.Body
-        };
-        cboProduct.SelectedIndexChanged += CboProduct_SelectedIndexChanged;
-        formPanel.Controls.Add(cboProduct);
-        y += 32;
-
-        L("Previous quantity (system)");
-        lblPreviousQty = new Label
-        {
-            Text = "—",
-            Font = UiTheme.Body,
-            ForeColor = UiTheme.TextMuted,
-            Location = new Point(lx, y),
-            AutoSize = true
-        };
-        formPanel.Controls.Add(lblPreviousQty);
-        y += 28;
-
-        L("New quantity *");
-        nudNewQty = new NumericUpDown
-        {
-            Location = new Point(lx, y),
-            Width = 120,
-            Minimum = 0,
-            Maximum = 10_000_000,
-            Value = 0,
-            Font = UiTheme.Body
-        };
-        nudNewQty.ValueChanged += (_, _) => UpdateDifference();
-        formPanel.Controls.Add(nudNewQty);
-        y += 32;
-
-        L("Difference (New − Previous)");
-        lblDifference = new Label
-        {
-            Text = "—",
-            Font = UiTheme.Body,
-            Location = new Point(lx, y),
-            AutoSize = true
-        };
-        formPanel.Controls.Add(lblDifference);
-        y += 28;
-
-        var xR = lx + fw + 40;
-        var yR = 12;
-
-        formPanel.Controls.Add(new Label
-        {
-            Text = "Transaction date *",
-            Font = UiTheme.Label,
-            Location = new Point(xR, yR),
-            AutoSize = true
-        });
-        yR += 18;
-        dtpDate = new DateTimePicker
-        {
-            Location = new Point(xR, yR),
-            Width = 200,
-            Format = DateTimePickerFormat.Short,
-            MaxDate = DateTime.Today,
-            Value = DateTime.Today,
-            Font = UiTheme.Body
-        };
-        formPanel.Controls.Add(dtpDate);
-        yR += 36;
-
-        formPanel.Controls.Add(new Label
-        {
-            Text = "Reason *",
-            Font = UiTheme.Label,
-            Location = new Point(xR, yR),
-            AutoSize = true
-        });
-        yR += 18;
-        txtReason = new TextBox
-        {
-            BorderStyle = BorderStyle.FixedSingle,
-            Location = new Point(xR, yR),
-            Width = 280,
-            MaxLength = 250,
-            Font = UiTheme.Body
-        };
-        formPanel.Controls.Add(txtReason);
-        yR += 32;
-
-        formPanel.Controls.Add(new Label
-        {
-            Text = "Notes",
-            Font = UiTheme.Label,
-            Location = new Point(xR, yR),
-            AutoSize = true
-        });
-        yR += 18;
-        txtNotes = new TextBox
-        {
-            BorderStyle = BorderStyle.FixedSingle,
-            Location = new Point(xR, yR),
-            Width = 280,
-            Height = 48,
-            Multiline = true,
-            MaxLength = 500,
-            Font = UiTheme.Body,
-            ScrollBars = ScrollBars.Vertical
-        };
-        formPanel.Controls.Add(txtNotes);
-
-        lblError = new Label
-        {
-            ForeColor = UiTheme.Error,
-            Font = UiTheme.Label,
-            Location = new Point(lx, y),
-            Size = new Size(520, 28),
-            Visible = false
-        };
-        formPanel.Controls.Add(lblError);
-
-        btnSave = UiTheme.StyleButton(new Button
-        {
-            Text = "Record Adjustment",
-            Size = new Size(160, 34),
-            Location = new Point(xR + 120, y)
-        }, UiTheme.ButtonKind.Primary);
-        btnSave.Click += BtnSave_Click;
-        formPanel.Controls.Add(btnSave);
-
-        var lblHint = new Label
-        {
-            Dock = DockStyle.Top,
-            Height = 28,
-            Text = "  Recent adjustments",
-            Font = UiTheme.Label,
-            ForeColor = UiTheme.TextMuted,
-            TextAlign = ContentAlignment.MiddleLeft
-        };
-
-        grid = new DataGridView
-        {
-            Dock = DockStyle.Fill,
-            BackgroundColor = UiTheme.Surface,
-            BorderStyle = BorderStyle.FixedSingle,
-            AllowUserToAddRows = false,
-            AllowUserToDeleteRows = false,
-            AllowUserToResizeRows = false,
-            ReadOnly = true,
-            MultiSelect = false,
-            SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-            RowHeadersVisible = false,
-            Font = UiTheme.Body,
-            ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-            {
-                Font = UiTheme.Label,
-                BackColor = UiTheme.StatusStripBackground,
-                ForeColor = UiTheme.Text
-            },
-            EnableHeadersVisualStyles = false
-        };
-
-        Controls.Add(grid);
-        Controls.Add(lblHint);
-        Controls.Add(formPanel);
+        lblPreviousQty.Font = UiTheme.Body;
+        lblPreviousQty.ForeColor = UiTheme.TextMuted;
+        lblDifference.Font = UiTheme.Body;
+        lblError.Font = UiTheme.Label;
+        lblError.ForeColor = UiTheme.Error;
+        lblHint.Font = UiTheme.Label;
+        lblHint.ForeColor = UiTheme.TextMuted;
+        UiTheme.StyleComboBox(cboProduct);
+        UiTheme.StyleTextBox(txtReason);
+        UiTheme.StyleTextBox(txtNotes);
+        UiTheme.StyleDatePicker(dtpDate);
+        UiTheme.StyleButton(btnSave, UiTheme.ButtonKind.Primary);
+        UiTheme.ApplyGridTheme(grid);
+        dtpDate.MaxDate = DateTime.Today;
+        dtpDate.Value = DateTime.Today;
     }
+
+    private void NudNewQty_ValueChanged(object? sender, EventArgs e) => UpdateDifference();
 
     private void LoadProducts()
     {
@@ -365,7 +181,7 @@ public class AdjustmentForm : Form
             Show(nameof(TransactionHistoryRow.Reason), "Reason", 1.4f);
             Show(nameof(TransactionHistoryRow.UserFullName), "User", 1.0f);
         }
-        catch { /* still usable */ }
+        catch { }
     }
 
     private sealed class LookupItem
