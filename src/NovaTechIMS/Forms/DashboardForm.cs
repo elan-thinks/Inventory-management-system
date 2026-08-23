@@ -10,7 +10,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms;
 
-/// <summary>SCR-002 Dashboard — metric tiles + activity + quick actions.</summary>
+/// <summary>SCR-002 Dashboard — metric tiles + activity + quick actions + icons.</summary>
 public partial class DashboardForm : Form
 {
     private readonly DashboardService _service = new();
@@ -80,20 +80,19 @@ public partial class DashboardForm : Form
             lnkViewAll.ActiveLinkColor = UiTheme.PrimaryHover;
         }
 
-        // Explicit colors — never rely on theme alone for readability
         StyleValue(lblProducts, Color.FromArgb(31, 41, 51));
         StyleValue(lblCategories, Color.FromArgb(31, 41, 51));
         StyleValue(lblSuppliers, Color.FromArgb(31, 41, 51));
         StyleValue(lblTotalQty, Color.FromArgb(31, 41, 51));
-        StyleValue(lblLow, Color.FromArgb(199, 119, 0));   // warning
-        StyleValue(lblOut, Color.FromArgb(192, 57, 43));   // error
+        StyleValue(lblLow, Color.FromArgb(199, 119, 0));
+        StyleValue(lblOut, Color.FromArgb(192, 57, 43));
 
-        StyleCaption(capProducts);
-        StyleCaption(capCategories);
-        StyleCaption(capSuppliers);
-        StyleCaption(capTotalQty);
-        StyleCaption(capLow);
-        StyleCaption(capOut);
+        StyleCaption(capProducts, "icons-totalProduct.png");
+        StyleCaption(capCategories, "icons-catagory-tag.png");
+        StyleCaption(capSuppliers, "icons-suppliers.png");
+        StyleCaption(capTotalQty, "icons-totalProduct.png");
+        StyleCaption(capLow, "icons-warning.png");
+        StyleCaption(capOut, "icons-x-error.png");
 
         foreach (var tile in new[] { tileProducts, tileCategories, tileSuppliers, tileTotalQty, tileLow, tileOut })
         {
@@ -126,13 +125,14 @@ public partial class DashboardForm : Form
         lbl.Visible = true;
     }
 
-    private static void StyleCaption(Label? lbl)
+    private static void StyleCaption(Label? lbl, string iconFile)
     {
         if (lbl is null) return;
         lbl.ForeColor = Color.FromArgb(90, 100, 110);
         lbl.BackColor = Color.White;
         lbl.Font = new Font("Segoe UI", 8.25F);
         lbl.Visible = true;
+        AppIcons.ApplyToLabel(lbl, iconFile, 14);
     }
 
     private void BuildQuickActions()
@@ -149,34 +149,35 @@ public partial class DashboardForm : Form
         int btnWidth = Math.Max(160, actionsPanel.ClientSize.Width - 32);
         bool primaryUsed = false;
 
-        void AddAction(string text, string navKey)
+        void AddAction(string text, string navKey, string iconFile)
         {
             var kind = !primaryUsed ? UiTheme.ButtonKind.Primary : UiTheme.ButtonKind.Secondary;
             primaryUsed = true;
             var b = UiTheme.StyleButton(new Button
             {
-                Text = text,
+                Text = "  " + text,
                 Location = new Point(16, ay),
                 Size = new Size(btnWidth, 36),
                 Tag = navKey,
                 TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(12, 0, 8, 0)
+                Padding = new Padding(10, 0, 8, 0)
             }, kind);
+            AppIcons.ApplyToButton(b, iconFile, 16);
             b.Click += (_, _) => _navigate?.Invoke(navKey);
             actionsPanel.Controls.Add(b);
             ay += 44;
         }
 
         if (AuthorizationService.HasPermission(_user, Permissions.StockIn))
-            AddAction("  ↓  Record Stock-In", "Stock In");
+            AddAction("Record Stock-In", "Stock In", "icons-stockIn.png");
         if (AuthorizationService.HasPermission(_user, Permissions.StockOut))
-            AddAction("  ↑  Record Stock-Out", "Stock Out");
+            AddAction("Record Stock-Out", "Stock Out", "icons-stockOut.png");
         if (AuthorizationService.HasPermission(_user, Permissions.ViewProducts))
-            AddAction("  🔍  Search Products", "Products");
+            AddAction("Search Products", "Products", "icons-search.png");
         if (AuthorizationService.HasPermission(_user, Permissions.PerformAdjustment))
-            AddAction("  ⇄  Inventory Adjustment", "Inventory Adjustment");
+            AddAction("Inventory Adjustment", "Inventory Adjustment", "icons-Inventory-adjust.png");
         if (AuthorizationService.HasPermission(_user, Permissions.ManageUsers))
-            AddAction("  👤  Manage Users", "User Management");
+            AddAction("Manage Users", "User Management", "icons-user.png");
 
         actionsPanel.Resize += (_, _) =>
         {
@@ -212,7 +213,6 @@ public partial class DashboardForm : Form
             SetMetric(lblLow, m.LowStockCount.ToString("N0", nfi));
             SetMetric(lblOut, m.OutOfStockCount.ToString("N0", nfi));
 
-            // Force paint
             foreach (var t in new[] { tileProducts, tileCategories, tileSuppliers, tileTotalQty, tileLow, tileOut })
                 t?.Invalidate();
             metricsPanel?.Refresh();
@@ -236,7 +236,6 @@ public partial class DashboardForm : Form
                 foreach (DataGridViewColumn col in grid.Columns)
                     col.Visible = false;
 
-                // Fixed order: Date | Type | Product | Qty | User
                 int di = 0;
                 void Show(string name, string header, float w)
                 {
@@ -271,7 +270,6 @@ public partial class DashboardForm : Form
         }
         catch (Exception ex)
         {
-            // Still show zeros so tiles are never empty
             SetMetric(lblProducts, "0");
             SetMetric(lblCategories, "0");
             SetMetric(lblSuppliers, "0");
