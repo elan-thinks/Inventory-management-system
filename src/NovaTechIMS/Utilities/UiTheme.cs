@@ -148,16 +148,50 @@ internal static class UiTheme
         box.BorderStyle = BorderStyle.FixedSingle;
         box.BackColor = Surface;
         box.ForeColor = Text;
+        // Placeholder color is OS-controlled; dark surface is enough
         return box;
     }
 
+    /// <summary>
+    /// Dark ComboBox — owner-draw so Windows does not force a white face/list.
+    /// </summary>
     public static ComboBox StyleComboBox(ComboBox combo)
     {
         combo.Font = Body;
         combo.FlatStyle = FlatStyle.Flat;
         combo.BackColor = Surface;
         combo.ForeColor = Text;
+        combo.DrawMode = DrawMode.OwnerDrawFixed;
+        combo.ItemHeight = 22;
+
+        // Avoid stacking handlers if StyleComboBox is called more than once
+        combo.DrawItem -= ComboDrawItem;
+        combo.DrawItem += ComboDrawItem;
+
         return combo;
+    }
+
+    private static void ComboDrawItem(object? sender, DrawItemEventArgs e)
+    {
+        if (sender is not ComboBox combo || e.Index < 0)
+            return;
+
+        bool selected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
+        using var bg = new SolidBrush(selected ? RowSelected : Surface);
+        e.Graphics.FillRectangle(bg, e.Bounds);
+
+        string text = combo.GetItemText(combo.Items[e.Index]);
+        using var fg = new SolidBrush(Text);
+        var textRect = new Rectangle(e.Bounds.X + 6, e.Bounds.Y, e.Bounds.Width - 6, e.Bounds.Height);
+        TextRenderer.DrawText(
+            e.Graphics,
+            text,
+            Body,
+            textRect,
+            Text,
+            TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+
+        e.DrawFocusRectangle();
     }
 
     public static DateTimePicker StyleDatePicker(DateTimePicker picker)
@@ -166,6 +200,36 @@ internal static class UiTheme
         picker.CalendarForeColor = Text;
         picker.CalendarMonthBackground = Surface;
         return picker;
+    }
+
+    /// <summary>
+    /// Walk a form/control tree and force dark TextBox + ComboBox colors.
+    /// Call from any list/edit form ApplyRuntimeStyling.
+    /// </summary>
+    public static void ApplyDarkInputs(Control root)
+    {
+        foreach (Control c in root.Controls)
+        {
+            switch (c)
+            {
+                case TextBox tb:
+                    StyleTextBox(tb);
+                    break;
+                case ComboBox cb:
+                    StyleComboBox(cb);
+                    break;
+                case NumericUpDown nud:
+                    nud.BackColor = Surface;
+                    nud.ForeColor = Text;
+                    break;
+                case DateTimePicker dtp:
+                    StyleDatePicker(dtp);
+                    break;
+            }
+
+            if (c.HasChildren)
+                ApplyDarkInputs(c);
+        }
     }
 
     public static void WireFocusBorder(Control input, Panel wrapper)
