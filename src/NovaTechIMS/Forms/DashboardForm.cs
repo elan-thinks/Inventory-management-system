@@ -59,7 +59,7 @@ public class DashboardForm : Form
         metricsPanel.Controls.Add(MakeTile("Categories", out lblCategories, UiTheme.Text));
         metricsPanel.Controls.Add(MakeTile("Suppliers", out lblSuppliers, UiTheme.Text));
         metricsPanel.Controls.Add(MakeTile("Total qty on hand", out lblTotalQty, UiTheme.Text));
-        metricsPanel.Controls.Add(MakeTile("Low stock", out lblLow, ColorTranslator.FromHtml("#B7791F")));
+        metricsPanel.Controls.Add(MakeTile("Low stock", out lblLow, UiTheme.Warning));
         metricsPanel.Controls.Add(MakeTile("Out of stock", out lblOut, UiTheme.Error));
 
         var bottom = new TableLayoutPanel
@@ -85,25 +85,20 @@ public class DashboardForm : Form
         grid = new DataGridView
         {
             Dock = DockStyle.Fill,
-            BackgroundColor = UiTheme.Surface,
-            BorderStyle = BorderStyle.FixedSingle,
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
-            AllowUserToResizeRows = false,
             ReadOnly = true,
             MultiSelect = false,
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-            RowHeadersVisible = false,
-            Font = UiTheme.Body,
-            ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-            {
-                Font = UiTheme.Label,
-                BackColor = UiTheme.StatusStripBackground,
-                ForeColor = UiTheme.Text
-            },
-            EnableHeadersVisualStyles = false
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
         };
+        UiTheme.ApplyGridTheme(grid);
+        UiTheme.WireStatusBadgeColumn(grid, nameof(TransactionHistoryRow.TypeLabel), value => (value?.ToString() ?? "") switch
+        {
+            "Stock-In" => ("Stock-In", UiTheme.BadgeTone.Success, '\u2713'),
+            "Stock-Out" => ("Stock-Out", UiTheme.BadgeTone.Error, '\u2715'),
+            _ => ("Adjustment", UiTheme.BadgeTone.Info, '!')
+        });
 
         lblEmpty = new Label
         {
@@ -123,8 +118,12 @@ public class DashboardForm : Form
         {
             Dock = DockStyle.Fill,
             BackColor = UiTheme.Surface,
-            Padding = new Padding(12),
-            BorderStyle = BorderStyle.FixedSingle
+            Padding = new Padding(12)
+        };
+        actionsPanel.Paint += (_, e) =>
+        {
+            using var pen = new Pen(UiTheme.Border, 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, actionsPanel.Width - 1, actionsPanel.Height - 1);
         };
         var lblQa = new Label
         {
@@ -138,19 +137,13 @@ public class DashboardForm : Form
         int ay = 40;
         void AddAction(string text, string navKey)
         {
-            var b = new Button
+            var b = UiTheme.StyleButton(new Button
             {
                 Text = text,
                 Location = new Point(12, ay),
                 Size = new Size(200, 34),
-                FlatStyle = FlatStyle.Flat,
-                Font = UiTheme.Button,
-                BackColor = UiTheme.Primary,
-                ForeColor = Color.White,
-                Cursor = Cursors.Hand,
                 Tag = navKey
-            };
-            b.FlatAppearance.BorderSize = 0;
+            }, UiTheme.ButtonKind.Primary);
             b.Click += (_, _) => _navigate?.Invoke(navKey);
             actionsPanel.Controls.Add(b);
             ay += 42;
@@ -192,9 +185,14 @@ public class DashboardForm : Form
             Height = 88,
             Margin = new Padding(0, 0, 10, 0),
             BackColor = UiTheme.Surface,
-            BorderStyle = BorderStyle.FixedSingle,
             Padding = new Padding(10)
         };
+        tile.Paint += (_, e) =>
+        {
+            using var pen = new Pen(UiTheme.Border, 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, tile.Width - 1, tile.Height - 1);
+        };
+        UiTheme.ApplyRoundedRegion(tile, UiTheme.RadiusLg);
 
         valueLabel = new Label
         {

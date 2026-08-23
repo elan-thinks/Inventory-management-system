@@ -7,13 +7,14 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Reports;
 
-/// <summary>Reports hub (SCR-016) — M19 card layout; generation unchanged.</summary>
+/// <summary>
+/// Reports hub (SCR-016): choose report type, filters, run viewer (SCR-017).
+/// </summary>
 public class ReportsHubForm : Form
 {
     private readonly ReportService _service = new();
 
-    private FlowLayoutPanel cards = null!;
-    private Panel filterPanel = null!;
+    private ComboBox cboReport = null!;
     private DateTimePicker dtpFrom = null!;
     private DateTimePicker dtpTo = null!;
     private ComboBox cboType = null!;
@@ -24,9 +25,7 @@ public class ReportsHubForm : Form
     private Label lblProduct = null!;
     private Button btnRun = null!;
     private Label lblError = null!;
-    private Label lblSelected = null!;
-
-    private int _selectedReport;
+    private Label lblHint = null!;
 
     public ReportsHubForm()
     {
@@ -34,7 +33,7 @@ public class ReportsHubForm : Form
         Load += (_, _) =>
         {
             LoadProducts();
-            SelectReport(0);
+            UpdateFilterVisibility();
         };
     }
 
@@ -47,190 +46,125 @@ public class ReportsHubForm : Form
         Dock = DockStyle.Fill;
         TopLevel = false;
 
-        cards = new FlowLayoutPanel
+        var card = new Panel
         {
-            Dock = DockStyle.Top,
-            Height = 220,
-            Padding = new Padding(8),
-            AutoScroll = true,
-            WrapContents = true
+            Location = new Point(24, 24),
+            Size = new Size(560, 320),
+            BackColor = UiTheme.Surface,
+            Padding = new Padding(20)
         };
+        UiTheme.ApplyRoundedRegion(card, UiTheme.RadiusLg);
 
-        AddCard(0, "Current Inventory", "All active products with quantity and stock status.");
-        AddCard(1, "Low Stock", "Products at or below minimum stock level.");
-        AddCard(2, "Out of Stock", "Products with zero quantity on hand.");
-        AddCard(3, "Stock-In", "Goods received over a date range.");
-        AddCard(4, "Stock-Out", "Goods issued over a date range.");
-        AddCard(5, "Transaction History", "Full movement log with optional filters.");
+        int y = 16;
+        const int lx = 20;
 
-        filterPanel = new Panel
+        card.Controls.Add(new Label
         {
-            Dock = DockStyle.Top,
-            Height = 140,
-            Padding = new Padding(16),
-            BackColor = UiTheme.Surface
-        };
-
-        lblSelected = new Label
-        {
-            Text = "Selected: Current Inventory",
-            Font = UiTheme.SectionTitle,
-            Location = new Point(16, 12),
+            Text = "Select report",
+            Font = UiTheme.Label,
+            Location = new Point(lx, y),
             AutoSize = true
-        };
-        filterPanel.Controls.Add(lblSelected);
+        });
+        y += 20;
 
-        lblFrom = new Label { Text = "From", Font = UiTheme.Label, Location = new Point(16, 48), AutoSize = true };
-        dtpFrom = new DateTimePicker
+        cboReport = UiTheme.StyleComboBox(new ComboBox
         {
-            Location = new Point(60, 44),
+            Location = new Point(lx, y),
+            Width = 400,
+            DropDownStyle = ComboBoxStyle.DropDownList
+        });
+        cboReport.Items.AddRange(new object[]
+        {
+            "Current Inventory",
+            "Low Stock",
+            "Out of Stock",
+            "Stock-In (date range)",
+            "Stock-Out (date range)",
+            "Inventory Transaction History"
+        });
+        cboReport.SelectedIndex = 0;
+        cboReport.SelectedIndexChanged += (_, _) => UpdateFilterVisibility();
+        card.Controls.Add(cboReport);
+        y += 40;
+
+        lblFrom = new Label { Text = "From", Font = UiTheme.Label, ForeColor = UiTheme.TextMuted, Location = new Point(lx, y), AutoSize = true };
+        card.Controls.Add(lblFrom);
+        dtpFrom = UiTheme.StyleDatePicker(new DateTimePicker
+        {
+            Location = new Point(lx + 50, y - 2),
             Width = 130,
             Format = DateTimePickerFormat.Short,
-            Value = DateTime.Today.AddDays(-30),
-            Font = UiTheme.Body
-        };
-        lblTo = new Label { Text = "To", Font = UiTheme.Label, Location = new Point(210, 48), AutoSize = true };
-        dtpTo = new DateTimePicker
+            Value = DateTime.Today.AddDays(-30)
+        });
+        card.Controls.Add(dtpFrom);
+
+        lblTo = new Label { Text = "To", Font = UiTheme.Label, ForeColor = UiTheme.TextMuted, Location = new Point(lx + 200, y), AutoSize = true };
+        card.Controls.Add(lblTo);
+        dtpTo = UiTheme.StyleDatePicker(new DateTimePicker
         {
-            Location = new Point(240, 44),
+            Location = new Point(lx + 230, y - 2),
             Width = 130,
             Format = DateTimePickerFormat.Short,
-            Value = DateTime.Today,
-            Font = UiTheme.Body
-        };
+            Value = DateTime.Today
+        });
+        card.Controls.Add(dtpTo);
+        y += 36;
 
-        lblType = new Label { Text = "Type", Font = UiTheme.Label, Location = new Point(16, 84), AutoSize = true };
-        cboType = new ComboBox
+        lblType = new Label { Text = "Type", Font = UiTheme.Label, ForeColor = UiTheme.TextMuted, Location = new Point(lx, y), AutoSize = true };
+        card.Controls.Add(lblType);
+        cboType = UiTheme.StyleComboBox(new ComboBox
         {
-            Location = new Point(60, 80),
+            Location = new Point(lx + 50, y - 2),
             Width = 150,
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Font = UiTheme.Body
-        };
+            DropDownStyle = ComboBoxStyle.DropDownList
+        });
         cboType.Items.AddRange(new object[] { "All", "Stock-In", "Stock-Out", "Adjustment" });
         cboType.SelectedIndex = 0;
+        card.Controls.Add(cboType);
+        y += 36;
 
-        lblProduct = new Label { Text = "Product", Font = UiTheme.Label, Location = new Point(230, 84), AutoSize = true };
-        cboProduct = new ComboBox
+        lblProduct = new Label { Text = "Product", Font = UiTheme.Label, ForeColor = UiTheme.TextMuted, Location = new Point(lx, y), AutoSize = true };
+        card.Controls.Add(lblProduct);
+        cboProduct = UiTheme.StyleComboBox(new ComboBox
         {
-            Location = new Point(290, 80),
-            Width = 220,
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Font = UiTheme.Body
-        };
+            Location = new Point(lx + 60, y - 2),
+            Width = 280,
+            DropDownStyle = ComboBoxStyle.DropDownList
+        });
+        card.Controls.Add(cboProduct);
+        y += 44;
 
-        btnRun = new Button
+        btnRun = UiTheme.StyleButton(new Button
         {
-            Text = "Generate",
-            Location = new Point(540, 76),
-            Size = new Size(120, 34),
-            FlatStyle = FlatStyle.Flat,
-            Font = UiTheme.Button,
-            BackColor = UiTheme.Primary,
-            ForeColor = Color.White,
-            Cursor = Cursors.Hand
-        };
-        btnRun.FlatAppearance.BorderSize = 0;
+            Text = "Run report",
+            Location = new Point(lx, y),
+            Size = new Size(130, 34)
+        }, UiTheme.ButtonKind.Primary);
         btnRun.Click += BtnRun_Click;
+        card.Controls.Add(btnRun);
 
         lblError = new Label
         {
             ForeColor = UiTheme.Error,
             Font = UiTheme.Label,
-            Location = new Point(16, 112),
-            Size = new Size(640, 24),
+            Location = new Point(lx + 150, y),
+            Size = new Size(320, 40),
             Visible = false
         };
+        card.Controls.Add(lblError);
 
-        filterPanel.Controls.Add(lblFrom);
-        filterPanel.Controls.Add(dtpFrom);
-        filterPanel.Controls.Add(lblTo);
-        filterPanel.Controls.Add(dtpTo);
-        filterPanel.Controls.Add(lblType);
-        filterPanel.Controls.Add(cboType);
-        filterPanel.Controls.Add(lblProduct);
-        filterPanel.Controls.Add(cboProduct);
-        filterPanel.Controls.Add(btnRun);
-        filterPanel.Controls.Add(lblError);
-
-        var lblHint = new Label
+        lblHint = new Label
         {
             Dock = DockStyle.Bottom,
-            Height = 36,
+            Height = 40,
             Text = "  Reports open in a separate window. Use Print… on the viewer if needed. Export is out of MVP scope.",
             Font = UiTheme.Label,
             ForeColor = UiTheme.TextMuted,
             TextAlign = ContentAlignment.MiddleLeft
         };
 
+        Controls.Add(card);
         Controls.Add(lblHint);
-        Controls.Add(filterPanel);
-        Controls.Add(cards);
-    }
-
-    private void AddCard(int index, string title, string description)
-    {
-        var card = new Panel
-        {
-            Width = 200,
-            Height = 100,
-            Margin = new Padding(8),
-            BackColor = UiTheme.Surface,
-            BorderStyle = BorderStyle.FixedSingle,
-            Cursor = Cursors.Hand,
-            Tag = index
-        };
-
-        var t = new Label
-        {
-            Text = title,
-            Font = UiTheme.SectionTitle,
-            ForeColor = UiTheme.Primary,
-            Location = new Point(12, 12),
-            AutoSize = true
-        };
-        var d = new Label
-        {
-            Text = description,
-            Font = UiTheme.Label,
-            ForeColor = UiTheme.TextMuted,
-            Location = new Point(12, 40),
-            Size = new Size(176, 48)
-        };
-
-        void Select(object? s, EventArgs e) => SelectReport(index);
-        card.Click += Select;
-        t.Click += Select;
-        d.Click += Select;
-
-        card.Controls.Add(t);
-        card.Controls.Add(d);
-        cards.Controls.Add(card);
-    }
-
-    private void SelectReport(int index)
-    {
-        _selectedReport = index;
-        var names = new[]
-        {
-            "Current Inventory", "Low Stock", "Out of Stock",
-            "Stock-In", "Stock-Out", "Transaction History"
-        };
-        lblSelected.Text = "Selected: " + names[index];
-
-        foreach (Control c in cards.Controls)
-        {
-            if (c is Panel p && p.Tag is int i)
-                p.BackColor = i == index ? UiTheme.InfoTint : UiTheme.Surface;
-        }
-
-        bool needsDates = index is 3 or 4 or 5;
-        bool needsTypeProduct = index == 5;
-
-        lblFrom.Visible = dtpFrom.Visible = needsDates;
-        lblTo.Visible = dtpTo.Visible = needsDates;
-        lblType.Visible = cboType.Visible = needsTypeProduct;
-        lblProduct.Visible = cboProduct.Visible = needsTypeProduct;
     }
 
     private void LoadProducts()
@@ -243,7 +177,22 @@ public class ReportsHubForm : Form
                 cboProduct.Items.Add(new LookupItem(p.ProductID, p.ProductName));
             cboProduct.SelectedIndex = 0;
         }
-        catch { /* run surfaces errors */ }
+        catch
+        {
+            // run will surface errors
+        }
+    }
+
+    private void UpdateFilterVisibility()
+    {
+        var idx = cboReport.SelectedIndex;
+        bool needsDates = idx is 3 or 4 or 5;
+        bool needsTypeProduct = idx == 5;
+
+        lblFrom.Visible = dtpFrom.Visible = needsDates;
+        lblTo.Visible = dtpTo.Visible = needsDates;
+        lblType.Visible = cboType.Visible = needsTypeProduct;
+        lblProduct.Visible = cboProduct.Visible = needsTypeProduct;
     }
 
     private void BtnRun_Click(object? sender, EventArgs e)
@@ -256,7 +205,7 @@ public class ReportsHubForm : Form
             string title;
             object data;
 
-            switch (_selectedReport)
+            switch (cboReport.SelectedIndex)
             {
                 case 0:
                     title = "Current Inventory";
@@ -301,7 +250,7 @@ public class ReportsHubForm : Form
         }
         catch (Exception ex)
         {
-            lblError.Text = ErrorPresenter.ToUserMessage(DbExceptionMapper.Map(ex));
+            lblError.Text = "Could not run report. " + ex.Message;
             lblError.Visible = true;
         }
         finally

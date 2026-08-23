@@ -43,30 +43,20 @@ public class ReportViewerForm : Form
             Padding = new Padding(8)
         };
 
-        var btnPrint = new Button
+        var btnPrint = UiTheme.StyleButton(new Button
         {
             Text = "Print…",
             Size = new Size(90, 28),
-            Location = new Point(8, 8),
-            FlatStyle = FlatStyle.Flat,
-            Font = UiTheme.Button,
-            BackColor = UiTheme.Primary,
-            ForeColor = Color.White,
-            Cursor = Cursors.Hand
-        };
-        btnPrint.FlatAppearance.BorderSize = 0;
+            Location = new Point(8, 8)
+        }, UiTheme.ButtonKind.Primary);
         btnPrint.Click += BtnPrint_Click;
 
-        var btnClose = new Button
+        var btnClose = UiTheme.StyleButton(new Button
         {
             Text = "Close",
             Size = new Size(80, 28),
-            Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            FlatStyle = FlatStyle.Flat,
-            Font = UiTheme.Label,
-            BackColor = UiTheme.Surface
-        };
-        btnClose.FlatAppearance.BorderColor = UiTheme.Border;
+            Anchor = AnchorStyles.Top | AnchorStyles.Right
+        }, UiTheme.ButtonKind.Secondary);
         btnClose.Click += (_, _) => Close();
         toolbar.Resize += (_, _) => btnClose.Left = toolbar.ClientSize.Width - btnClose.Width - 8;
 
@@ -78,7 +68,7 @@ public class ReportViewerForm : Form
             Dock = DockStyle.Top,
             Height = 28,
             Text = "  " + _title,
-            Font = UiTheme.Label,
+            Font = UiTheme.SectionTitle,
             ForeColor = UiTheme.Text,
             TextAlign = ContentAlignment.MiddleLeft
         };
@@ -86,25 +76,14 @@ public class ReportViewerForm : Form
         grid = new DataGridView
         {
             Dock = DockStyle.Fill,
-            BackgroundColor = UiTheme.Surface,
-            BorderStyle = BorderStyle.FixedSingle,
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
-            AllowUserToResizeRows = false,
             ReadOnly = true,
             MultiSelect = false,
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-            RowHeadersVisible = false,
-            Font = UiTheme.Body,
-            ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-            {
-                Font = UiTheme.Label,
-                BackColor = UiTheme.StatusStripBackground,
-                ForeColor = UiTheme.Text
-            },
-            EnableHeadersVisualStyles = false
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
         };
+        UiTheme.ApplyGridTheme(grid);
 
         Controls.Add(grid);
         Controls.Add(lbl);

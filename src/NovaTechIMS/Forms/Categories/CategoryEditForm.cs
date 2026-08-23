@@ -56,39 +56,37 @@ public class CategoryEditForm : Form
         var lblName = new Label
         {
             Text = "Name *",
-            Font = UiTheme.Label,
+            Font = UiTheme.LabelSemibold,
             ForeColor = UiTheme.Text,
             Location = new Point(24, 24),
             AutoSize = true
         };
 
-        txtName = new TextBox
+        txtName = UiTheme.StyleTextBox(new TextBox
         {
             Location = new Point(24, 48),
             Width = 392,
-            MaxLength = 100,
-            Font = UiTheme.Body
-        };
+            MaxLength = 100
+        });
 
         var lblDescription = new Label
         {
             Text = "Description",
-            Font = UiTheme.Label,
+            Font = UiTheme.LabelSemibold,
             ForeColor = UiTheme.Text,
             Location = new Point(24, 88),
             AutoSize = true
         };
 
-        txtDescription = new TextBox
+        txtDescription = UiTheme.StyleTextBox(new TextBox
         {
             Location = new Point(24, 112),
             Width = 392,
             Height = 80,
             Multiline = true,
             MaxLength = 500,
-            ScrollBars = ScrollBars.Vertical,
-            Font = UiTheme.Body
-        };
+            ScrollBars = ScrollBars.Vertical
+        });
 
         chkActive = new CheckBox
         {
@@ -103,38 +101,26 @@ public class CategoryEditForm : Form
         lblError = new Label
         {
             ForeColor = UiTheme.Error,
-            Font = UiTheme.Label,
+            Font = UiTheme.ErrorText,
             Location = new Point(24, 236),
             Size = new Size(392, 36),
             Visible = false
         };
 
-        btnSave = new Button
+        btnSave = UiTheme.StyleButton(new Button
         {
             Text = "Save",
-            Font = UiTheme.Button,
-            BackColor = UiTheme.Primary,
-            ForeColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
             Size = new Size(100, 32),
-            Location = new Point(212, 276),
-            Cursor = Cursors.Hand
-        };
-        btnSave.FlatAppearance.BorderSize = 0;
+            Location = new Point(212, 276)
+        }, UiTheme.ButtonKind.Primary);
         btnSave.Click += BtnSave_Click;
 
-        btnCancel = new Button
+        btnCancel = UiTheme.StyleButton(new Button
         {
             Text = "Cancel",
-            Font = UiTheme.Body,
-            BackColor = UiTheme.Surface,
-            ForeColor = UiTheme.Text,
-            FlatStyle = FlatStyle.Flat,
             Size = new Size(100, 32),
-            Location = new Point(316, 276),
-            Cursor = Cursors.Hand
-        };
-        btnCancel.FlatAppearance.BorderColor = UiTheme.Border;
+            Location = new Point(316, 276)
+        }, UiTheme.ButtonKind.Secondary);
         btnCancel.Click += (_, _) => DialogResult = DialogResult.Cancel;
 
         AcceptButton = btnSave;

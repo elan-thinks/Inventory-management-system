@@ -49,71 +49,66 @@ public class DelegationEditForm : Form
         }
 
         L("Recipient (Inventory Staff) *");
-        cboRecipient = new ComboBox
+        cboRecipient = UiTheme.StyleComboBox(new ComboBox
         {
             Location = new Point(lx, y),
             Width = fw,
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Font = UiTheme.Body
-        };
+            DropDownStyle = ComboBoxStyle.DropDownList
+        });
         Controls.Add(cboRecipient);
         y += 32;
 
         L("Responsibility *");
-        cboResponsibility = new ComboBox
+        cboResponsibility = UiTheme.StyleComboBox(new ComboBox
         {
             Location = new Point(lx, y),
             Width = fw,
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Font = UiTheme.Body
-        };
+            DropDownStyle = ComboBoxStyle.DropDownList
+        });
         cboResponsibility.Items.AddRange(new object[] { "Stock-In", "Stock-Out", "Report Access" });
         cboResponsibility.SelectedIndex = 0;
         Controls.Add(cboResponsibility);
         y += 32;
 
         L("Start date *");
-        dtpStart = new DateTimePicker
+        dtpStart = UiTheme.StyleDatePicker(new DateTimePicker
         {
             Location = new Point(lx, y),
             Width = 160,
             Format = DateTimePickerFormat.Short,
-            Value = DateTime.Today,
-            Font = UiTheme.Body
-        };
+            Value = DateTime.Today
+        });
         Controls.Add(dtpStart);
         y += 32;
 
         L("End date *");
-        dtpEnd = new DateTimePicker
+        dtpEnd = UiTheme.StyleDatePicker(new DateTimePicker
         {
             Location = new Point(lx, y),
             Width = 160,
             Format = DateTimePickerFormat.Short,
-            Value = DateTime.Today.AddDays(7),
-            Font = UiTheme.Body
-        };
+            Value = DateTime.Today.AddDays(7)
+        });
         Controls.Add(dtpEnd);
         y += 32;
 
         L("Reason *");
-        txtReason = new TextBox
+        txtReason = UiTheme.StyleTextBox(new TextBox
         {
             Location = new Point(lx, y),
             Width = fw,
             Height = 60,
             Multiline = true,
             MaxLength = 500,
-            Font = UiTheme.Body,
             ScrollBars = ScrollBars.Vertical
-        };
+        });
         Controls.Add(txtReason);
         y += 72;
 
         lblError = new Label
         {
             ForeColor = UiTheme.Error,
-            Font = UiTheme.Label,
+            Font = UiTheme.ErrorText,
             Location = new Point(lx, y),
             Size = new Size(fw, 40),
             Visible = false
@@ -121,29 +116,20 @@ public class DelegationEditForm : Form
         Controls.Add(lblError);
         y += 44;
 
-        btnSave = new Button
+        btnSave = UiTheme.StyleButton(new Button
         {
             Text = "Create",
-            Font = UiTheme.Button,
-            BackColor = UiTheme.Primary,
-            ForeColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
             Size = new Size(100, 32),
-            Location = new Point(lx + fw - 208, y),
-            Cursor = Cursors.Hand
-        };
-        btnSave.FlatAppearance.BorderSize = 0;
+            Location = new Point(lx + fw - 208, y)
+        }, UiTheme.ButtonKind.Primary);
         btnSave.Click += BtnSave_Click;
 
-        var btnCancel = new Button
+        var btnCancel = UiTheme.StyleButton(new Button
         {
             Text = "Cancel",
             Size = new Size(100, 32),
-            Location = new Point(lx + fw - 100, y),
-            FlatStyle = FlatStyle.Flat,
-            Cursor = Cursors.Hand
-        };
-        btnCancel.FlatAppearance.BorderColor = UiTheme.Border;
+            Location = new Point(lx + fw - 100, y)
+        }, UiTheme.ButtonKind.Secondary);
         btnCancel.Click += (_, _) => DialogResult = DialogResult.Cancel;
 
         AcceptButton = btnSave;

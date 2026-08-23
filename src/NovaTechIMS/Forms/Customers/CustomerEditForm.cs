@@ -76,6 +76,7 @@ public class CustomerEditForm : Form
         {
             var tb = new TextBox
             {
+                BorderStyle = BorderStyle.FixedSingle,
                 Location = new Point(fieldX, y),
                 Width = fieldW,
                 MaxLength = maxLen,
@@ -131,32 +132,21 @@ public class CustomerEditForm : Form
         Controls.Add(lblError);
         y += 40;
 
-        btnSave = new Button
+        btnSave = UiTheme.StyleButton(new Button
         {
             Text = "Save",
-            Font = UiTheme.Button,
-            BackColor = UiTheme.Primary,
-            ForeColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
             Size = new Size(100, 32),
-            Location = new Point(232, y),
-            Cursor = Cursors.Hand
-        };
-        btnSave.FlatAppearance.BorderSize = 0;
+            Location = new Point(232, y)
+        }, UiTheme.ButtonKind.Primary);
         btnSave.Click += BtnSave_Click;
+btnSave.Click += BtnSave_Click;
 
-        btnCancel = new Button
+        btnCancel = UiTheme.StyleButton(new Button
         {
             Text = "Cancel",
-            Font = UiTheme.Body,
-            BackColor = UiTheme.Surface,
-            ForeColor = UiTheme.Text,
-            FlatStyle = FlatStyle.Flat,
             Size = new Size(100, 32),
-            Location = new Point(336, y),
-            Cursor = Cursors.Hand
-        };
-        btnCancel.FlatAppearance.BorderColor = UiTheme.Border;
+            Location = new Point(336, y)
+        }, UiTheme.ButtonKind.Secondary);
         btnCancel.Click += (_, _) => DialogResult = DialogResult.Cancel;
 
         AcceptButton = btnSave;

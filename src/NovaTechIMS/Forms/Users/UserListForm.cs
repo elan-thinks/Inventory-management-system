@@ -7,7 +7,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Users;
 
-/// <summary>User Management list — M19 headers, badges, self-deactivate disabled.</summary>
+/// <summary>User Management list (FR-USR, Administrator only).</summary>
 public class UserListForm : Form
 {
     private readonly UserService _service = new();
@@ -37,50 +37,38 @@ public class UserListForm : Form
 
         var toolbar = new Panel { Dock = DockStyle.Top, Height = 48, BackColor = UiTheme.Background };
 
-        txtSearch = new TextBox
+        txtSearch = UiTheme.StyleTextBox(new TextBox
         {
             Width = 220,
             Location = new Point(0, 8),
-            PlaceholderText = "Search username or name…",
-            Font = UiTheme.Body
-        };
+            PlaceholderText = "Search username or name…"
+        });
         txtSearch.TextChanged += (_, _) => ReloadGrid();
 
-        cboStatus = new ComboBox
+        cboStatus = UiTheme.StyleComboBox(new ComboBox
         {
             DropDownStyle = ComboBoxStyle.DropDownList,
             Width = 140,
-            Location = new Point(232, 8),
-            Font = UiTheme.Body
-        };
+            Location = new Point(232, 8)
+        });
         cboStatus.Items.AddRange(new object[] { "All statuses", "Active", "Inactive" });
         cboStatus.SelectedIndex = 0;
         cboStatus.SelectedIndexChanged += (_, _) => ReloadGrid();
 
-        btnRefresh = new Button
+        btnRefresh = UiTheme.StyleButton(new Button
         {
             Text = "Refresh",
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(88, 30),
-            FlatStyle = FlatStyle.Flat,
-            Font = UiTheme.Label,
-            BackColor = UiTheme.Surface
-        };
-        btnRefresh.FlatAppearance.BorderColor = UiTheme.Border;
+            Size = new Size(88, 30)
+        }, UiTheme.ButtonKind.Secondary);
         btnRefresh.Click += (_, _) => ReloadGrid();
 
-        btnAdd = new Button
+        btnAdd = UiTheme.StyleButton(new Button
         {
             Text = "+ Add User",
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(110, 30),
-            FlatStyle = FlatStyle.Flat,
-            Font = UiTheme.Button,
-            BackColor = UiTheme.Primary,
-            ForeColor = Color.White,
-            Cursor = Cursors.Hand
-        };
-        btnAdd.FlatAppearance.BorderSize = 0;
+            Size = new Size(110, 30)
+        }, UiTheme.ButtonKind.Primary);
         btnAdd.Click += (_, _) =>
         {
             using var dlg = new UserEditForm();
@@ -103,16 +91,18 @@ public class UserListForm : Form
             Dock = DockStyle.Fill,
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
-            AllowUserToResizeRows = false,
             ReadOnly = true,
             MultiSelect = false,
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-            RowHeadersVisible = false
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
         };
-        GridStyles.Apply(grid);
+        UiTheme.ApplyGridTheme(grid);
+        UiTheme.WireStatusBadgeColumn(grid, "Status", value => (value?.ToString() ?? "") switch
+        {
+            "Active" => ("Active", UiTheme.BadgeTone.Success, '\u2713'),
+            _ => ("Inactive", UiTheme.BadgeTone.Muted, '\u2715')
+        });
         grid.CellContentClick += Grid_CellContentClick;
-        grid.CellFormatting += Grid_CellFormattingSelfDeactivate;
 
         lblEmpty = new Label
         {
@@ -183,38 +173,40 @@ public class UserListForm : Form
             Show(nameof(UserListRow.RoleLabel), "Role", 1.0f);
             Show(nameof(UserListRow.Status), "Status", 0.6f);
 
-            grid.Columns.Add(GridStyles.ActionButton("colEdit", "Edit", 0.5f));
-            grid.Columns.Add(GridStyles.ActionButton("colDeactivate", "Deactivate", 0.7f));
-
-            GridStyles.ApplyStatusFormatting(grid,
-                nameof(UserListRow.RoleLabel),
-                nameof(UserListRow.Status));
+            grid.Columns.Add(new DataGridViewButtonColumn
+            {
+                Name = "colEdit",
+                Text = "Edit",
+                UseColumnTextForButtonValue = true,
+                FillWeight = 0.5f,
+                FlatStyle = FlatStyle.Flat,
+                DefaultCellStyle = { ForeColor = UiTheme.Primary, Font = UiTheme.LabelSemibold }
+            });
+            grid.Columns.Add(new DataGridViewButtonColumn
+            {
+                Name = "colDeactivate",
+                Text = "Deactivate",
+                UseColumnTextForButtonValue = true,
+                FillWeight = 0.7f,
+                FlatStyle = FlatStyle.Flat,
+                DefaultCellStyle = { ForeColor = UiTheme.Warning, Font = UiTheme.LabelSemibold }
+            });
 
             lblCount.Text = rows.Count == 1 ? "1 user" : $"{rows.Count} users";
+        }
+        catch (UnauthorizedException ex)
+        {
+            grid.Visible = false;
+            lblEmpty.Visible = true;
+            lblEmpty.Text = ex.Message;
+            lblCount.Text = "";
         }
         catch (Exception ex)
         {
             grid.Visible = false;
             lblEmpty.Visible = true;
-            lblEmpty.Text = ErrorPresenter.ToUserMessage(DbExceptionMapper.Map(ex));
+            lblEmpty.Text = "Unable to load users.\n" + ex.Message;
             lblCount.Text = "";
-        }
-    }
-
-    private void Grid_CellFormattingSelfDeactivate(object? sender, DataGridViewCellFormattingEventArgs e)
-    {
-        if (e.RowIndex < 0 || grid.Columns[e.ColumnIndex].Name != "colDeactivate")
-            return;
-        if (grid.Rows[e.RowIndex].DataBoundItem is not UserListRow row)
-            return;
-
-        var currentId = SessionContext.Current?.UserID ?? -1;
-        if (row.UserID == currentId)
-        {
-            e.CellStyle.ForeColor = UiTheme.DisabledText;
-            e.CellStyle.BackColor = UiTheme.DisabledBackground;
-            e.CellStyle.SelectionForeColor = UiTheme.DisabledText;
-            e.CellStyle.SelectionBackColor = UiTheme.DisabledBackground;
         }
     }
 
@@ -234,17 +226,6 @@ public class UserListForm : Form
 
         if (col.Name == "colDeactivate")
         {
-            var currentId = SessionContext.Current?.UserID ?? -1;
-            if (row.UserID == currentId)
-            {
-                MessageBox.Show(FindForm(),
-                    "You cannot deactivate your own account while logged in.",
-                    "Users",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-                return;
-            }
-
             if (!row.IsActive)
             {
                 MessageBox.Show(FindForm(), "User is already inactive.", "Users",
@@ -268,9 +249,10 @@ public class UserListForm : Form
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ReloadGrid();
             }
-            catch (Exception ex)
+            catch (AppException ex)
             {
-                ErrorPresenter.Show(FindForm(), DbExceptionMapper.Map(ex));
+                MessageBox.Show(FindForm(), ex.Message, "Users",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
     }

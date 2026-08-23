@@ -44,7 +44,7 @@ public partial class MainForm : Form
         lblDateStatus.Text = DateTime.Now.ToString("dddd, dd MMM yyyy");
         lblMessageStatus.Text = "Ready";
         MinimumSize = new Size(UiTheme.MinWindowWidth, UiTheme.MinWindowHeight);
-        lblRoleBadge.Text = "v1.0";
+        lblRoleBadge.Text = "v1.3";
     }
 
     private void BuildNavigation()
@@ -122,6 +122,7 @@ public partial class MainForm : Form
         btn.FlatAppearance.BorderSize = 0;
         btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(30, 255, 255, 255);
         btn.Click += NavItem_Click;
+        btn.Paint += NavButton_Paint;
         flpNav.Controls.Add(btn);
 
         if (text == "Dashboard")
@@ -215,20 +216,31 @@ public partial class MainForm : Form
         lblMessageStatus.Text = $"Opened: {key}";
     }
 
+    private void NavButton_Paint(object? sender, PaintEventArgs e)
+    {
+        if (sender is not Button btn || btn != _activeNavButton) return;
+        using var brush = new SolidBrush(UiTheme.SidebarAccent);
+        e.Graphics.FillRectangle(brush, 0, 4, 3, btn.Height - 8);
+    }
+
     private void SetActiveNav(Button btn)
     {
         if (_activeNavButton != null)
         {
+            var previous = _activeNavButton;
             _activeNavButton.BackColor = UiTheme.SidebarBackground;
             _activeNavButton.ForeColor = UiTheme.SidebarText;
             _activeNavButton.Font = UiTheme.SidebarItem;
             _activeNavButton.FlatAppearance.BorderSize = 0;
+            _activeNavButton = null;
+            previous.Invalidate();
         }
 
         _activeNavButton = btn;
         btn.BackColor = Color.FromArgb(40, 255, 255, 255);
         btn.ForeColor = UiTheme.SidebarTextActive;
         btn.Font = UiTheme.SidebarItemActive;
+        btn.Invalidate();
     }
 
     private void ShowPlaceholder(string title, string subtitle, string body)

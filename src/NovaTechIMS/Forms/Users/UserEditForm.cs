@@ -75,6 +75,7 @@ public class UserEditForm : Form
         {
             var tb = new TextBox
             {
+                BorderStyle = BorderStyle.FixedSingle,
                 Location = new Point(lx, y),
                 Width = fw,
                 Font = UiTheme.Body
@@ -108,6 +109,7 @@ public class UserEditForm : Form
         L("Role *");
         cboRole = new ComboBox
         {
+            FlatStyle = FlatStyle.Flat,
             Location = new Point(lx, y),
             Width = fw,
             DropDownStyle = ComboBoxStyle.DropDownList,
@@ -140,30 +142,22 @@ public class UserEditForm : Form
         Controls.Add(lblError);
         y += 44;
 
-        btnSave = new Button
+        btnSave = UiTheme.StyleButton(new Button
         {
             Text = "Save",
-            Font = UiTheme.Button,
-            BackColor = UiTheme.Primary,
-            ForeColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
             Size = new Size(100, 32),
-            Location = new Point(lx + fw - 208, y),
-            Cursor = Cursors.Hand
-        };
-        btnSave.FlatAppearance.BorderSize = 0;
+            Location = new Point(lx + fw - 208, y)
+        }, UiTheme.ButtonKind.Primary);
         btnSave.Click += BtnSave_Click;
+btnSave.Click += BtnSave_Click;
 
-        var btnCancel = new Button
+        var btnCancel = UiTheme.StyleButton(new Button
         {
             Text = "Cancel",
             Size = new Size(100, 32),
-            Location = new Point(lx + fw - 100, y),
-            FlatStyle = FlatStyle.Flat,
-            Cursor = Cursors.Hand
-        };
-        btnCancel.FlatAppearance.BorderColor = UiTheme.Border;
-        btnCancel.Click += (_, _) => DialogResult = DialogResult.Cancel;
+            Location = new Point(lx + fw - 100, y)
+        }, UiTheme.ButtonKind.Secondary);
+btnCancel.Click += (_, _) => DialogResult = DialogResult.Cancel;
 
         AcceptButton = btnSave;
         CancelButton = btnCancel;

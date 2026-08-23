@@ -17,6 +17,7 @@ partial class LoginForm
     private TextBox txtPassword;
     private Label lblError;
     private Button btnLogin;
+    private Button btnCancel;
     private Label lblHint;
 
     protected override void Dispose(bool disposing)
@@ -39,6 +40,7 @@ partial class LoginForm
         txtPassword = new TextBox();
         lblError = new Label();
         btnLogin = new Button();
+        btnCancel = new Button();
         lblHint = new Label();
 
         SuspendLayout();
@@ -47,7 +49,7 @@ partial class LoginForm
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = UiTheme.Background;
-        ClientSize = new Size(480, 400);
+        ClientSize = new Size(480, 420);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = true;
@@ -58,10 +60,15 @@ partial class LoginForm
         Load += LoginForm_Load;
 
         pnlCard.BackColor = UiTheme.Surface;
-        pnlCard.BorderStyle = BorderStyle.FixedSingle;
-        pnlCard.Location = new Point(60, 36);
-        pnlCard.Size = new Size(360, 310);
+        pnlCard.Location = new Point(60, 40);
+        pnlCard.Size = new Size(360, 320);
         pnlCard.Name = "pnlCard";
+        pnlCard.Paint += (_, e) =>
+        {
+            using var pen = new Pen(UiTheme.Border, 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, pnlCard.Width - 1, pnlCard.Height - 1);
+        };
+        UiTheme.ApplyRoundedRegion(pnlCard, UiTheme.RadiusLg);
 
         lblBrand.Text = "NovaTech IMS";
         lblBrand.Font = UiTheme.ScreenTitle;
@@ -87,6 +94,7 @@ partial class LoginForm
         txtUsername.Location = new Point(28, 112);
         txtUsername.Size = new Size(300, 28);
         txtUsername.Font = UiTheme.Body;
+        txtUsername.BorderStyle = BorderStyle.FixedSingle;
         txtUsername.Name = "txtUsername";
         txtUsername.TabIndex = 0;
         txtUsername.AccessibleName = "Username";
@@ -101,6 +109,7 @@ partial class LoginForm
         txtPassword.Location = new Point(28, 172);
         txtPassword.Size = new Size(300, 28);
         txtPassword.Font = UiTheme.Body;
+        txtPassword.BorderStyle = BorderStyle.FixedSingle;
         txtPassword.UseSystemPasswordChar = true;
         txtPassword.Name = "txtPassword";
         txtPassword.TabIndex = 1;
@@ -109,36 +118,51 @@ partial class LoginForm
         lblError.Text = "";
         lblError.Font = UiTheme.Label;
         lblError.ForeColor = UiTheme.Error;
-        lblError.BackColor = UiTheme.ErrorTint;
         lblError.AutoSize = false;
-        lblError.Size = new Size(300, 36);
+        lblError.Size = new Size(300, 20);
         lblError.Location = new Point(28, 208);
         lblError.Name = "lblError";
-        lblError.Padding = new Padding(8, 6, 8, 6);
         lblError.Visible = false;
 
-        // Full-width primary Login (approved SCR-001)
-        btnLogin.Text = "Login";
+        btnLogin.Text = "Sign In";
         btnLogin.Font = UiTheme.Button;
         btnLogin.BackColor = UiTheme.Primary;
         btnLogin.ForeColor = Color.White;
         btnLogin.FlatStyle = FlatStyle.Flat;
         btnLogin.FlatAppearance.BorderSize = 0;
-        btnLogin.Size = new Size(300, 36);
-        btnLogin.Location = new Point(28, 252);
+        btnLogin.FlatAppearance.MouseOverBackColor = UiTheme.PrimaryHover;
+        btnLogin.Size = new Size(140, 34);
+        btnLogin.Location = new Point(28, 240);
         btnLogin.Name = "btnLogin";
         btnLogin.TabIndex = 2;
         btnLogin.Cursor = Cursors.Hand;
         btnLogin.Click += BtnLogin_Click;
-        btnLogin.AccessibleName = "Login";
+        btnLogin.AccessibleName = "Sign In";
+        UiTheme.ApplyRoundedRegion(btnLogin, UiTheme.RadiusSm);
 
-        // Version footnote only — never claim open credentials
-        lblHint.Text = "NovaTech Electronics · Inventory Management System · v1.0";
-        lblHint.Font = UiTheme.Label;
+        btnCancel.Text = "Exit";
+        btnCancel.Font = UiTheme.Button;
+        btnCancel.BackColor = UiTheme.Surface;
+        btnCancel.ForeColor = UiTheme.Text;
+        btnCancel.FlatStyle = FlatStyle.Flat;
+        btnCancel.FlatAppearance.BorderColor = UiTheme.Border;
+        btnCancel.FlatAppearance.BorderSize = 1;
+        btnCancel.FlatAppearance.MouseOverBackColor = UiTheme.RowHover;
+        btnCancel.Size = new Size(140, 34);
+        btnCancel.Location = new Point(188, 240);
+        btnCancel.Name = "btnCancel";
+        btnCancel.TabIndex = 3;
+        btnCancel.Cursor = Cursors.Hand;
+        btnCancel.Click += BtnCancel_Click;
+        btnCancel.AccessibleName = "Exit";
+        UiTheme.ApplyRoundedRegion(btnCancel, UiTheme.RadiusSm);
+
+        lblHint.Text = "Enter your NovaTech IMS credentials to continue.";
+        lblHint.Font = UiTheme.HelperText;
         lblHint.ForeColor = UiTheme.TextMuted;
         lblHint.AutoSize = false;
-        lblHint.Size = new Size(300, 28);
-        lblHint.Location = new Point(28, 296);
+        lblHint.Size = new Size(300, 32);
+        lblHint.Location = new Point(28, 282);
         lblHint.Name = "lblHint";
 
         pnlCard.Controls.Add(lblBrand);
@@ -149,6 +173,7 @@ partial class LoginForm
         pnlCard.Controls.Add(txtPassword);
         pnlCard.Controls.Add(lblError);
         pnlCard.Controls.Add(btnLogin);
+        pnlCard.Controls.Add(btnCancel);
         pnlCard.Controls.Add(lblHint);
 
         Controls.Add(pnlCard);

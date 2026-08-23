@@ -8,7 +8,10 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Stock-In (FR-SIN) — M19 preview banner + Clear Form.</summary>
+/// <summary>
+/// Stock-In screen (FR-SIN, Milestone 11).
+/// Hosted in MainForm content area.
+/// </summary>
 public class StockInForm : Form
 {
     private readonly StockInService _service = new();
@@ -20,13 +23,10 @@ public class StockInForm : Form
     private TextBox txtUnitPrice = null!;
     private TextBox txtNotes = null!;
     private Label lblCurrentQty = null!;
-    private Label lblPreview = null!;
     private Label lblError = null!;
     private Button btnSave = null!;
-    private Button btnClear = null!;
     private DataGridView grid = null!;
-
-    private int _currentOnHand;
+    private Label lblHint = null!;
 
     public StockInForm()
     {
@@ -50,14 +50,14 @@ public class StockInForm : Form
         var formPanel = new Panel
         {
             Dock = DockStyle.Top,
-            Height = 320,
+            Height = 280,
             BackColor = UiTheme.Surface,
             Padding = new Padding(16)
         };
 
+        int y = 12;
         const int lx = 16;
         const int fw = 280;
-        var yL = 12;
 
         void L(string t, int x, ref int yy)
         {
@@ -71,21 +71,25 @@ public class StockInForm : Form
             yy += 18;
         }
 
+        // Left column
+        var yL = y;
         L("Product *", lx, ref yL);
         cboProduct = new ComboBox
         {
+            FlatStyle = FlatStyle.Flat,
             Location = new Point(lx, yL),
             Width = fw,
             DropDownStyle = ComboBoxStyle.DropDownList,
             Font = UiTheme.Body
         };
-        cboProduct.SelectedIndexChanged += (_, _) => UpdateProductAndPreview();
+        cboProduct.SelectedIndexChanged += CboProduct_SelectedIndexChanged;
         formPanel.Controls.Add(cboProduct);
         yL += 32;
 
         L("Actual supplier *", lx, ref yL);
         cboSupplier = new ComboBox
         {
+            FlatStyle = FlatStyle.Flat,
             Location = new Point(lx, yL),
             Width = fw,
             DropDownStyle = ComboBoxStyle.DropDownList,
@@ -104,12 +108,12 @@ public class StockInForm : Form
             Value = 1,
             Font = UiTheme.Body
         };
-        nudQuantity.ValueChanged += (_, _) => UpdatePreview();
         formPanel.Controls.Add(nudQuantity);
         yL += 32;
 
+        // Right column
         var xR = lx + fw + 40;
-        var yR = 12;
+        var yR = y;
         L("Transaction date *", xR, ref yR);
         dtpDate = new DateTimePicker
         {
@@ -126,6 +130,7 @@ public class StockInForm : Form
         L("Purchase price (at receipt) *", xR, ref yR);
         txtUnitPrice = new TextBox
         {
+            BorderStyle = BorderStyle.FixedSingle,
             Location = new Point(xR, yR),
             Width = 120,
             Font = UiTheme.Body,
@@ -146,74 +151,41 @@ public class StockInForm : Form
         formPanel.Controls.Add(lblCurrentQty);
         yR += 28;
 
-        lblPreview = new Label
-        {
-            Text = "Select a product to see the new quantity on hand.",
-            Font = UiTheme.Label,
-            BackColor = UiTheme.InfoTint,
-            ForeColor = UiTheme.Info,
-            Location = new Point(lx, yL),
-            Size = new Size(fw + 240, 36),
-            Padding = new Padding(8, 8, 8, 8),
-            TextAlign = ContentAlignment.MiddleLeft
-        };
-        formPanel.Controls.Add(lblPreview);
-        yL += 44;
-
         L("Notes", lx, ref yL);
         txtNotes = new TextBox
         {
+            BorderStyle = BorderStyle.FixedSingle,
             Location = new Point(lx, yL),
             Width = fw + 240,
-            Height = 40,
+            Height = 48,
             Multiline = true,
             MaxLength = 500,
             Font = UiTheme.Body,
             ScrollBars = ScrollBars.Vertical
         };
         formPanel.Controls.Add(txtNotes);
-        yL += 48;
+        yL += 56;
 
         lblError = new Label
         {
             ForeColor = UiTheme.Error,
             Font = UiTheme.Label,
             Location = new Point(lx, yL),
-            Size = new Size(400, 28),
+            Size = new Size(520, 28),
             Visible = false
         };
         formPanel.Controls.Add(lblError);
 
-        btnClear = new Button
-        {
-            Text = "Clear Form",
-            Font = UiTheme.Label,
-            FlatStyle = FlatStyle.Flat,
-            Size = new Size(100, 34),
-            Location = new Point(xR, yL),
-            BackColor = UiTheme.Surface,
-            Cursor = Cursors.Hand
-        };
-        btnClear.FlatAppearance.BorderColor = UiTheme.Border;
-        btnClear.Click += (_, _) => ClearForm();
-        formPanel.Controls.Add(btnClear);
-
-        btnSave = new Button
+        btnSave = UiTheme.StyleButton(new Button
         {
             Text = "Record Stock-In",
-            Font = UiTheme.Button,
-            BackColor = UiTheme.Primary,
-            ForeColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
             Size = new Size(150, 34),
-            Location = new Point(xR + 110, yL),
-            Cursor = Cursors.Hand
-        };
-        btnSave.FlatAppearance.BorderSize = 0;
+            Location = new Point(xR + 50, yL)
+        }, UiTheme.ButtonKind.Primary);
         btnSave.Click += BtnSave_Click;
         formPanel.Controls.Add(btnSave);
 
-        var lblHint = new Label
+        lblHint = new Label
         {
             Dock = DockStyle.Top,
             Height = 28,
@@ -226,6 +198,8 @@ public class StockInForm : Form
         grid = new DataGridView
         {
             Dock = DockStyle.Fill,
+            BackgroundColor = UiTheme.Surface,
+            BorderStyle = BorderStyle.FixedSingle,
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
             AllowUserToResizeRows = false,
@@ -233,9 +207,16 @@ public class StockInForm : Form
             MultiSelect = false,
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
             AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-            RowHeadersVisible = false
+            RowHeadersVisible = false,
+            Font = UiTheme.Body,
+            ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
+            {
+                Font = UiTheme.Label,
+                BackColor = UiTheme.StatusStripBackground,
+                ForeColor = UiTheme.Text
+            },
+            EnableHeadersVisualStyles = false
         };
-        GridStyles.Apply(grid);
 
         Controls.Add(grid);
         Controls.Add(lblHint);
@@ -260,28 +241,26 @@ public class StockInForm : Form
         }
         catch (Exception ex)
         {
-            lblError.Text = ErrorPresenter.ToUserMessage(DbExceptionMapper.Map(ex));
+            lblError.Text = "Could not load products/suppliers. " + ex.Message;
             lblError.Visible = true;
         }
     }
 
-    private void UpdateProductAndPreview()
+    private void CboProduct_SelectedIndexChanged(object? sender, EventArgs e)
     {
         if (cboProduct.SelectedItem is not LookupItem item || item.Value <= 0)
         {
-            _currentOnHand = 0;
             lblCurrentQty.Text = "—";
-            UpdatePreview();
             return;
         }
 
         try
         {
             var p = _service.GetProduct(item.Value);
-            _currentOnHand = p.QuantityOnHand;
-            lblCurrentQty.Text = _currentOnHand.ToString(CultureInfo.InvariantCulture);
+            lblCurrentQty.Text = p.QuantityOnHand.ToString(CultureInfo.InvariantCulture);
             txtUnitPrice.Text = p.PurchasePrice.ToString("0.00", CultureInfo.InvariantCulture);
 
+            // Prefer product default supplier if present in list
             for (var i = 0; i < cboSupplier.Items.Count; i++)
             {
                 if (cboSupplier.Items[i] is LookupItem s && s.Value == p.SupplierID)
@@ -293,41 +272,8 @@ public class StockInForm : Form
         }
         catch
         {
-            _currentOnHand = 0;
             lblCurrentQty.Text = "—";
         }
-
-        UpdatePreview();
-    }
-
-    private void UpdatePreview()
-    {
-        if (cboProduct.SelectedItem is not LookupItem item || item.Value <= 0)
-        {
-            lblPreview.Text = "Select a product to see the new quantity on hand.";
-            lblPreview.BackColor = UiTheme.InfoTint;
-            lblPreview.ForeColor = UiTheme.Info;
-            return;
-        }
-
-        var qty = (int)nudQuantity.Value;
-        var neu = _currentOnHand + qty;
-        lblPreview.Text =
-            $"New quantity on hand will be: {_currentOnHand} + {qty} = {neu}";
-        lblPreview.BackColor = UiTheme.InfoTint;
-        lblPreview.ForeColor = UiTheme.Info;
-    }
-
-    private void ClearForm()
-    {
-        if (cboProduct.Items.Count > 0) cboProduct.SelectedIndex = 0;
-        if (cboSupplier.Items.Count > 0) cboSupplier.SelectedIndex = 0;
-        nudQuantity.Value = 1;
-        dtpDate.Value = DateTime.Today;
-        txtUnitPrice.Text = "0.00";
-        txtNotes.Clear();
-        lblError.Visible = false;
-        UpdateProductAndPreview();
     }
 
     private void BtnSave_Click(object? sender, EventArgs e)
@@ -348,16 +294,6 @@ public class StockInForm : Form
                 throw new ValidationException("Purchase price must be a valid number.");
 
             var qty = (int)nudQuantity.Value;
-            var neu = _currentOnHand + qty;
-
-            var confirm = MessageBox.Show(
-                FindForm(),
-                $"Record Stock-In of {qty} unit(s)?\nNew quantity on hand will be: {neu}",
-                "Confirm Stock-In",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
-            if (confirm != DialogResult.Yes) return;
-
             var txnId = _service.Record(
                 prod.Value,
                 sup.Value,
@@ -368,12 +304,15 @@ public class StockInForm : Form
 
             MessageBox.Show(
                 FindForm(),
-                $"Stock-In recorded successfully.\nTransaction ID: {txnId}\nNew quantity on hand: {neu}",
+                $"Stock-In recorded successfully.\nTransaction ID: {txnId}",
                 "Stock-In",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
 
-            ClearForm();
+            // Reset partial form
+            nudQuantity.Value = 1;
+            txtNotes.Clear();
+            CboProduct_SelectedIndexChanged(null, EventArgs.Empty);
             ReloadRecent();
         }
         catch (AppException ex)
@@ -383,7 +322,7 @@ public class StockInForm : Form
         }
         catch (Exception ex)
         {
-            lblError.Text = ErrorPresenter.ToUserMessage(DbExceptionMapper.Map(ex));
+            lblError.Text = "Could not record Stock-In. " + ex.Message;
             lblError.Visible = true;
         }
         finally
@@ -422,7 +361,10 @@ public class StockInForm : Form
             Show(nameof(StockInListRow.NewQuantity), "New", 0.5f);
             Show(nameof(StockInListRow.UserFullName), "User", 1.0f);
         }
-        catch { /* form still usable */ }
+        catch
+        {
+            // ignore list load errors; form still usable
+        }
     }
 
     private sealed class LookupItem
