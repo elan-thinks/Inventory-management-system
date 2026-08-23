@@ -18,19 +18,16 @@ internal static class AppIcons
     {
         get
         {
-            // Prefer output folder (bin/.../Resources)
             var baseDir = AppContext.BaseDirectory;
             var candidate = Path.Combine(baseDir, "Resources");
             if (Directory.Exists(candidate))
                 return candidate;
 
-            // Fallback: project-relative path when running from IDE with different cwd
             candidate = Path.Combine(baseDir, "..", "..", "..", "Resources");
             return Path.GetFullPath(candidate);
         }
     }
 
-    /// <summary>Load icon by file name (e.g. "icons-dashboard.png"). Optional resize.</summary>
     public static Image? Get(string fileName, int size = 16)
     {
         if (string.IsNullOrWhiteSpace(fileName))
@@ -89,7 +86,73 @@ internal static class AppIcons
             lbl.Text = "  " + lbl.Text.TrimStart();
     }
 
-    // ---- Named shortcuts matching Resources file names ----
+    /// <summary>Icon-only Edit action column (icons-edit.png).</summary>
+    public static DataGridViewImageColumn CreateEditColumn(float fillWeight = 0.4f)
+    {
+        var img = Get("icons-edit.png", 16);
+        return new DataGridViewImageColumn
+        {
+            Name = "colEdit",
+            HeaderText = "",
+            Image = img,
+            ImageLayout = DataGridViewImageCellLayout.Zoom,
+            FillWeight = fillWeight,
+            MinimumWidth = 36,
+            ToolTipText = "Edit",
+            Description = "Edit",
+            DefaultCellStyle = new DataGridViewCellStyle
+            {
+                Alignment = DataGridViewContentAlignment.MiddleCenter,
+                NullValue = null,
+                BackColor = UiTheme.Surface,
+                SelectionBackColor = UiTheme.RowSelected
+            }
+        };
+    }
+
+    /// <summary>Icon-only Delete action column (icon-delete.png).</summary>
+    public static DataGridViewImageColumn CreateDeleteColumn(float fillWeight = 0.4f)
+    {
+        var img = Get("icon-delete.png", 16);
+        return new DataGridViewImageColumn
+        {
+            Name = "colDelete",
+            HeaderText = "",
+            Image = img,
+            ImageLayout = DataGridViewImageCellLayout.Zoom,
+            FillWeight = fillWeight,
+            MinimumWidth = 36,
+            ToolTipText = "Delete",
+            Description = "Delete",
+            DefaultCellStyle = new DataGridViewCellStyle
+            {
+                Alignment = DataGridViewContentAlignment.MiddleCenter,
+                NullValue = null,
+                BackColor = UiTheme.Surface,
+                SelectionBackColor = UiTheme.RowSelected
+            }
+        };
+    }
+
+    /// <summary>
+    /// After DataSource bind, force every row to show the column icon
+    /// (image columns need a non-null cell value or they stay blank).
+    /// </summary>
+    public static void FillActionIcons(DataGridView grid)
+    {
+        var editImg = Get("icons-edit.png", 16);
+        var delImg = Get("icon-delete.png", 16);
+
+        foreach (DataGridViewRow row in grid.Rows)
+        {
+            if (row.IsNewRow) continue;
+            if (grid.Columns.Contains("colEdit") && editImg is not null)
+                row.Cells["colEdit"].Value = editImg;
+            if (grid.Columns.Contains("colDelete") && delImg is not null)
+                row.Cells["colDelete"].Value = delImg;
+        }
+    }
+
     public static Image? Dashboard => Get("icons-dashboard.png");
     public static Image? Products => Get("icons-totalProduct.png");
     public static Image? Category => Get("icons-catagory-tag.png");
