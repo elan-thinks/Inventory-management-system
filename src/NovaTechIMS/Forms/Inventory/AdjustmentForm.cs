@@ -8,7 +8,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Inventory Adjustment (FR-ADJ) — Designer-based (partial).</summary>
+/// <summary>Inventory Adjustment (FR-ADJ) — mockup-style sections + confirm.</summary>
 public partial class AdjustmentForm : Form
 {
     private readonly AdjustmentService _service = new();
@@ -30,27 +30,47 @@ public partial class AdjustmentForm : Form
         Font = UiTheme.Body;
         BackColor = UiTheme.Background;
         formPanel.BackColor = UiTheme.Surface;
+        formPanel.Paint += (_, e) =>
+        {
+            using var pen = new Pen(UiTheme.Border, 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, formPanel.Width - 1, formPanel.Height - 1);
+        };
+
+        foreach (var sec in new[] { secProduct, secMovement, secReason })
+        {
+            sec.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
+            sec.ForeColor = UiTheme.Secondary;
+        }
+
         foreach (Control c in formPanel.Controls)
         {
-            if (c is Label lbl && lbl != lblError && lbl != lblPreviousQty && lbl != lblDifference)
+            if (c is Label lbl && lbl != lblError && lbl != lblPreview
+                && lbl != lblPreviousQty && lbl != lblDifference
+                && lbl != secProduct && lbl != secMovement && lbl != secReason
+                && lbl != helpProduct)
             {
                 lbl.Font = UiTheme.Label;
                 lbl.ForeColor = UiTheme.Text;
             }
         }
-        lblPreviousQty.Font = UiTheme.Body;
+
+        helpProduct.ForeColor = UiTheme.TextMuted;
+        previewBanner.BackColor = UiTheme.InfoTint;
+        lblPreview.Font = UiTheme.Label;
+        lblPreview.ForeColor = UiTheme.Text;
         lblPreviousQty.ForeColor = UiTheme.TextMuted;
-        lblDifference.Font = UiTheme.Body;
         lblError.Font = UiTheme.Label;
         lblError.ForeColor = UiTheme.Error;
         lblHint.Font = UiTheme.Label;
         lblHint.ForeColor = UiTheme.TextMuted;
+
         UiTheme.StyleComboBox(cboProduct);
         UiTheme.StyleTextBox(txtReason);
         UiTheme.StyleTextBox(txtNotes);
         UiTheme.StyleDatePicker(dtpDate);
         UiTheme.StyleButton(btnSave, UiTheme.ButtonKind.Primary);
         UiTheme.ApplyGridTheme(grid);
+
         dtpDate.MaxDate = DateTime.Today;
         dtpDate.Value = DateTime.Today;
     }
@@ -64,7 +84,8 @@ public partial class AdjustmentForm : Form
             cboProduct.Items.Clear();
             cboProduct.Items.Add(new LookupItem(0, "— Select product —"));
             foreach (var p in _service.GetActiveProducts())
-                cboProduct.Items.Add(new LookupItem(p.ProductID, $"{p.ProductName} (ID {p.ProductID})"));
+                cboProduct.Items.Add(new LookupItem(p.ProductID,
+                    $"{p.ProductName} — On hand: {p.QuantityOnHand}"));
             cboProduct.SelectedIndex = 0;
         }
         catch (Exception ex)
@@ -101,25 +122,49 @@ public partial class AdjustmentForm : Form
     private void UpdateDifference()
     {
         var diff = (int)nudNewQty.Value - _previousQty;
-        lblDifference.Text = diff.ToString(CultureInfo.InvariantCulture);
+        lblDifference.Text = diff >= 0 ? $"+{diff}" : diff.ToString(CultureInfo.InvariantCulture);
         lblDifference.ForeColor = diff == 0
             ? UiTheme.TextMuted
             : (diff > 0 ? Color.DarkGreen : UiTheme.Error);
+
+        if (cboProduct.SelectedItem is not LookupItem item || item.Value <= 0)
+            lblPreview.Text = "  Select a product and set the new quantity.";
+        else
+            lblPreview.Text = $"  Quantity will change from {_previousQty} to {(int)nudNewQty.Value} (diff {lblDifference.Text}).";
     }
 
     private void BtnSave_Click(object? sender, EventArgs e)
     {
         lblError.Visible = false;
-        btnSave.Enabled = false;
 
         try
         {
             if (cboProduct.SelectedItem is not LookupItem prod || prod.Value <= 0)
                 throw new ValidationException("Product is required.");
 
+            var newQty = (int)nudNewQty.Value;
+            var productName = prod.Text.Split('—')[0].Trim();
+            var diff = newQty - _previousQty;
+
+            var confirm = MessageBox.Show(
+                FindForm(),
+                $"Adjust {productName}?\n\n" +
+                $"Previous on hand: {_previousQty}\n" +
+                $"New on hand:      {newQty}\n" +
+                $"Difference:       {(diff >= 0 ? "+" : "")}{diff}\n" +
+                $"Reason:           {txtReason.Text.Trim()}",
+                "Confirm Adjustment",
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Question);
+
+            if (confirm != DialogResult.OK)
+                return;
+
+            btnSave.Enabled = false;
+
             var txnId = _service.Record(
                 prod.Value,
-                (int)nudNewQty.Value,
+                newQty,
                 dtpDate.Value.Date,
                 txtReason.Text,
                 txtNotes.Text);
