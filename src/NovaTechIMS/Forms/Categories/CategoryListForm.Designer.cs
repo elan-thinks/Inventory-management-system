@@ -3,12 +3,17 @@ using System.Windows.Forms;
 
 namespace NovaTechIMS.Forms.Categories;
 
+/// <summary>
+/// Category list layout — full controls on the design surface (drag/drop).
+/// </summary>
 partial class CategoryListForm
 {
     private System.ComponentModel.IContainer components = null;
 
     private Panel toolbar;
+    private Label lblSearch;
     private TextBox txtSearch;
+    private Label lblStatus;
     private ComboBox cboStatus;
     private Button btnClearFilters;
     private Button btnAdd;
@@ -27,7 +32,9 @@ partial class CategoryListForm
     private void InitializeComponent()
     {
         toolbar = new Panel();
+        lblSearch = new Label();
         txtSearch = new TextBox();
+        lblStatus = new Label();
         cboStatus = new ComboBox();
         btnClearFilters = new Button();
         btnRefresh = new Button();
@@ -35,14 +42,16 @@ partial class CategoryListForm
         grid = new DataGridView();
         lblCount = new Label();
         lblEmpty = new Label();
+
         toolbar.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)grid).BeginInit();
         SuspendLayout();
-        // 
-        // toolbar
-        // 
+
+        // ---- toolbar ----
         toolbar.BackColor = Color.FromArgb(244, 246, 248);
+        toolbar.Controls.Add(lblSearch);
         toolbar.Controls.Add(txtSearch);
+        toolbar.Controls.Add(lblStatus);
         toolbar.Controls.Add(cboStatus);
         toolbar.Controls.Add(btnClearFilters);
         toolbar.Controls.Add(btnRefresh);
@@ -50,103 +59,133 @@ partial class CategoryListForm
         toolbar.Dock = DockStyle.Top;
         toolbar.Location = new Point(0, 0);
         toolbar.Name = "toolbar";
-        toolbar.Padding = new Padding(0, 4, 0, 4);
-        toolbar.Size = new Size(900, 48);
-        toolbar.TabIndex = 8;
+        toolbar.Padding = new Padding(8, 6, 8, 6);
+        toolbar.Size = new Size(900, 72);
+        toolbar.TabIndex = 0;
         toolbar.Resize += Toolbar_Resize;
-        // 
-        // txtSearch
-        // 
-        txtSearch.Location = new Point(0, 8);
+
+        lblSearch.AutoSize = true;
+        lblSearch.Font = new Font("Segoe UI", 8.25F);
+        lblSearch.ForeColor = Color.FromArgb(107, 119, 133);
+        lblSearch.Location = new Point(8, 6);
+        lblSearch.Name = "lblSearch";
+        lblSearch.Text = "Search";
+
+        txtSearch.BorderStyle = BorderStyle.FixedSingle;
+        txtSearch.Font = new Font("Segoe UI", 10F);
+        txtSearch.Location = new Point(8, 24);
         txtSearch.Name = "txtSearch";
         txtSearch.PlaceholderText = "Search by name…";
-        txtSearch.Size = new Size(220, 27);
+        txtSearch.Size = new Size(220, 25);
         txtSearch.TabIndex = 0;
         txtSearch.TextChanged += TxtSearch_TextChanged;
-        // 
-        // cboStatus
-        // 
+
+        lblStatus.AutoSize = true;
+        lblStatus.Font = new Font("Segoe UI", 8.25F);
+        lblStatus.ForeColor = Color.FromArgb(107, 119, 133);
+        lblStatus.Location = new Point(240, 6);
+        lblStatus.Name = "lblStatus";
+        lblStatus.Text = "Status";
+
         cboStatus.DropDownStyle = ComboBoxStyle.DropDownList;
+        cboStatus.Font = new Font("Segoe UI", 10F);
         cboStatus.Items.AddRange(new object[] { "All statuses", "Active", "Inactive" });
-        cboStatus.Location = new Point(232, 8);
+        cboStatus.Location = new Point(240, 24);
         cboStatus.Name = "cboStatus";
-        cboStatus.Size = new Size(140, 28);
+        cboStatus.Size = new Size(140, 25);
         cboStatus.TabIndex = 1;
         cboStatus.SelectedIndexChanged += CboStatus_SelectedIndexChanged;
-        // 
-        // btnClearFilters
-        // 
-        btnClearFilters.Location = new Point(384, 6);
+
+        btnClearFilters.FlatStyle = FlatStyle.Flat;
+        btnClearFilters.Font = new Font("Segoe UI", 9F);
+        btnClearFilters.ForeColor = Color.FromArgb(30, 75, 143);
+        btnClearFilters.Location = new Point(392, 22);
         btnClearFilters.Name = "btnClearFilters";
         btnClearFilters.Size = new Size(100, 30);
         btnClearFilters.TabIndex = 2;
         btnClearFilters.Text = "Clear filters";
-        btnClearFilters.Visible = false;
+        btnClearFilters.UseVisualStyleBackColor = true;
+        btnClearFilters.Visible = true; // designer; runtime hides until filters active
         btnClearFilters.Click += BtnClearFilters_Click;
-        // 
-        // btnRefresh
-        // 
+
         btnRefresh.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnRefresh.Location = new Point(700, 8);
+        btnRefresh.BackColor = Color.White;
+        btnRefresh.FlatAppearance.BorderColor = Color.FromArgb(215, 220, 225);
+        btnRefresh.FlatStyle = FlatStyle.Flat;
+        btnRefresh.Font = new Font("Segoe UI", 9F);
+        btnRefresh.Location = new Point(680, 20);
         btnRefresh.Name = "btnRefresh";
-        btnRefresh.Size = new Size(88, 30);
+        btnRefresh.Size = new Size(88, 32);
         btnRefresh.TabIndex = 3;
         btnRefresh.Text = "Refresh";
+        btnRefresh.UseVisualStyleBackColor = false;
         btnRefresh.Click += BtnRefresh_Click;
-        // 
-        // btnAdd
-        // 
+
         btnAdd.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnAdd.Location = new Point(796, 8);
+        btnAdd.BackColor = Color.FromArgb(30, 75, 143);
+        btnAdd.FlatAppearance.BorderSize = 0;
+        btnAdd.FlatStyle = FlatStyle.Flat;
+        btnAdd.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        btnAdd.ForeColor = Color.White;
+        btnAdd.Location = new Point(776, 20);
         btnAdd.Name = "btnAdd";
-        btnAdd.Size = new Size(130, 30);
+        btnAdd.Size = new Size(116, 32);
         btnAdd.TabIndex = 4;
         btnAdd.Text = "+ Add Category";
+        btnAdd.UseVisualStyleBackColor = false;
         btnAdd.Click += BtnAdd_Click;
-        // 
-        // grid
-        // 
+
+        // ---- grid ----
         grid.AllowUserToAddRows = false;
         grid.AllowUserToDeleteRows = false;
+        grid.AllowUserToResizeRows = false;
         grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        grid.BackgroundColor = Color.White;
+        grid.BorderStyle = BorderStyle.FixedSingle;
         grid.ColumnHeadersHeight = 34;
         grid.Dock = DockStyle.Fill;
-        grid.Location = new Point(0, 48);
+        grid.Location = new Point(0, 72);
         grid.MultiSelect = false;
         grid.Name = "grid";
         grid.ReadOnly = true;
         grid.RowHeadersVisible = false;
         grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        grid.Size = new Size(900, 424);
-        grid.TabIndex = 5;
+        grid.Size = new Size(900, 400);
+        grid.TabIndex = 1;
         grid.CellContentClick += Grid_CellContentClick;
-        // 
-        // lblCount
-        // 
+
+        // design-time sample headers
+        grid.ColumnCount = 5;
+        grid.Columns[0].HeaderText = "ID";
+        grid.Columns[1].HeaderText = "Name";
+        grid.Columns[2].HeaderText = "Description";
+        grid.Columns[3].HeaderText = "Products";
+        grid.Columns[4].HeaderText = "Status";
+
+        lblEmpty.Dock = DockStyle.Fill;
+        lblEmpty.Font = new Font("Segoe UI", 10F);
+        lblEmpty.ForeColor = Color.FromArgb(107, 119, 133);
+        lblEmpty.Location = new Point(0, 72);
+        lblEmpty.Name = "lblEmpty";
+        lblEmpty.Size = new Size(900, 400);
+        lblEmpty.TabIndex = 2;
+        lblEmpty.Text = "No categories yet. Add your first category to get started.";
+        lblEmpty.TextAlign = ContentAlignment.MiddleCenter;
+        lblEmpty.Visible = false;
+
+        lblCount.BackColor = Color.FromArgb(244, 246, 248);
         lblCount.Dock = DockStyle.Bottom;
         lblCount.Font = new Font("Segoe UI", 9F);
         lblCount.ForeColor = Color.FromArgb(107, 119, 133);
         lblCount.Location = new Point(0, 472);
         lblCount.Name = "lblCount";
+        lblCount.Padding = new Padding(8, 0, 0, 0);
         lblCount.Size = new Size(900, 28);
-        lblCount.TabIndex = 7;
+        lblCount.TabIndex = 3;
+        lblCount.Text = "0 categories";
         lblCount.TextAlign = ContentAlignment.MiddleLeft;
-        // 
-        // lblEmpty
-        // 
-        lblEmpty.Dock = DockStyle.Fill;
-        lblEmpty.Font = new Font("Segoe UI", 10F);
-        lblEmpty.ForeColor = Color.FromArgb(107, 119, 133);
-        lblEmpty.Location = new Point(0, 48);
-        lblEmpty.Name = "lblEmpty";
-        lblEmpty.Size = new Size(900, 424);
-        lblEmpty.TabIndex = 6;
-        lblEmpty.Text = "No categories yet. Add your first category to get started.";
-        lblEmpty.TextAlign = ContentAlignment.MiddleCenter;
-        lblEmpty.Visible = false;
-        // 
-        // CategoryListForm
-        // 
+
+        // ---- form ----
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.FromArgb(244, 246, 248);
@@ -159,6 +198,7 @@ partial class CategoryListForm
         FormBorderStyle = FormBorderStyle.None;
         Name = "CategoryListForm";
         Text = "Categories";
+
         toolbar.ResumeLayout(false);
         toolbar.PerformLayout();
         ((System.ComponentModel.ISupportInitialize)grid).EndInit();

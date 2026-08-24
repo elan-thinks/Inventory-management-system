@@ -1,9 +1,11 @@
 using System.Drawing;
 using System.Windows.Forms;
-using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Categories;
 
+/// <summary>
+/// Category create/edit dialog — BCL-only in Designer (no UiTheme) so View Designer is stable.
+/// </summary>
 partial class CategoryEditForm
 {
     private System.ComponentModel.IContainer components = null;
@@ -38,73 +40,89 @@ partial class CategoryEditForm
         SuspendLayout();
 
         AutoScaleMode = AutoScaleMode.Font;
-        Font = UiTheme.Body;
+        Font = new Font("Segoe UI", 10F);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
         ShowInTaskbar = false;
         StartPosition = FormStartPosition.CenterParent;
         ClientSize = new Size(440, 320);
-        BackColor = UiTheme.Surface;
+        BackColor = Color.White;
         Name = "CategoryEditForm";
         Text = "Category";
 
-        lblName.Text = "Name *";
-        lblName.Font = UiTheme.LabelSemibold;
-        lblName.ForeColor = UiTheme.Text;
-        lblName.Location = new Point(24, 24);
         lblName.AutoSize = true;
+        lblName.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblName.ForeColor = Color.FromArgb(31, 41, 51);
+        lblName.Location = new Point(24, 24);
         lblName.Name = "lblName";
+        lblName.Text = "Name *";
 
+        txtName.BorderStyle = BorderStyle.FixedSingle;
         txtName.Location = new Point(24, 48);
-        txtName.Width = 392;
         txtName.MaxLength = 100;
         txtName.Name = "txtName";
+        txtName.Size = new Size(392, 25);
         txtName.TabIndex = 0;
 
-        lblDescription.Text = "Description";
-        lblDescription.Font = UiTheme.LabelSemibold;
-        lblDescription.ForeColor = UiTheme.Text;
-        lblDescription.Location = new Point(24, 88);
         lblDescription.AutoSize = true;
+        lblDescription.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblDescription.ForeColor = Color.FromArgb(31, 41, 51);
+        lblDescription.Location = new Point(24, 88);
         lblDescription.Name = "lblDescription";
+        lblDescription.Text = "Description";
 
+        txtDescription.BorderStyle = BorderStyle.FixedSingle;
         txtDescription.Location = new Point(24, 112);
-        txtDescription.Size = new Size(392, 80);
-        txtDescription.Multiline = true;
         txtDescription.MaxLength = 500;
-        txtDescription.ScrollBars = ScrollBars.Vertical;
+        txtDescription.Multiline = true;
         txtDescription.Name = "txtDescription";
+        txtDescription.ScrollBars = ScrollBars.Vertical;
+        txtDescription.Size = new Size(392, 80);
         txtDescription.TabIndex = 1;
 
-        chkActive.Text = "Active";
-        chkActive.Font = UiTheme.Body;
-        chkActive.ForeColor = UiTheme.Text;
-        chkActive.Location = new Point(24, 204);
         chkActive.AutoSize = true;
         chkActive.Checked = true;
+        chkActive.CheckState = CheckState.Checked;
+        chkActive.Font = new Font("Segoe UI", 10F);
+        chkActive.ForeColor = Color.FromArgb(31, 41, 51);
+        chkActive.Location = new Point(24, 204);
         chkActive.Name = "chkActive";
         chkActive.TabIndex = 2;
+        chkActive.Text = "Active";
+        chkActive.UseVisualStyleBackColor = true;
 
-        lblError.ForeColor = UiTheme.Error;
-        lblError.Font = UiTheme.ErrorText;
+        lblError.ForeColor = Color.FromArgb(192, 57, 43);
+        lblError.Font = new Font("Segoe UI", 8.5F);
         lblError.Location = new Point(24, 236);
+        lblError.Name = "lblError";
         lblError.Size = new Size(392, 36);
         lblError.Visible = false;
-        lblError.Name = "lblError";
 
-        btnSave.Text = "Save";
-        btnSave.Size = new Size(100, 32);
+        btnSave.BackColor = Color.FromArgb(30, 75, 143);
+        btnSave.FlatAppearance.BorderSize = 0;
+        btnSave.FlatStyle = FlatStyle.Flat;
+        btnSave.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        btnSave.ForeColor = Color.White;
         btnSave.Location = new Point(212, 276);
         btnSave.Name = "btnSave";
+        btnSave.Size = new Size(100, 32);
         btnSave.TabIndex = 3;
+        btnSave.Text = "Save";
+        btnSave.UseVisualStyleBackColor = false;
         btnSave.Click += BtnSave_Click;
 
-        btnCancel.Text = "Cancel";
-        btnCancel.Size = new Size(100, 32);
+        btnCancel.BackColor = Color.White;
+        btnCancel.FlatAppearance.BorderColor = Color.FromArgb(215, 220, 225);
+        btnCancel.FlatStyle = FlatStyle.Flat;
+        btnCancel.Font = new Font("Segoe UI", 10F);
+        btnCancel.ForeColor = Color.FromArgb(31, 41, 51);
         btnCancel.Location = new Point(316, 276);
         btnCancel.Name = "btnCancel";
+        btnCancel.Size = new Size(100, 32);
         btnCancel.TabIndex = 4;
+        btnCancel.Text = "Cancel";
+        btnCancel.UseVisualStyleBackColor = false;
         btnCancel.Click += BtnCancel_Click;
 
         AcceptButton = btnSave;

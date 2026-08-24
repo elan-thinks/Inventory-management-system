@@ -7,7 +7,7 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms.Categories;
 
 /// <summary>
-/// SCR-006 Category List — Designer-based; design-time safe constructor.
+/// SCR-006 Category List — designer owns layout; this file is data + filters only.
 /// </summary>
 public partial class CategoryListForm : Form
 {
@@ -21,40 +21,67 @@ public partial class CategoryListForm : Form
         if (DesignTime.IsActive)
             return;
 
+        grid.Columns.Clear();
+        grid.ColumnCount = 0;
+
         ApplyRuntimeStyling();
         Load += (_, _) => ReloadGrid();
     }
 
     private void ApplyRuntimeStyling()
     {
+        BackColor = UiTheme.Background;
+        toolbar.BackColor = UiTheme.Background;
+        lblCount.BackColor = UiTheme.Background;
+        lblCount.ForeColor = UiTheme.TextMuted;
+        lblEmpty.ForeColor = UiTheme.TextMuted;
+        lblEmpty.BackColor = UiTheme.Background;
+
+        if (lblSearch is not null) lblSearch.ForeColor = UiTheme.TextMuted;
+        if (lblStatus is not null) lblStatus.ForeColor = UiTheme.TextMuted;
+
         UiTheme.StyleTextBox(txtSearch);
         UiTheme.StyleComboBox(cboStatus);
         UiTheme.StyleButton(btnClearFilters, UiTheme.ButtonKind.Ghost);
         UiTheme.StyleButton(btnRefresh, UiTheme.ButtonKind.Secondary);
         UiTheme.StyleButton(btnAdd, UiTheme.ButtonKind.Primary);
         UiTheme.ApplyGridTheme(grid);
-        UiTheme.WireStatusBadgeColumn(grid, "Status", value => (value?.ToString() ?? "") switch
+        UiTheme.WireStatusBadgeColumn(grid, nameof(CategoryListRow.Status), value => (value?.ToString() ?? "") switch
         {
             "Active" => ("Active", UiTheme.BadgeTone.Success, '\u2713'),
             _ => ("Inactive", UiTheme.BadgeTone.Muted, '\u2715')
         });
+
+        btnClearFilters.Visible = false;
         Toolbar_Resize(toolbar, EventArgs.Empty);
     }
 
     private void Toolbar_Resize(object? sender, EventArgs e)
     {
-        btnAdd.Left = toolbar.ClientSize.Width - btnAdd.Width;
+        if (toolbar is null || btnAdd is null || btnRefresh is null) return;
+        btnAdd.Left = Math.Max(8, toolbar.ClientSize.Width - btnAdd.Width - 8);
         btnRefresh.Left = btnAdd.Left - btnRefresh.Width - 8;
     }
 
-    private void TxtSearch_TextChanged(object? sender, EventArgs e) => ReloadGrid();
-    private void CboStatus_SelectedIndexChanged(object? sender, EventArgs e) => ReloadGrid();
+    private void TxtSearch_TextChanged(object? sender, EventArgs e)
+    {
+        if (DesignTime.IsActive) return;
+        ReloadGrid();
+    }
+
+    private void CboStatus_SelectedIndexChanged(object? sender, EventArgs e)
+    {
+        if (DesignTime.IsActive) return;
+        ReloadGrid();
+    }
+
     private void BtnRefresh_Click(object? sender, EventArgs e) => ReloadGrid();
 
     private void BtnClearFilters_Click(object? sender, EventArgs e)
     {
         txtSearch.Clear();
-        cboStatus.SelectedIndex = 0;
+        if (cboStatus.Items.Count > 0)
+            cboStatus.SelectedIndex = 0;
         ReloadGrid();
     }
 
@@ -98,7 +125,8 @@ public partial class CategoryListForm : Form
         {
             grid.Visible = false;
             lblEmpty.Visible = true;
-            lblEmpty.Text = "Unable to load categories. Check the database connection.\n" + ex.Message;
+            var mapped = DbExceptionMapper.Map(ex);
+            lblEmpty.Text = "Unable to load categories.\n" + ErrorPresenter.Classify(mapped).Message;
             lblCount.Text = "";
         }
     }
