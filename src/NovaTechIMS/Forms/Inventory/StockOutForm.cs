@@ -7,15 +7,24 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Stock-Out (FR-SOUT) — mockup-style sections + confirm.</summary>
+/// <summary>Stock-Out (FR-SOUT) — designer owns layout; this file is data + save only.</summary>
 public partial class StockOutForm : Form
 {
-    private readonly StockOutService _service = new();
+    private StockOutService? _service;
     private int _currentOnHand;
+
+    private StockOutService Service => _service ??= new StockOutService();
 
     public StockOutForm()
     {
         InitializeComponent();
+
+        if (DesignTime.IsActive)
+            return;
+
+        grid.Columns.Clear();
+        grid.ColumnCount = 0;
+
         ApplyRuntimeStyling();
         Load += (_, _) =>
         {
@@ -32,7 +41,7 @@ public partial class StockOutForm : Form
         formPanel.BackColor = UiTheme.Surface;
         formPanel.Paint += (_, e) =>
         {
-            using var pen = new Pen(UiTheme.Border, 1);
+            using var pen = new System.Drawing.Pen(UiTheme.Border, 1);
             e.Graphics.DrawRectangle(pen, 0, 0, formPanel.Width - 1, formPanel.Height - 1);
         };
 
@@ -81,26 +90,28 @@ public partial class StockOutForm : Form
         {
             cboProduct.Items.Clear();
             cboProduct.Items.Add(new LookupItem(0, "— Select product —"));
-            foreach (var p in _service.GetActiveProducts())
+            foreach (var p in Service.GetActiveProducts())
                 cboProduct.Items.Add(new LookupItem(p.ProductID,
                     $"{p.ProductName} — On hand: {p.QuantityOnHand}"));
             cboProduct.SelectedIndex = 0;
 
             cboCustomer.Items.Clear();
             cboCustomer.Items.Add(new LookupItem(0, "— None (optional) —"));
-            foreach (var c in _service.GetActiveCustomers())
+            foreach (var c in Service.GetActiveCustomers())
                 cboCustomer.Items.Add(new LookupItem(c.CustomerID, c.CustomerName));
             cboCustomer.SelectedIndex = 0;
         }
         catch (Exception ex)
         {
-            lblError.Text = "Could not load products/customers. " + ex.Message;
+            lblError.Text = "Could not load products/customers. " + ErrorPresenter.Classify(DbExceptionMapper.Map(ex)).Message;
             lblError.Visible = true;
         }
     }
 
     private void CboProduct_SelectedIndexChanged(object? sender, EventArgs e)
     {
+        if (DesignTime.IsActive) return;
+
         if (cboProduct.SelectedItem is not LookupItem item || item.Value <= 0)
         {
             _currentOnHand = 0;
@@ -111,7 +122,7 @@ public partial class StockOutForm : Form
 
         try
         {
-            var p = _service.GetProduct(item.Value);
+            var p = Service.GetProduct(item.Value);
             _currentOnHand = p.QuantityOnHand;
             lblCurrentQty.Text = _currentOnHand.ToString(CultureInfo.InvariantCulture);
             txtUnitPrice.Text = p.SellingPrice.ToString("0.00", CultureInfo.InvariantCulture);
@@ -123,6 +134,12 @@ public partial class StockOutForm : Form
             lblCurrentQty.Text = "—";
             UpdatePreview();
         }
+    }
+
+    private void NudQuantity_ValueChanged(object? sender, EventArgs e)
+    {
+        if (DesignTime.IsActive) return;
+        UpdatePreview();
     }
 
     private void UpdatePreview()
@@ -143,6 +160,7 @@ public partial class StockOutForm : Form
 
     private void BtnSave_Click(object? sender, EventArgs e)
     {
+        if (DesignTime.IsActive) return;
         lblError.Visible = false;
 
         try
@@ -182,7 +200,7 @@ public partial class StockOutForm : Form
 
             btnSave.Enabled = false;
 
-            var txnId = _service.Record(
+            var txnId = Service.Record(
                 prod.Value,
                 customerId,
                 qty,
@@ -209,7 +227,7 @@ public partial class StockOutForm : Form
         }
         catch (Exception ex)
         {
-            lblError.Text = "Could not record Stock-Out. " + ex.Message;
+            lblError.Text = "Could not record Stock-Out. " + ErrorPresenter.Classify(DbExceptionMapper.Map(ex)).Message;
             lblError.Visible = true;
         }
         finally
@@ -222,7 +240,7 @@ public partial class StockOutForm : Form
     {
         try
         {
-            var rows = _service.GetRecent(50);
+            var rows = Service.GetRecent(50);
             grid.DataSource = null;
             grid.Columns.Clear();
             grid.DataSource = rows;

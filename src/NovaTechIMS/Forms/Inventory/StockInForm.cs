@@ -8,15 +8,24 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Stock-In (FR-SIN) — mockup-style sections + confirm.</summary>
+/// <summary>Stock-In (FR-SIN) — designer owns layout; this file is data + save only.</summary>
 public partial class StockInForm : Form
 {
-    private readonly StockInService _service = new();
+    private StockInService? _service;
     private int _currentOnHand;
+
+    private StockInService Service => _service ??= new StockInService();
 
     public StockInForm()
     {
         InitializeComponent();
+
+        if (DesignTime.IsActive)
+            return;
+
+        grid.Columns.Clear();
+        grid.ColumnCount = 0;
+
         ApplyRuntimeStyling();
         Load += (_, _) =>
         {
@@ -82,26 +91,28 @@ public partial class StockInForm : Form
         {
             cboProduct.Items.Clear();
             cboProduct.Items.Add(new LookupItem(0, "— Select product —"));
-            foreach (var p in _service.GetActiveProducts())
+            foreach (var p in Service.GetActiveProducts())
                 cboProduct.Items.Add(new LookupItem(p.ProductID,
                     $"{p.ProductName} — On hand: {p.QuantityOnHand}"));
             cboProduct.SelectedIndex = 0;
 
             cboSupplier.Items.Clear();
             cboSupplier.Items.Add(new LookupItem(0, "— Select supplier —"));
-            foreach (var s in _service.GetActiveSuppliers())
+            foreach (var s in Service.GetActiveSuppliers())
                 cboSupplier.Items.Add(new LookupItem(s.SupplierID, s.SupplierName));
             cboSupplier.SelectedIndex = 0;
         }
         catch (Exception ex)
         {
-            lblError.Text = "Could not load products/suppliers. " + ex.Message;
+            lblError.Text = "Could not load products/suppliers. " + ErrorPresenter.Classify(DbExceptionMapper.Map(ex)).Message;
             lblError.Visible = true;
         }
     }
 
     private void CboProduct_SelectedIndexChanged(object? sender, EventArgs e)
     {
+        if (DesignTime.IsActive) return;
+
         if (cboProduct.SelectedItem is not LookupItem item || item.Value <= 0)
         {
             _currentOnHand = 0;
@@ -112,7 +123,7 @@ public partial class StockInForm : Form
 
         try
         {
-            var p = _service.GetProduct(item.Value);
+            var p = Service.GetProduct(item.Value);
             _currentOnHand = p.QuantityOnHand;
             lblCurrentQty.Text = _currentOnHand.ToString(CultureInfo.InvariantCulture);
             txtUnitPrice.Text = p.PurchasePrice.ToString("0.00", CultureInfo.InvariantCulture);
@@ -136,6 +147,12 @@ public partial class StockInForm : Form
         }
     }
 
+    private void NudQuantity_ValueChanged(object? sender, EventArgs e)
+    {
+        if (DesignTime.IsActive) return;
+        UpdatePreview();
+    }
+
     private void UpdatePreview()
     {
         if (cboProduct.SelectedItem is not LookupItem item || item.Value <= 0)
@@ -151,6 +168,7 @@ public partial class StockInForm : Form
 
     private void BtnSave_Click(object? sender, EventArgs e)
     {
+        if (DesignTime.IsActive) return;
         lblError.Visible = false;
 
         try
@@ -185,7 +203,7 @@ public partial class StockInForm : Form
 
             btnSave.Enabled = false;
 
-            var txnId = _service.Record(
+            var txnId = Service.Record(
                 prod.Value,
                 sup.Value,
                 qty,
@@ -212,7 +230,7 @@ public partial class StockInForm : Form
         }
         catch (Exception ex)
         {
-            lblError.Text = "Could not record Stock-In. " + ex.Message;
+            lblError.Text = "Could not record Stock-In. " + ErrorPresenter.Classify(DbExceptionMapper.Map(ex)).Message;
             lblError.Visible = true;
         }
         finally
@@ -225,7 +243,7 @@ public partial class StockInForm : Form
     {
         try
         {
-            var rows = _service.GetRecent(50);
+            var rows = Service.GetRecent(50);
             grid.DataSource = null;
             grid.Columns.Clear();
             grid.DataSource = rows;
