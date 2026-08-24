@@ -8,14 +8,22 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Delegations;
 
-/// <summary>Delegation Management list — Designer-based (partial).</summary>
+/// <summary>Delegation Management list — designer owns layout.</summary>
 public partial class DelegationListForm : Form
 {
-    private readonly DelegationService _service = new();
+    private DelegationService? _service;
+    private DelegationService Service => _service ??= new DelegationService();
 
     public DelegationListForm()
     {
         InitializeComponent();
+
+        if (DesignTime.IsActive)
+            return;
+
+        grid.Columns.Clear();
+        grid.ColumnCount = 0;
+
         ApplyRuntimeStyling();
         Load += (_, _) => ReloadGrid();
     }
@@ -29,6 +37,8 @@ public partial class DelegationListForm : Form
         lblEmpty.ForeColor = UiTheme.TextMuted;
         lblCount.Font = UiTheme.Label;
         lblCount.ForeColor = UiTheme.TextMuted;
+        if (lblStatus is not null) lblStatus.ForeColor = UiTheme.TextMuted;
+        if (lblResp is not null) lblResp.ForeColor = UiTheme.TextMuted;
         UiTheme.StyleComboBox(cboStatus);
         UiTheme.StyleComboBox(cboResponsibility);
         UiTheme.StyleButton(btnRefresh, UiTheme.ButtonKind.Secondary);
@@ -45,11 +55,17 @@ public partial class DelegationListForm : Form
 
     private void Toolbar_Resize(object? sender, EventArgs e)
     {
-        btnNew.Left = toolbar.ClientSize.Width - btnNew.Width;
+        if (toolbar is null || btnNew is null || btnRefresh is null) return;
+        btnNew.Left = Math.Max(8, toolbar.ClientSize.Width - btnNew.Width - 8);
         btnRefresh.Left = btnNew.Left - btnRefresh.Width - 8;
     }
 
-    private void CboFilter_SelectedIndexChanged(object? sender, EventArgs e) => ReloadGrid();
+    private void CboFilter_SelectedIndexChanged(object? sender, EventArgs e)
+    {
+        if (DesignTime.IsActive) return;
+        ReloadGrid();
+    }
+
     private void BtnRefresh_Click(object? sender, EventArgs e) => ReloadGrid();
 
     private void BtnNew_Click(object? sender, EventArgs e)
@@ -79,7 +95,7 @@ public partial class DelegationListForm : Form
                 _ => null
             };
 
-            var rows = _service.GetList(null, status, resp);
+            var rows = Service.GetList(null, status, resp);
             grid.DataSource = null;
             grid.Columns.Clear();
 
@@ -137,7 +153,7 @@ public partial class DelegationListForm : Form
         {
             grid.Visible = false;
             lblEmpty.Visible = true;
-            lblEmpty.Text = "Unable to load delegations.\n" + ex.Message +
+            lblEmpty.Text = "Unable to load delegations.\n" + ErrorPresenter.Classify(DbExceptionMapper.Map(ex)).Message +
                 "\n\nIf the Delegation table is missing, run database/15-delegation.sql.";
             lblCount.Text = "";
         }
@@ -178,7 +194,7 @@ public partial class DelegationListForm : Form
 
         try
         {
-            _service.Revoke(row.DelegationID);
+            Service.Revoke(row.DelegationID);
             MessageBox.Show(FindForm(), "Delegation revoked.", "Delegations",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
             ReloadGrid();

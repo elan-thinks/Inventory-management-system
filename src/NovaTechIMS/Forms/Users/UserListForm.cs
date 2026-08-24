@@ -6,14 +6,22 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Users;
 
-/// <summary>User Management list — Designer-based (partial).</summary>
+/// <summary>User Management list — designer owns layout.</summary>
 public partial class UserListForm : Form
 {
-    private readonly UserService _service = new();
+    private UserService? _service;
+    private UserService Service => _service ??= new UserService();
 
     public UserListForm()
     {
         InitializeComponent();
+
+        if (DesignTime.IsActive)
+            return;
+
+        grid.Columns.Clear();
+        grid.ColumnCount = 0;
+
         ApplyRuntimeStyling();
         Load += (_, _) => ReloadGrid();
     }
@@ -27,12 +35,14 @@ public partial class UserListForm : Form
         lblEmpty.ForeColor = UiTheme.TextMuted;
         lblCount.Font = UiTheme.Label;
         lblCount.ForeColor = UiTheme.TextMuted;
+        if (lblSearch is not null) lblSearch.ForeColor = UiTheme.TextMuted;
+        if (lblStatus is not null) lblStatus.ForeColor = UiTheme.TextMuted;
         UiTheme.StyleTextBox(txtSearch);
         UiTheme.StyleComboBox(cboStatus);
         UiTheme.StyleButton(btnRefresh, UiTheme.ButtonKind.Secondary);
         UiTheme.StyleButton(btnAdd, UiTheme.ButtonKind.Primary);
         UiTheme.ApplyGridTheme(grid);
-        UiTheme.WireStatusBadgeColumn(grid, "Status", value => (value?.ToString() ?? "") switch
+        UiTheme.WireStatusBadgeColumn(grid, nameof(UserListRow.Status), value => (value?.ToString() ?? "") switch
         {
             "Active" => ("Active", UiTheme.BadgeTone.Success, '\u2713'),
             _ => ("Inactive", UiTheme.BadgeTone.Muted, '\u2715')
@@ -42,12 +52,23 @@ public partial class UserListForm : Form
 
     private void Toolbar_Resize(object? sender, EventArgs e)
     {
-        btnAdd.Left = toolbar.ClientSize.Width - btnAdd.Width;
+        if (toolbar is null || btnAdd is null || btnRefresh is null) return;
+        btnAdd.Left = Math.Max(8, toolbar.ClientSize.Width - btnAdd.Width - 8);
         btnRefresh.Left = btnAdd.Left - btnRefresh.Width - 8;
     }
 
-    private void TxtSearch_TextChanged(object? sender, EventArgs e) => ReloadGrid();
-    private void CboStatus_SelectedIndexChanged(object? sender, EventArgs e) => ReloadGrid();
+    private void TxtSearch_TextChanged(object? sender, EventArgs e)
+    {
+        if (DesignTime.IsActive) return;
+        ReloadGrid();
+    }
+
+    private void CboStatus_SelectedIndexChanged(object? sender, EventArgs e)
+    {
+        if (DesignTime.IsActive) return;
+        ReloadGrid();
+    }
+
     private void BtnRefresh_Click(object? sender, EventArgs e) => ReloadGrid();
 
     private void BtnAdd_Click(object? sender, EventArgs e)
@@ -69,7 +90,7 @@ public partial class UserListForm : Form
                 _ => null
             };
 
-            var rows = _service.GetList(search, active);
+            var rows = Service.GetList(search, active);
             grid.DataSource = null;
             grid.Columns.Clear();
 
@@ -131,7 +152,7 @@ public partial class UserListForm : Form
         {
             grid.Visible = false;
             lblEmpty.Visible = true;
-            lblEmpty.Text = "Unable to load users.\n" + ex.Message;
+            lblEmpty.Text = "Unable to load users.\n" + ErrorPresenter.Classify(DbExceptionMapper.Map(ex)).Message;
             lblCount.Text = "";
         }
     }
@@ -170,7 +191,7 @@ public partial class UserListForm : Form
 
             try
             {
-                _service.Deactivate(row.UserID);
+                Service.Deactivate(row.UserID);
                 MessageBox.Show(FindForm(), "User deactivated.", "Users",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ReloadGrid();

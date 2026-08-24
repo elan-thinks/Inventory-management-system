@@ -3,6 +3,7 @@ using System.Windows.Forms;
 
 namespace NovaTechIMS.Forms.Users;
 
+/// <summary>User create/edit dialog — BCL-only Designer layout.</summary>
 partial class UserEditForm
 {
     private System.ComponentModel.IContainer components = null;
@@ -57,6 +58,8 @@ partial class UserEditForm
         Text = "User";
 
         lblUsername.AutoSize = true;
+        lblUsername.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblUsername.ForeColor = Color.FromArgb(31, 41, 51);
         lblUsername.Location = new Point(24, 20);
         lblUsername.Name = "lblUsername";
         lblUsername.Text = "Username *";
@@ -69,6 +72,8 @@ partial class UserEditForm
         txtUsername.TabIndex = 0;
 
         lblFullName.AutoSize = true;
+        lblFullName.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblFullName.ForeColor = Color.FromArgb(31, 41, 51);
         lblFullName.Location = new Point(24, 70);
         lblFullName.Name = "lblFullName";
         lblFullName.Text = "Full name *";
@@ -81,6 +86,8 @@ partial class UserEditForm
         txtFullName.TabIndex = 1;
 
         lblPassword.AutoSize = true;
+        lblPassword.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblPassword.ForeColor = Color.FromArgb(31, 41, 51);
         lblPassword.Location = new Point(24, 120);
         lblPassword.Name = "lblPassword";
         lblPassword.Text = "Password";
@@ -93,11 +100,15 @@ partial class UserEditForm
         txtPassword.UseSystemPasswordChar = true;
 
         lblPasswordHint.AutoSize = true;
+        lblPasswordHint.Font = new Font("Segoe UI", 8.5F, FontStyle.Italic);
+        lblPasswordHint.ForeColor = Color.FromArgb(107, 119, 133);
         lblPasswordHint.Location = new Point(24, 168);
         lblPasswordHint.Name = "lblPasswordHint";
         lblPasswordHint.Text = "Password required (min 6 characters).";
 
         lblRole.AutoSize = true;
+        lblRole.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblRole.ForeColor = Color.FromArgb(31, 41, 51);
         lblRole.Location = new Point(24, 196);
         lblRole.Name = "lblRole";
         lblRole.Text = "Role *";
@@ -121,20 +132,31 @@ partial class UserEditForm
         lblError.Location = new Point(24, 280);
         lblError.Name = "lblError";
         lblError.Size = new Size(360, 40);
+        lblError.ForeColor = Color.FromArgb(192, 57, 43);
         lblError.Visible = false;
 
+        btnSave.BackColor = Color.FromArgb(30, 75, 143);
+        btnSave.FlatAppearance.BorderSize = 0;
+        btnSave.FlatStyle = FlatStyle.Flat;
+        btnSave.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        btnSave.ForeColor = Color.White;
         btnSave.Location = new Point(176, 330);
         btnSave.Name = "btnSave";
         btnSave.Size = new Size(100, 32);
         btnSave.TabIndex = 5;
         btnSave.Text = "Save";
+        btnSave.UseVisualStyleBackColor = false;
         btnSave.Click += BtnSave_Click;
 
+        btnCancel.BackColor = Color.White;
+        btnCancel.FlatAppearance.BorderColor = Color.FromArgb(215, 220, 225);
+        btnCancel.FlatStyle = FlatStyle.Flat;
         btnCancel.Location = new Point(284, 330);
         btnCancel.Name = "btnCancel";
         btnCancel.Size = new Size(100, 32);
         btnCancel.TabIndex = 6;
         btnCancel.Text = "Cancel";
+        btnCancel.UseVisualStyleBackColor = false;
         btnCancel.Click += BtnCancel_Click;
 
         AcceptButton = btnSave;

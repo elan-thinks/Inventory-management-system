@@ -3,6 +3,7 @@ using System.Windows.Forms;
 
 namespace NovaTechIMS.Forms.Delegations;
 
+/// <summary>New Delegation dialog — BCL-only Designer layout.</summary>
 partial class DelegationEditForm
 {
     private System.ComponentModel.IContainer components = null;
@@ -57,17 +58,22 @@ partial class DelegationEditForm
         Text = "New Delegation";
 
         lblRecipient.AutoSize = true;
+        lblRecipient.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblRecipient.ForeColor = Color.FromArgb(31, 41, 51);
         lblRecipient.Location = new Point(24, 20);
         lblRecipient.Name = "lblRecipient";
         lblRecipient.Text = "Recipient (Inventory Staff) *";
 
         cboRecipient.DropDownStyle = ComboBoxStyle.DropDownList;
+        cboRecipient.Items.AddRange(new object[] { "— Select staff —" });
         cboRecipient.Location = new Point(24, 38);
         cboRecipient.Name = "cboRecipient";
         cboRecipient.Size = new Size(340, 25);
         cboRecipient.TabIndex = 0;
 
         lblResponsibility.AutoSize = true;
+        lblResponsibility.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblResponsibility.ForeColor = Color.FromArgb(31, 41, 51);
         lblResponsibility.Location = new Point(24, 72);
         lblResponsibility.Name = "lblResponsibility";
         lblResponsibility.Text = "Responsibility *";
@@ -81,6 +87,8 @@ partial class DelegationEditForm
         cboResponsibility.SelectedIndex = 0;
 
         lblStart.AutoSize = true;
+        lblStart.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblStart.ForeColor = Color.FromArgb(31, 41, 51);
         lblStart.Location = new Point(24, 124);
         lblStart.Name = "lblStart";
         lblStart.Text = "Start date *";
@@ -92,6 +100,8 @@ partial class DelegationEditForm
         dtpStart.TabIndex = 2;
 
         lblEnd.AutoSize = true;
+        lblEnd.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblEnd.ForeColor = Color.FromArgb(31, 41, 51);
         lblEnd.Location = new Point(24, 176);
         lblEnd.Name = "lblEnd";
         lblEnd.Text = "End date *";
@@ -103,6 +113,8 @@ partial class DelegationEditForm
         dtpEnd.TabIndex = 3;
 
         lblReason.AutoSize = true;
+        lblReason.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblReason.ForeColor = Color.FromArgb(31, 41, 51);
         lblReason.Location = new Point(24, 228);
         lblReason.Name = "lblReason";
         lblReason.Text = "Reason *";
@@ -119,20 +131,31 @@ partial class DelegationEditForm
         lblError.Location = new Point(24, 316);
         lblError.Name = "lblError";
         lblError.Size = new Size(340, 40);
+        lblError.ForeColor = Color.FromArgb(192, 57, 43);
         lblError.Visible = false;
 
+        btnSave.BackColor = Color.FromArgb(30, 75, 143);
+        btnSave.FlatAppearance.BorderSize = 0;
+        btnSave.FlatStyle = FlatStyle.Flat;
+        btnSave.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        btnSave.ForeColor = Color.White;
         btnSave.Location = new Point(156, 370);
         btnSave.Name = "btnSave";
         btnSave.Size = new Size(100, 32);
         btnSave.TabIndex = 5;
         btnSave.Text = "Create";
+        btnSave.UseVisualStyleBackColor = false;
         btnSave.Click += BtnSave_Click;
 
+        btnCancel.BackColor = Color.White;
+        btnCancel.FlatAppearance.BorderColor = Color.FromArgb(215, 220, 225);
+        btnCancel.FlatStyle = FlatStyle.Flat;
         btnCancel.Location = new Point(264, 370);
         btnCancel.Name = "btnCancel";
         btnCancel.Size = new Size(100, 32);
         btnCancel.TabIndex = 6;
         btnCancel.Text = "Cancel";
+        btnCancel.UseVisualStyleBackColor = false;
         btnCancel.Click += BtnCancel_Click;
 
         AcceptButton = btnSave;
