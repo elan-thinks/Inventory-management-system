@@ -18,7 +18,8 @@ Desktop inventory system for a university Windows Programming project: catalog, 
 | Technical Design | Complete — `/technical-design/` |
 | Implementation (M0–M19) | **Complete** — `/src/` |
 | Automated tests (xUnit) | **20 tests** — `src/NovaTechIMS.Tests/` |
-| UI designer-friendly layouts | Complete — hybrid Designer + code-behind |
+| UI designer-friendly layouts | Complete |
+| **M20 Full system integration testing** | **In progress** — `src/MILESTONE-20-GATE.md` |
 
 **Theme:** Light UI (`UiTheme` — background `#F4F6F8`, primary `#1E4B8F`).
 
@@ -30,9 +31,9 @@ Desktop inventory system for a university Windows Programming project: catalog, 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - Visual Studio 2022 (WinForms workload) **or** `dotnet` CLI
 - [PostgreSQL](https://www.postgresql.org/download/) running locally
-- Database scripts applied from `/database/` (see that folder’s order)
+- Database scripts applied from `/database/`
 
-Connection string: `src/NovaTechIMS/App.config` (adjust host, database, user, password for your machine).
+Connection string: `src/NovaTechIMS/App.config`.
 
 ---
 
@@ -49,55 +50,31 @@ dotnet build NovaTechIMS.sln
 dotnet run --project NovaTechIMS\NovaTechIMS.csproj
 ```
 
-Or open **`src/NovaTechIMS.sln`** in Visual Studio → set **NovaTechIMS** as startup project → **F5**.
-
-Login uses seeded users from the database scripts (typically administrator / staff accounts defined in seed SQL).
+Or open **`src/NovaTechIMS.sln`** → startup project **NovaTechIMS** → **F5**.
 
 ---
 
 ## Run automated tests
-
-Tests live in **`src/NovaTechIMS.Tests/`** (xUnit). They exercise models, security, services, and utilities against the main project.
-
-### CLI (recommended)
-
-From the repo root or `src`:
 
 ```powershell
 cd src
 dotnet test NovaTechIMS.Tests\NovaTechIMS.Tests.csproj
 ```
 
-Run with more detail:
+Expected: **20 passed**, **0 failed**, **0 skipped**.  
+Details: **`docs/HOW-TO-RUN-TESTS.md`**.
 
-```powershell
-dotnet test NovaTechIMS.Tests\NovaTechIMS.Tests.csproj --verbosity normal
-```
+---
 
-Filter by name (example):
+## Full system integration testing (Milestone 20)
 
-```powershell
-dotnet test NovaTechIMS.Tests\NovaTechIMS.Tests.csproj --filter "FullyQualifiedName~Password"
-```
+After M0–M19, verify the product end-to-end:
 
-Expected (Milestone 18 verification): **build success**, **20 passed**, **0 failed**, **0 skipped**.
+1. Gate: **`src/MILESTONE-20-GATE.md`**
+2. Master checklist: **`docs/FULL-SYSTEM-INTEGRATION-TEST-M20.md`**
+3. Deeper negatives (optional): **`docs/MANUAL-TEST-CHECKLIST-M18.md`**
 
-### Visual Studio
-
-1. Open `src/NovaTechIMS.sln`
-2. **Test → Test Explorer**
-3. **Run All**
-
-### What the tests cover
-
-| Folder under `NovaTechIMS.Tests` | Focus |
-|----------------------------------|--------|
-| `Models/` | Domain / enum behaviour |
-| `Security/` | Auth / permissions helpers |
-| `Services/` | Business rules (unit-level) |
-| `Utilities/` | Helpers (e.g. mapping, presentation) |
-
-**Note:** Automated suite is primarily unit-level. Full UI and PostgreSQL failure scenarios are in `docs/MANUAL-TEST-CHECKLIST-M18.md`.
+Mark Pass/Fail on the machine with a real PostgreSQL instance, Admin + Staff accounts, and a full stock journey (create master data → Stock-In → Stock-Out → History → Reports).
 
 ---
 
@@ -105,14 +82,12 @@ Expected (Milestone 18 verification): **build success**, **20 passed**, **0 fail
 
 | Layer | Role |
 |-------|------|
-| `*.Designer.cs` | Layout (panels, grids, buttons) — **View Designer (Shift+F7)** |
-| `*.cs` code-behind | Data load, save, filters, permissions |
-| `Services` / data access | Business rules + SQL via Npgsql |
-| `MainForm` | Shell: sidebar, header, hosts one page at a time |
+| `*.Designer.cs` | Layout — View Designer (Shift+F7) |
+| `*.cs` code-behind | Data, save, filters, permissions |
+| Services / Npgsql | Business rules + SQL |
+| MainForm | Shell hosts one page at a time |
 
-- **Designer** = structure; **runtime** = data, role-based nav, theme polish.
-- Do not rename/delete controls the code uses.
-- Details: `docs/UI-DESIGNER-CONVERSION.md`, `src/DESIGNER-NOTES.md`.
+See `docs/UI-DESIGNER-CONVERSION.md`, `src/DESIGNER-NOTES.md`.
 
 ---
 
@@ -120,20 +95,18 @@ Expected (Milestone 18 verification): **build success**, **20 passed**, **0 fail
 
 ```
 /
-├── README.md                 ← this file
-├── docs/                     SRS + checklists + designer conversion notes
-├── product-requirements/     Product + UX
-├── UI/                       Visual design tokens & specs
-├── project-management/       Audits & amendments (e.g. PostgreSQL)
-├── technical-design/         Architecture blueprint
-├── database/                 PostgreSQL schema + seed scripts
+├── README.md
+├── docs/                     SRS, HOW-TO-RUN-TESTS, M20 integration checklist
+├── product-requirements/
+├── UI/
+├── project-management/
+├── technical-design/
+├── database/
 └── src/
     ├── NovaTechIMS.sln
-    ├── README.md
-    ├── DESIGNER-NOTES.md
-    ├── MILESTONE-*-GATE.md   Acceptance gates (M0–M19)
-    ├── NovaTechIMS/          WinForms app (net8.0-windows)
-    └── NovaTechIMS.Tests/    xUnit test project
+    ├── MILESTONE-0 … 20-GATE.md
+    ├── NovaTechIMS/
+    └── NovaTechIMS.Tests/
 ```
 
 ---
@@ -142,9 +115,7 @@ Expected (Milestone 18 verification): **build success**, **20 passed**, **0 fail
 
 | Doc | Purpose |
 |-----|---------|
-| `src/README.md` | Implementation folder quick start |
-| `docs/HOW-TO-RUN-TESTS.md` | Detailed test commands |
-| `docs/MANUAL-TEST-CHECKLIST-M18.md` | Manual integration checklist |
-| `docs/FINAL-RELEASE-CHECKLIST.md` | Release gate |
-| `technical-design/00-README.md` | Tech design index |
-| `project-management/DATABASE-ENGINE-AMENDMENT.md` | Why PostgreSQL (not LocalDB) |
+| `docs/HOW-TO-RUN-TESTS.md` | Automated test commands |
+| `docs/FULL-SYSTEM-INTEGRATION-TEST-M20.md` | M20 end-to-end checklist |
+| `docs/FINAL-RELEASE-CHECKLIST.md` | Release sign-off |
+| `technical-design/00-README.md` | Architecture index |

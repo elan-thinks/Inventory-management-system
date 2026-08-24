@@ -1,31 +1,24 @@
 # 15 - Implementation Milestones
 
 **Document:** Progressive Implementation Roadmap  
-**Version:** 1.1 (status updated for `version1.3`)  
-
-Build from simple C# concepts upward. Historical order is preserved below; **all milestones 0–19 are complete** on branch `version1.3`.
+**Version:** 1.2 (M20 integration testing added)  
+**Branch:** `version1.3`
 
 | Milestone | Objective | Status |
 |-----------|----------|--------|
 | 0 | Environment + solution setup | **Done** |
 | 1 | WinForms shell (Login + MainForm) | **Done** |
 | 2 | Models and enums | **Done** |
-| 3 | Database schema (**PostgreSQL**, not LocalDB) | **Done** |
+| 3 | Database schema (PostgreSQL) | **Done** |
 | 4 | Connection + data access (Npgsql) | **Done** |
-| 5 | Category CRUD | **Done** |
-| 6 | Supplier CRUD | **Done** |
-| 7 | Customer CRUD | **Done** |
-| 8 | Product CRUD | **Done** |
-| 9 | Authentication | **Done** |
-| 10 | Role-based authorization | **Done** |
-| 11 | Stock-In | **Done** |
-| 12 | Stock-Out | **Done** |
-| 13 | Inventory History (read-only) | **Done** |
-| 14 | Inventory Adjustment | **Done** |
-| 15 | Delegation | **Done** |
-| 16 | Reports | **Done** |
+| 5–8 | Category / Supplier / Customer / Product CRUD | **Done** |
+| 9–10 | Authentication + authorization | **Done** |
+| 11–14 | Stock-In / Out / History / Adjustment | **Done** |
+| 15–16 | Delegation + Reports | **Done** |
 | 17 | Validation + error polish | **Done** |
-| 18 | Testing (automated + manual checklist) | **Done** (20 automated tests) |
+| 18 | Automated testing (20 xUnit tests) | **Done** |
 | 19 | Final UI polish + designer-friendly layouts | **Done** |
+| **20** | **Full system integration testing** | **In progress** |
 
-Acceptance detail: `src/MILESTONE-*-GATE.md`.
+- Gate: `src/MILESTONE-20-GATE.md`  
+- Checklist: `docs/FULL-SYSTEM-INTEGRATION-TEST-M20.md`  
