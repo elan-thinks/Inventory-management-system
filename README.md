@@ -2,40 +2,24 @@
 
 **Repository:** https://github.com/elan-thinks/Inventory-management-system  
 **Active branch:** `version1.3`  
-**Stack:** C# · .NET 8 · Windows Forms · PostgreSQL · Npgsql · xUnit
-
-Desktop inventory system for a university Windows Programming project: catalog, stock movements, adjustments, history, users, delegations, and reports.
+**Stack:** C# · .NET 8 · Windows Forms · PostgreSQL · Npgsql · xUnit  
+**Release:** **Approved for delivery** — see `docs/RELEASE-STATUS.md`
 
 ---
 
-## Current status (`version1.3`)
+## Status summary
 
 | Area | Status |
 |------|--------|
-| Requirements (SRS) | Complete — `/docs/` |
-| Product / UX | Complete — `/product-requirements/` |
-| Visual Design | Complete — `/UI/` |
-| Technical Design | Complete — `/technical-design/` |
-| Implementation (M0–M19) | **Complete** — `/src/` |
-| Automated tests (xUnit) | **20 tests** — `src/NovaTechIMS.Tests/` |
-| UI designer-friendly layouts | Complete |
-| Demo seed data | `database/04-SeedDemoData.sql` |
-| **M20 Full system integration testing** | **COMPLETE — ALL PASS** |
-
-**Theme:** Light UI (`UiTheme`).
+| Implementation (M0–M19) | Complete |
+| Automated tests | 20 xUnit tests |
+| Full system integration (M20) | Complete — ALL PASS |
+| Milestone documentation | Aligned to `version1.3` |
+| Formal release checklist | `docs/FINAL-RELEASE-CHECKLIST.md` |
 
 ---
 
-## Prerequisites
-
-- Windows 10/11 · .NET 8 SDK · Visual Studio 2022 or `dotnet` CLI  
-- PostgreSQL · scripts in `/database/` (include `04-SeedDemoData.sql` for demo data)
-
-Connection string: `src/NovaTechIMS/App.config`.
-
----
-
-## Clone and run
+## Run the app
 
 ```powershell
 git clone https://github.com/elan-thinks/Inventory-management-system.git
@@ -46,7 +30,9 @@ dotnet build NovaTechIMS.sln
 dotnet run --project NovaTechIMS\NovaTechIMS.csproj
 ```
 
-### Demo logins (after seed script)
+Requires PostgreSQL + scripts under `/database/` (use `04-SeedDemoData.sql` for demo data).
+
+### Demo logins
 
 | Username | Password | Role |
 |----------|----------|------|
@@ -55,37 +41,24 @@ dotnet run --project NovaTechIMS\NovaTechIMS.csproj
 
 ---
 
-## Run automated tests
+## Final verification (build + tests)
 
 ```powershell
 cd src
+dotnet build NovaTechIMS.sln
 dotnet test NovaTechIMS.Tests\NovaTechIMS.Tests.csproj
 ```
 
-Details: `docs/HOW-TO-RUN-TESTS.md`.
+Expected: **20 passed · 0 failed · 0 skipped**.
+
+Details: `docs/HOW-TO-RUN-TESTS.md` · `docs/RELEASE-STATUS.md`
 
 ---
 
-## Integration testing (M20)
+## Milestone gates
 
-Gate: `src/MILESTONE-20-GATE.md` — **COMPLETE**.  
-Checklist: `docs/FULL-SYSTEM-INTEGRATION-TEST-M20.md` — **ALL PASS**.
+All gates under `src/MILESTONE-*-GATE.md` (0–20). Latest:
 
----
-
-## Repository layout
-
-```
-/
-├── README.md
-├── docs/
-├── product-requirements/
-├── UI/
-├── project-management/
-├── technical-design/
-├── database/          # schema + 04-SeedDemoData.sql
-└── src/
-    ├── MILESTONE-0 … 20-GATE.md
-    ├── NovaTechIMS/
-    └── NovaTechIMS.Tests/
-```
+- **M18** — Automated testing · COMPLETE · branch `version1.3`
+- **M19** — UI polish · COMPLETE · branch `version1.3`
+- **M20** — Full system integration · COMPLETE — ALL PASS

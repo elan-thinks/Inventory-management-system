@@ -1,58 +1,50 @@
 # Milestone 20 Gate — Full System Integration Testing
 
-**Status:** COMPLETE — **ALL PASS**  
-**Branch:** `version1.3`  
-**Depends on:** M18 (automated tests) · M19 (UI polish) · live PostgreSQL
+**Status:** COMPLETE — ALL PASS  
+**Branch:** `version1.3`
 
 ---
 
 ## Objective
 
-Prove the **entire** NovaTech IMS works as one product end-to-end:
-
-- Login → shell → every major module → data consistency → roles → failure paths
-- System-level flows across UI + services + PostgreSQL
+End-to-end proof: UI + services + PostgreSQL across all modules and roles.
 
 ---
 
-## Local verification
+## Verification
 
 | Item | Result |
 |------|--------|
 | Date | 2026-08-24 |
 | Tester | Developer |
 | Checklist | `docs/FULL-SYSTEM-INTEGRATION-TEST-M20.md` |
-| Critical cases | **ALL PASS** |
-| High cases | **ALL PASS** |
-| Medium cases | **ALL PASS** |
-| Blockers remaining | **None** |
-| Gate decision | **COMPLETE** |
+| Critical / High / Medium | **ALL PASS** |
+| Blockers | **None** |
+| Gate | **COMPLETE** |
 
-Supporting data: demo seed `database/04-SeedDemoData.sql` (10 categories / suppliers / customers / products; admin + staff01–staff10).
+Demo data: `database/04-SeedDemoData.sql`.
 
 ---
 
-## Acceptance criteria (met)
+## Pre-flight commands (final evidence)
 
-1. Automated suite remained green where applicable  
-2. Master integration checklist executed  
-3. Critical and High rows **Pass**  
-4. No open blockers  
-5. Gate marked **COMPLETE**  
+```powershell
+git checkout version1.3
+git pull origin version1.3
+cd src
+dotnet build NovaTechIMS.sln
+dotnet test NovaTechIMS.Tests\NovaTechIMS.Tests.csproj
+```
 
----
-
-## Relationship to prior milestones
-
-| Milestone | Role |
-|-----------|------|
-| M18 | Unit tests + initial manual negative list |
-| M19 | UI polish / designer alignment |
-| **M20** | **Full system integration — CLOSED** |
+Expected: **20 passed · 0 failed · 0 skipped**.
 
 ---
 
-## Next
+## Closed milestones summary
 
-- Optional: formal release packaging / demo script  
-- Or close delivery with `docs/FINAL-RELEASE-CHECKLIST.md` sign-off  
+| M | Focus | Status |
+|---|--------|--------|
+| 0–17 | Core implementation | COMPLETE |
+| 18 | Automated tests | COMPLETE |
+| 19 | UI polish + designer | COMPLETE |
+| 20 | Full system integration | COMPLETE |
