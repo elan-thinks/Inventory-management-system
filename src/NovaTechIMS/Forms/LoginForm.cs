@@ -22,7 +22,15 @@ public partial class LoginForm : Form
         if (DesignTime.IsActive)
             return;
 
-        ApplyRuntimeStyling();
+        try
+        {
+            ApplyRuntimeStyling();
+        }
+        catch (Exception ex)
+        {
+            // Never block the login window from appearing because of theme polish
+            System.Diagnostics.Debug.WriteLine("[Login] styling: " + ex);
+        }
     }
 
     private void ApplyRuntimeStyling()
@@ -31,7 +39,7 @@ public partial class LoginForm : Form
         Font = UiTheme.Body;
 
         pnlCard.BackColor = UiTheme.Surface;
-        UiTheme.ApplyRoundedRegion(pnlCard, UiTheme.RadiusLg);
+        // Avoid Region clipping issues on some hosts — simple border paint is enough
         pnlCard.Paint += (_, e) =>
         {
             using var pen = new Pen(UiTheme.Border, 1);

@@ -17,14 +17,31 @@ internal static class Program
     {
         ApplicationConfiguration.Initialize();
 
-        // UI-thread exceptions
         Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
         Application.ThreadException += OnUiThreadException;
-
-        // Non-UI thread exceptions
         AppDomain.CurrentDomain.UnhandledException += OnDomainUnhandledException;
 
-        Application.Run(new LoginForm());
+        try
+        {
+            Application.Run(new LoginForm());
+        }
+        catch (Exception ex)
+        {
+            // Constructors / first paint can fail before the message loop — always show something.
+            Debug.WriteLine("[Startup] " + ex);
+            try
+            {
+                MessageBox.Show(
+                    "NovaTech IMS failed to start:\n\n" + ex.Message + "\n\n" + ex.GetType().FullName,
+                    "Startup error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+            catch
+            {
+                // ignore
+            }
+        }
     }
 
     private static void OnUiThreadException(object sender, ThreadExceptionEventArgs e)
@@ -44,7 +61,7 @@ internal static class Program
             }
             catch
             {
-                // last resort — ignore
+                // last resort
             }
         }
     }
