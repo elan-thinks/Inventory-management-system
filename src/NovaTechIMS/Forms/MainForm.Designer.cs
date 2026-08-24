@@ -29,7 +29,6 @@ partial class MainForm
     private ToolStripStatusLabel lblSpacer;
     private ToolStripStatusLabel lblMessageStatus;
 
-    // Design-time sample nav (cleared/replaced at runtime)
     private Label lblNavGroupCatalog;
     private Button btnNavDashboard;
     private Button btnNavProducts;
@@ -83,7 +82,7 @@ partial class MainForm
         MinimumSize = new Size(1024, 768);
         Name = "MainForm";
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "NovaTech IMS";
+        Text = "Inventory Management System (IMS)";
         Font = new Font("Segoe UI", 10F);
         Load += MainForm_Load;
 
@@ -92,7 +91,7 @@ partial class MainForm
         pnlSidebar.BackColor = Color.FromArgb(22, 50, 79);
         pnlSidebar.Name = "pnlSidebar";
 
-        lblBrand.Text = "  NovaTech IMS";
+        lblBrand.Text = "  IMS";
         lblBrand.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
         lblBrand.ForeColor = Color.White;
         lblBrand.Dock = DockStyle.Top;
