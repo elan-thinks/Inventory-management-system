@@ -10,14 +10,16 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms.Reports;
 
 /// <summary>
-/// SCR-016/017 Reports hub — card chooser + embedded results (mockup).
+/// SCR-016/017 Reports hub — designer owns shell; cards built at runtime.
 /// </summary>
 public partial class ReportsHubForm : Form
 {
-    private readonly ReportService _service = new();
+    private ReportService? _service;
     private string _currentTitle = "";
     private int _printRow;
     private Panel? _selectedCard;
+
+    private ReportService Service => _service ??= new ReportService();
 
     private static readonly (string Title, string Desc, string Icon, int Index)[] ReportDefs =
     {
@@ -32,8 +34,13 @@ public partial class ReportsHubForm : Form
     public ReportsHubForm()
     {
         InitializeComponent();
+
+        if (DesignTime.IsActive)
+            return;
+
         ApplyRuntimeStyling();
         BuildCards();
+        filterBar.Visible = false;
         dtpFrom.Value = DateTime.Today.AddDays(-30);
         dtpTo.Value = DateTime.Today;
     }
@@ -63,10 +70,16 @@ public partial class ReportsHubForm : Form
 
         UiTheme.StyleButton(btnBack, UiTheme.ButtonKind.Secondary);
         UiTheme.StyleButton(btnPrint, UiTheme.ButtonKind.Primary);
-        AppIcons.ApplyToButton(btnPrint, "icons-print.png", 16);
 
         UiTheme.ApplyGridTheme(grid);
         pnlResults.BackColor = UiTheme.Surface;
+    }
+
+    private void ResultsHeader_Resize(object? sender, EventArgs e)
+    {
+        if (resultsHeader is null || btnPrint is null || btnBack is null) return;
+        btnPrint.Left = Math.Max(8, resultsHeader.ClientSize.Width - btnPrint.Width - 8);
+        btnBack.Left = btnPrint.Left - btnBack.Width - 8;
     }
 
     private void BuildCards()
@@ -146,19 +159,14 @@ public partial class ReportsHubForm : Form
 
     private void OnCardClicked(Panel card, int reportIndex)
     {
+        if (DesignTime.IsActive) return;
+
         _selectedCard = card;
         foreach (Control c in cardsPanel.Controls)
             c.Invalidate();
 
-        // Date-range reports: show filter bar first; click again or auto-run
         bool needsDates = reportIndex is 3 or 4 or 5;
         filterBar.Visible = needsDates;
-
-        if (needsDates)
-        {
-            // Keep chooser visible so user can set dates, then run via double purpose:
-            // run immediately with current dates (default last 30 days)
-        }
 
         RunReport(reportIndex);
     }
@@ -177,32 +185,32 @@ public partial class ReportsHubForm : Form
             {
                 case 0:
                     title = "Current Inventory Report";
-                    data = _service.GetCurrentInventory();
+                    data = Service.GetCurrentInventory();
                     filters = "Filters: Category — All · Stock Status — All";
                     break;
                 case 1:
                     title = "Low Stock Report";
-                    data = _service.GetLowStock();
+                    data = Service.GetLowStock();
                     filters = "Products at or below minimum level";
                     break;
                 case 2:
                     title = "Out-of-Stock Report";
-                    data = _service.GetOutOfStock();
+                    data = Service.GetOutOfStock();
                     filters = "Quantity on hand = 0";
                     break;
                 case 3:
-                    title = $"Stock-In Report";
-                    data = _service.GetStockInReport(dtpFrom.Value, dtpTo.Value);
+                    title = "Stock-In Report";
+                    data = Service.GetStockInReport(dtpFrom.Value, dtpTo.Value);
                     filters = $"From {dtpFrom.Value:yyyy-MM-dd} to {dtpTo.Value:yyyy-MM-dd}";
                     break;
                 case 4:
                     title = "Stock-Out Report";
-                    data = _service.GetStockOutReport(dtpFrom.Value, dtpTo.Value);
+                    data = Service.GetStockOutReport(dtpFrom.Value, dtpTo.Value);
                     filters = $"From {dtpFrom.Value:yyyy-MM-dd} to {dtpTo.Value:yyyy-MM-dd}";
                     break;
                 default:
                     title = "Transaction History Report";
-                    data = _service.GetTransactionHistoryReport(dtpFrom.Value, dtpTo.Value, null, null);
+                    data = Service.GetTransactionHistoryReport(dtpFrom.Value, dtpTo.Value, null, null);
                     filters = $"From {dtpFrom.Value:yyyy-MM-dd} to {dtpTo.Value:yyyy-MM-dd}";
                     break;
             }
@@ -226,6 +234,7 @@ public partial class ReportsHubForm : Form
             pnlChooser.Visible = false;
             pnlResults.Visible = true;
             pnlResults.BringToFront();
+            ResultsHeader_Resize(resultsHeader, EventArgs.Empty);
         }
         catch (AppException ex)
         {
@@ -234,7 +243,7 @@ public partial class ReportsHubForm : Form
         }
         catch (Exception ex)
         {
-            lblError.Text = "Could not run report. " + ex.Message;
+            lblError.Text = "Could not run report. " + ErrorPresenter.Classify(DbExceptionMapper.Map(ex)).Message;
             lblError.Visible = true;
         }
     }
@@ -271,6 +280,7 @@ public partial class ReportsHubForm : Form
 
     private void BtnBack_Click(object? sender, EventArgs e)
     {
+        if (DesignTime.IsActive) return;
         pnlResults.Visible = false;
         pnlChooser.Visible = true;
         pnlChooser.BringToFront();
@@ -281,6 +291,8 @@ public partial class ReportsHubForm : Form
 
     private void BtnPrint_Click(object? sender, EventArgs e)
     {
+        if (DesignTime.IsActive) return;
+
         using var doc = new PrintDocument();
         doc.DocumentName = _currentTitle;
         doc.PrintPage += Doc_PrintPage;

@@ -3,6 +3,10 @@ using System.Windows.Forms;
 
 namespace NovaTechIMS.Forms;
 
+/// <summary>
+/// Application shell layout — sidebar, header, content, status strip (View Designer).
+/// Runtime navigation buttons are added in MainForm.cs (BuildNavigation).
+/// </summary>
 partial class MainForm
 {
     private System.ComponentModel.IContainer components = null;
@@ -24,6 +28,12 @@ partial class MainForm
     private ToolStripStatusLabel lblDateStatus;
     private ToolStripStatusLabel lblSpacer;
     private ToolStripStatusLabel lblMessageStatus;
+
+    // Design-time sample nav (cleared/replaced at runtime)
+    private Label lblNavGroupCatalog;
+    private Button btnNavDashboard;
+    private Button btnNavProducts;
+    private Button btnNavCategories;
 
     protected override void Dispose(bool disposing)
     {
@@ -53,9 +63,14 @@ partial class MainForm
         lblDateStatus = new ToolStripStatusLabel();
         lblSpacer = new ToolStripStatusLabel();
         lblMessageStatus = new ToolStripStatusLabel();
+        lblNavGroupCatalog = new Label();
+        btnNavDashboard = new Button();
+        btnNavProducts = new Button();
+        btnNavCategories = new Button();
 
         SuspendLayout();
         pnlSidebar.SuspendLayout();
+        flpNav.SuspendLayout();
         pnlMain.SuspendLayout();
         pnlHeader.SuspendLayout();
         pnlContent.SuspendLayout();
@@ -93,6 +108,50 @@ partial class MainForm
         flpNav.Padding = new Padding(0, 8, 0, 8);
         flpNav.BackColor = Color.FromArgb(22, 50, 79);
         flpNav.Name = "flpNav";
+
+        btnNavDashboard.Text = "  Dashboard";
+        btnNavDashboard.FlatStyle = FlatStyle.Flat;
+        btnNavDashboard.FlatAppearance.BorderSize = 0;
+        btnNavDashboard.ForeColor = Color.White;
+        btnNavDashboard.BackColor = Color.FromArgb(40, 255, 255, 255);
+        btnNavDashboard.TextAlign = ContentAlignment.MiddleLeft;
+        btnNavDashboard.Size = new Size(204, 36);
+        btnNavDashboard.Margin = new Padding(8, 2, 8, 2);
+        btnNavDashboard.Name = "btnNavDashboard";
+
+        lblNavGroupCatalog.Text = "CATALOG";
+        lblNavGroupCatalog.ForeColor = Color.FromArgb(199, 211, 224);
+        lblNavGroupCatalog.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+        lblNavGroupCatalog.AutoSize = false;
+        lblNavGroupCatalog.Size = new Size(196, 28);
+        lblNavGroupCatalog.Padding = new Padding(12, 12, 0, 0);
+        lblNavGroupCatalog.Margin = new Padding(0, 8, 0, 0);
+        lblNavGroupCatalog.Name = "lblNavGroupCatalog";
+
+        btnNavProducts.Text = "  Products";
+        btnNavProducts.FlatStyle = FlatStyle.Flat;
+        btnNavProducts.FlatAppearance.BorderSize = 0;
+        btnNavProducts.ForeColor = Color.FromArgb(199, 211, 224);
+        btnNavProducts.BackColor = Color.FromArgb(22, 50, 79);
+        btnNavProducts.TextAlign = ContentAlignment.MiddleLeft;
+        btnNavProducts.Size = new Size(204, 36);
+        btnNavProducts.Margin = new Padding(8, 2, 8, 2);
+        btnNavProducts.Name = "btnNavProducts";
+
+        btnNavCategories.Text = "  Categories";
+        btnNavCategories.FlatStyle = FlatStyle.Flat;
+        btnNavCategories.FlatAppearance.BorderSize = 0;
+        btnNavCategories.ForeColor = Color.FromArgb(199, 211, 224);
+        btnNavCategories.BackColor = Color.FromArgb(22, 50, 79);
+        btnNavCategories.TextAlign = ContentAlignment.MiddleLeft;
+        btnNavCategories.Size = new Size(204, 36);
+        btnNavCategories.Margin = new Padding(8, 2, 8, 2);
+        btnNavCategories.Name = "btnNavCategories";
+
+        flpNav.Controls.Add(btnNavDashboard);
+        flpNav.Controls.Add(lblNavGroupCatalog);
+        flpNav.Controls.Add(btnNavProducts);
+        flpNav.Controls.Add(btnNavCategories);
 
         btnLogout.Text = "  Sign Out";
         btnLogout.Font = new Font("Segoe UI", 9.5F);
@@ -144,7 +203,7 @@ partial class MainForm
         lblRoleBadge.Size = new Size(44, 20);
         lblRoleBadge.TextAlign = ContentAlignment.MiddleCenter;
         lblRoleBadge.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        lblRoleBadge.Location = new Point(900, 28);
+        lblRoleBadge.Location = new Point(1000, 28);
         lblRoleBadge.Name = "lblRoleBadge";
 
         pnlHeader.Controls.Add(lblBreadcrumb);
@@ -163,7 +222,7 @@ partial class MainForm
         lblPlaceholderTitle.Location = new Point(32, 40);
         lblPlaceholderTitle.Name = "lblPlaceholderTitle";
 
-        lblPlaceholderBody.Text = "";
+        lblPlaceholderBody.Text = "Select a navigation item. Content hosts here at runtime.";
         lblPlaceholderBody.Font = new Font("Segoe UI", 10F);
         lblPlaceholderBody.ForeColor = Color.FromArgb(107, 119, 133);
         lblPlaceholderBody.AutoSize = false;
@@ -207,6 +266,7 @@ partial class MainForm
         Controls.Add(statusStrip);
         Controls.Add(pnlSidebar);
 
+        flpNav.ResumeLayout(false);
         pnlSidebar.ResumeLayout(false);
         pnlHeader.ResumeLayout(false);
         pnlHeader.PerformLayout();
