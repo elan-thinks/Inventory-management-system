@@ -1,7 +1,7 @@
 # 15 - Implementation Milestones
 
 **Document:** Progressive Implementation Roadmap  
-**Version:** 1.2 (M20 integration testing added)  
+**Version:** 1.3 (M20 complete)  
 **Branch:** `version1.3`
 
 | Milestone | Objective | Status |
@@ -18,7 +18,7 @@
 | 17 | Validation + error polish | **Done** |
 | 18 | Automated testing (20 xUnit tests) | **Done** |
 | 19 | Final UI polish + designer-friendly layouts | **Done** |
-| **20** | **Full system integration testing** | **In progress** |
+| **20** | **Full system integration testing** | **Done — ALL PASS** |
 
 - Gate: `src/MILESTONE-20-GATE.md`  
 - Checklist: `docs/FULL-SYSTEM-INTEGRATION-TEST-M20.md`  

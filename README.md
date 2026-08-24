@@ -19,38 +19,39 @@ Desktop inventory system for a university Windows Programming project: catalog, 
 | Implementation (M0–M19) | **Complete** — `/src/` |
 | Automated tests (xUnit) | **20 tests** — `src/NovaTechIMS.Tests/` |
 | UI designer-friendly layouts | Complete |
-| **M20 Full system integration testing** | **In progress** — `src/MILESTONE-20-GATE.md` |
+| Demo seed data | `database/04-SeedDemoData.sql` |
+| **M20 Full system integration testing** | **COMPLETE — ALL PASS** |
 
-**Theme:** Light UI (`UiTheme` — background `#F4F6F8`, primary `#1E4B8F`).
+**Theme:** Light UI (`UiTheme`).
 
 ---
 
 ## Prerequisites
 
-- Windows 10/11
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- Visual Studio 2022 (WinForms workload) **or** `dotnet` CLI
-- [PostgreSQL](https://www.postgresql.org/download/) running locally
-- Database scripts applied from `/database/`
+- Windows 10/11 · .NET 8 SDK · Visual Studio 2022 or `dotnet` CLI  
+- PostgreSQL · scripts in `/database/` (include `04-SeedDemoData.sql` for demo data)
 
 Connection string: `src/NovaTechIMS/App.config`.
 
 ---
 
-## Clone and run the app
+## Clone and run
 
 ```powershell
 git clone https://github.com/elan-thinks/Inventory-management-system.git
 cd Inventory-management-system
-git fetch origin
 git checkout version1.3
-
 cd src
 dotnet build NovaTechIMS.sln
 dotnet run --project NovaTechIMS\NovaTechIMS.csproj
 ```
 
-Or open **`src/NovaTechIMS.sln`** → startup project **NovaTechIMS** → **F5**.
+### Demo logins (after seed script)
+
+| Username | Password | Role |
+|----------|----------|------|
+| `admin` | `Admin@123` | Administrator |
+| `staff01` … `staff10` | `Staff@123` | Inventory Staff |
 
 ---
 
@@ -61,33 +62,14 @@ cd src
 dotnet test NovaTechIMS.Tests\NovaTechIMS.Tests.csproj
 ```
 
-Expected: **20 passed**, **0 failed**, **0 skipped**.  
-Details: **`docs/HOW-TO-RUN-TESTS.md`**.
+Details: `docs/HOW-TO-RUN-TESTS.md`.
 
 ---
 
-## Full system integration testing (Milestone 20)
+## Integration testing (M20)
 
-After M0–M19, verify the product end-to-end:
-
-1. Gate: **`src/MILESTONE-20-GATE.md`**
-2. Master checklist: **`docs/FULL-SYSTEM-INTEGRATION-TEST-M20.md`**
-3. Deeper negatives (optional): **`docs/MANUAL-TEST-CHECKLIST-M18.md`**
-
-Mark Pass/Fail on the machine with a real PostgreSQL instance, Admin + Staff accounts, and a full stock journey (create master data → Stock-In → Stock-Out → History → Reports).
-
----
-
-## How the WinForms UI is built (hybrid)
-
-| Layer | Role |
-|-------|------|
-| `*.Designer.cs` | Layout — View Designer (Shift+F7) |
-| `*.cs` code-behind | Data, save, filters, permissions |
-| Services / Npgsql | Business rules + SQL |
-| MainForm | Shell hosts one page at a time |
-
-See `docs/UI-DESIGNER-CONVERSION.md`, `src/DESIGNER-NOTES.md`.
+Gate: `src/MILESTONE-20-GATE.md` — **COMPLETE**.  
+Checklist: `docs/FULL-SYSTEM-INTEGRATION-TEST-M20.md` — **ALL PASS**.
 
 ---
 
@@ -96,26 +78,14 @@ See `docs/UI-DESIGNER-CONVERSION.md`, `src/DESIGNER-NOTES.md`.
 ```
 /
 ├── README.md
-├── docs/                     SRS, HOW-TO-RUN-TESTS, M20 integration checklist
+├── docs/
 ├── product-requirements/
 ├── UI/
 ├── project-management/
 ├── technical-design/
-├── database/
+├── database/          # schema + 04-SeedDemoData.sql
 └── src/
-    ├── NovaTechIMS.sln
     ├── MILESTONE-0 … 20-GATE.md
     ├── NovaTechIMS/
     └── NovaTechIMS.Tests/
 ```
-
----
-
-## Further reading
-
-| Doc | Purpose |
-|-----|---------|
-| `docs/HOW-TO-RUN-TESTS.md` | Automated test commands |
-| `docs/FULL-SYSTEM-INTEGRATION-TEST-M20.md` | M20 end-to-end checklist |
-| `docs/FINAL-RELEASE-CHECKLIST.md` | Release sign-off |
-| `technical-design/00-README.md` | Architecture index |
