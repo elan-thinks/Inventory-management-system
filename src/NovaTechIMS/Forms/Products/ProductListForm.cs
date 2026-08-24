@@ -8,7 +8,7 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms.Products;
 
 /// <summary>
-/// SCR-003 Product List — Designer-compatible; no DB calls at design time.
+/// SCR-003 Product List — designer owns layout; this file is data + filters only.
 /// </summary>
 public partial class ProductListForm : Form
 {
@@ -27,6 +27,10 @@ public partial class ProductListForm : Form
         if (DesignTime.IsActive)
             return;
 
+        // Clear design-time sample columns before binding real data
+        grid.Columns.Clear();
+        grid.ColumnCount = 0;
+
         ApplyRuntimeStyling();
         LoadFilterLookups();
         Load += (_, _) => ReloadGrid();
@@ -35,7 +39,17 @@ public partial class ProductListForm : Form
     private void ApplyRuntimeStyling()
     {
         BackColor = UiTheme.Background;
-        UiTheme.ApplyDarkInputs(this);
+        toolbar.BackColor = UiTheme.Background;
+        lblCount.BackColor = UiTheme.Background;
+        lblCount.ForeColor = UiTheme.TextMuted;
+        lblEmpty.ForeColor = UiTheme.TextMuted;
+        lblEmpty.BackColor = UiTheme.Background;
+
+        if (lblSearch is not null) lblSearch.ForeColor = UiTheme.TextMuted;
+        if (lblCategory is not null) lblCategory.ForeColor = UiTheme.TextMuted;
+        if (lblSupplier is not null) lblSupplier.ForeColor = UiTheme.TextMuted;
+        if (lblStock is not null) lblStock.ForeColor = UiTheme.TextMuted;
+        if (lblStatus is not null) lblStatus.ForeColor = UiTheme.TextMuted;
 
         UiTheme.StyleTextBox(txtSearch);
         UiTheme.StyleComboBox(cboCategory);
@@ -45,11 +59,6 @@ public partial class ProductListForm : Form
         UiTheme.StyleButton(btnClearFilters, UiTheme.ButtonKind.Ghost);
         UiTheme.StyleButton(btnRefresh, UiTheme.ButtonKind.Secondary);
         UiTheme.StyleButton(btnAdd, UiTheme.ButtonKind.Primary);
-
-        toolbar.BackColor = UiTheme.Background;
-        lblCount.ForeColor = UiTheme.TextMuted;
-        lblEmpty.ForeColor = UiTheme.TextMuted;
-        lblEmpty.BackColor = UiTheme.Background;
 
         UiTheme.ApplyGridTheme(grid);
         UiTheme.WireStatusBadgeColumn(grid, nameof(ProductListRow.StockStatusLabel), value => (value?.ToString() ?? "") switch
@@ -63,26 +72,39 @@ public partial class ProductListForm : Form
             "Active" => ("Active", UiTheme.BadgeTone.Success, '\u2713'),
             _ => ("Inactive", UiTheme.BadgeTone.Muted, '\u2715')
         });
+
+        btnClearFilters.Visible = false;
         Toolbar_Resize(toolbar, EventArgs.Empty);
     }
 
     private void Toolbar_Resize(object? sender, EventArgs e)
     {
-        btnAdd.Left = toolbar.ClientSize.Width - btnAdd.Width;
+        if (toolbar is null || btnAdd is null || btnRefresh is null) return;
+        btnAdd.Left = Math.Max(8, toolbar.ClientSize.Width - btnAdd.Width - 8);
         btnRefresh.Left = btnAdd.Left - btnRefresh.Width - 8;
     }
 
-    private void TxtSearch_TextChanged(object? sender, EventArgs e) => ReloadGrid();
-    private void CboFilter_SelectedIndexChanged(object? sender, EventArgs e) => ReloadGrid();
+    private void TxtSearch_TextChanged(object? sender, EventArgs e)
+    {
+        if (DesignTime.IsActive) return;
+        ReloadGrid();
+    }
+
+    private void CboFilter_SelectedIndexChanged(object? sender, EventArgs e)
+    {
+        if (DesignTime.IsActive) return;
+        ReloadGrid();
+    }
+
     private void BtnRefresh_Click(object? sender, EventArgs e) => ReloadGrid();
 
     private void BtnClearFilters_Click(object? sender, EventArgs e)
     {
         txtSearch.Clear();
-        cboCategory.SelectedIndex = 0;
-        cboSupplier.SelectedIndex = 0;
-        cboStock.SelectedIndex = 0;
-        cboStatus.SelectedIndex = 0;
+        if (cboCategory.Items.Count > 0) cboCategory.SelectedIndex = 0;
+        if (cboSupplier.Items.Count > 0) cboSupplier.SelectedIndex = 0;
+        if (cboStock.Items.Count > 0) cboStock.SelectedIndex = 0;
+        if (cboStatus.Items.Count > 0) cboStatus.SelectedIndex = 0;
         ReloadGrid();
     }
 
@@ -151,13 +173,16 @@ public partial class ProductListForm : Form
             grid.Visible = true;
             grid.DataSource = rows;
             ConfigureColumns();
-            lblCount.Text = rows.Count == 1 ? "Showing 1 of 1 products" : $"Showing {rows.Count} of {rows.Count} products";
+            lblCount.Text = rows.Count == 1
+                ? "Showing 1 of 1 products"
+                : $"Showing {rows.Count} of {rows.Count} products";
         }
         catch (Exception ex)
         {
             grid.Visible = false;
             lblEmpty.Visible = true;
-            lblEmpty.Text = "Unable to load products. Check the database connection.\n" + ex.Message;
+            var mapped = DbExceptionMapper.Map(ex);
+            lblEmpty.Text = "Unable to load products.\n" + ErrorPresenter.Classify(mapped).Message;
             lblCount.Text = "";
         }
     }

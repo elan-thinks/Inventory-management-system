@@ -1,18 +1,26 @@
 using System.Drawing;
 using System.Windows.Forms;
-using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Products;
 
+/// <summary>
+/// Product list layout — full controls on the design surface (drag/drop).
+/// Filter data and grid rows load at runtime only.
+/// </summary>
 partial class ProductListForm
 {
     private System.ComponentModel.IContainer components = null;
 
     private Panel toolbar;
+    private Label lblSearch;
     private TextBox txtSearch;
+    private Label lblCategory;
     private ComboBox cboCategory;
+    private Label lblSupplier;
     private ComboBox cboSupplier;
+    private Label lblStock;
     private ComboBox cboStock;
+    private Label lblStatus;
     private ComboBox cboStatus;
     private Button btnClearFilters;
     private Button btnAdd;
@@ -31,10 +39,15 @@ partial class ProductListForm
     private void InitializeComponent()
     {
         toolbar = new Panel();
+        lblSearch = new Label();
         txtSearch = new TextBox();
+        lblCategory = new Label();
         cboCategory = new ComboBox();
+        lblSupplier = new Label();
         cboSupplier = new ComboBox();
+        lblStock = new Label();
         cboStock = new ComboBox();
+        lblStatus = new Label();
         cboStatus = new ComboBox();
         btnClearFilters = new Button();
         btnRefresh = new Button();
@@ -42,17 +55,22 @@ partial class ProductListForm
         grid = new DataGridView();
         lblCount = new Label();
         lblEmpty = new Label();
+
         toolbar.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)grid).BeginInit();
         SuspendLayout();
-        // 
-        // toolbar
-        // 
-        toolbar.BackColor = Color.FromArgb(15, 20, 25);
+
+        // ---- toolbar (two rows: filters + actions) ----
+        toolbar.BackColor = Color.FromArgb(244, 246, 248);
+        toolbar.Controls.Add(lblSearch);
         toolbar.Controls.Add(txtSearch);
+        toolbar.Controls.Add(lblCategory);
         toolbar.Controls.Add(cboCategory);
+        toolbar.Controls.Add(lblSupplier);
         toolbar.Controls.Add(cboSupplier);
+        toolbar.Controls.Add(lblStock);
         toolbar.Controls.Add(cboStock);
+        toolbar.Controls.Add(lblStatus);
         toolbar.Controls.Add(cboStatus);
         toolbar.Controls.Add(btnClearFilters);
         toolbar.Controls.Add(btnRefresh);
@@ -60,136 +78,188 @@ partial class ProductListForm
         toolbar.Dock = DockStyle.Top;
         toolbar.Location = new Point(0, 0);
         toolbar.Name = "toolbar";
-        toolbar.Size = new Size(1318, 84);
-        toolbar.TabIndex = 11;
+        toolbar.Padding = new Padding(8, 6, 8, 6);
+        toolbar.Size = new Size(1000, 96);
+        toolbar.TabIndex = 0;
         toolbar.Resize += Toolbar_Resize;
-        // 
-        // txtSearch
-        // 
-        txtSearch.Location = new Point(0, 8);
+
+        // Row 1 — filters
+        lblSearch.AutoSize = true;
+        lblSearch.Font = new Font("Segoe UI", 8.25F);
+        lblSearch.ForeColor = Color.FromArgb(107, 119, 133);
+        lblSearch.Location = new Point(8, 6);
+        lblSearch.Name = "lblSearch";
+        lblSearch.Text = "Search";
+
+        txtSearch.BorderStyle = BorderStyle.FixedSingle;
+        txtSearch.Font = new Font("Segoe UI", 10F);
+        txtSearch.Location = new Point(8, 24);
         txtSearch.Name = "txtSearch";
         txtSearch.PlaceholderText = "Search by name or ID…";
-        txtSearch.Size = new Size(200, 30);
+        txtSearch.Size = new Size(180, 25);
         txtSearch.TabIndex = 0;
         txtSearch.TextChanged += TxtSearch_TextChanged;
-        // 
-        // cboCategory
-        // 
+
+        lblCategory.AutoSize = true;
+        lblCategory.Font = new Font("Segoe UI", 8.25F);
+        lblCategory.ForeColor = Color.FromArgb(107, 119, 133);
+        lblCategory.Location = new Point(198, 6);
+        lblCategory.Name = "lblCategory";
+        lblCategory.Text = "Category";
+
         cboCategory.DropDownStyle = ComboBoxStyle.DropDownList;
         cboCategory.Font = new Font("Segoe UI", 10F);
-        cboCategory.Location = new Point(210, 8);
+        cboCategory.Items.AddRange(new object[] { "Category: All" });
+        cboCategory.Location = new Point(198, 24);
         cboCategory.Name = "cboCategory";
-        cboCategory.Size = new Size(160, 31);
+        cboCategory.Size = new Size(150, 25);
         cboCategory.TabIndex = 1;
         cboCategory.SelectedIndexChanged += CboFilter_SelectedIndexChanged;
-        // 
-        // cboSupplier
-        // 
+
+        lblSupplier.AutoSize = true;
+        lblSupplier.Font = new Font("Segoe UI", 8.25F);
+        lblSupplier.ForeColor = Color.FromArgb(107, 119, 133);
+        lblSupplier.Location = new Point(358, 6);
+        lblSupplier.Name = "lblSupplier";
+        lblSupplier.Text = "Supplier";
+
         cboSupplier.DropDownStyle = ComboBoxStyle.DropDownList;
         cboSupplier.Font = new Font("Segoe UI", 10F);
-        cboSupplier.Location = new Point(380, 8);
+        cboSupplier.Items.AddRange(new object[] { "Supplier: All" });
+        cboSupplier.Location = new Point(358, 24);
         cboSupplier.Name = "cboSupplier";
-        cboSupplier.Size = new Size(160, 31);
+        cboSupplier.Size = new Size(150, 25);
         cboSupplier.TabIndex = 2;
         cboSupplier.SelectedIndexChanged += CboFilter_SelectedIndexChanged;
-        // 
-        // cboStock
-        // 
+
+        lblStock.AutoSize = true;
+        lblStock.Font = new Font("Segoe UI", 8.25F);
+        lblStock.ForeColor = Color.FromArgb(107, 119, 133);
+        lblStock.Location = new Point(518, 6);
+        lblStock.Name = "lblStock";
+        lblStock.Text = "Stock";
+
         cboStock.DropDownStyle = ComboBoxStyle.DropDownList;
         cboStock.Font = new Font("Segoe UI", 10F);
-        cboStock.Location = new Point(550, 8);
+        cboStock.Items.AddRange(new object[] { "Stock Status: All", "In Stock", "Low Stock", "Out of Stock" });
+        cboStock.Location = new Point(518, 24);
         cboStock.Name = "cboStock";
-        cboStock.Size = new Size(130, 31);
+        cboStock.Size = new Size(130, 25);
         cboStock.TabIndex = 3;
         cboStock.SelectedIndexChanged += CboFilter_SelectedIndexChanged;
-        // 
-        // cboStatus
-        // 
+
+        lblStatus.AutoSize = true;
+        lblStatus.Font = new Font("Segoe UI", 8.25F);
+        lblStatus.ForeColor = Color.FromArgb(107, 119, 133);
+        lblStatus.Location = new Point(658, 6);
+        lblStatus.Name = "lblStatus";
+        lblStatus.Text = "Status";
+
         cboStatus.DropDownStyle = ComboBoxStyle.DropDownList;
         cboStatus.Font = new Font("Segoe UI", 10F);
-        cboStatus.Location = new Point(690, 8);
+        cboStatus.Items.AddRange(new object[] { "Status: All", "Active", "Inactive" });
+        cboStatus.Location = new Point(658, 24);
         cboStatus.Name = "cboStatus";
-        cboStatus.Size = new Size(120, 31);
+        cboStatus.Size = new Size(120, 25);
         cboStatus.TabIndex = 4;
         cboStatus.SelectedIndexChanged += CboFilter_SelectedIndexChanged;
-        // 
-        // btnClearFilters
-        // 
-        btnClearFilters.Location = new Point(0, 44);
+
+        // Row 2 — actions
+        btnClearFilters.FlatStyle = FlatStyle.Flat;
+        btnClearFilters.Font = new Font("Segoe UI", 9F);
+        btnClearFilters.ForeColor = Color.FromArgb(30, 75, 143);
+        btnClearFilters.Location = new Point(8, 58);
         btnClearFilters.Name = "btnClearFilters";
-        btnClearFilters.Size = new Size(100, 28);
+        btnClearFilters.Size = new Size(100, 30);
         btnClearFilters.TabIndex = 5;
         btnClearFilters.Text = "Clear filters";
-        btnClearFilters.Visible = false;
+        btnClearFilters.UseVisualStyleBackColor = true;
+        btnClearFilters.Visible = true; // visible in designer; runtime toggles
         btnClearFilters.Click += BtnClearFilters_Click;
-        // 
-        // btnRefresh
-        // 
+
         btnRefresh.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnRefresh.Location = new Point(1718, 44);
+        btnRefresh.BackColor = Color.White;
+        btnRefresh.FlatAppearance.BorderColor = Color.FromArgb(215, 220, 225);
+        btnRefresh.FlatStyle = FlatStyle.Flat;
+        btnRefresh.Font = new Font("Segoe UI", 9F);
+        btnRefresh.Location = new Point(780, 56);
         btnRefresh.Name = "btnRefresh";
-        btnRefresh.Size = new Size(88, 30);
+        btnRefresh.Size = new Size(88, 32);
         btnRefresh.TabIndex = 6;
         btnRefresh.Text = "Refresh";
+        btnRefresh.UseVisualStyleBackColor = false;
         btnRefresh.Click += BtnRefresh_Click;
-        // 
-        // btnAdd
-        // 
+
         btnAdd.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnAdd.Location = new Point(1814, 44);
+        btnAdd.BackColor = Color.FromArgb(30, 75, 143);
+        btnAdd.FlatAppearance.BorderSize = 0;
+        btnAdd.FlatStyle = FlatStyle.Flat;
+        btnAdd.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        btnAdd.ForeColor = Color.White;
+        btnAdd.Location = new Point(876, 56);
         btnAdd.Name = "btnAdd";
-        btnAdd.Size = new Size(130, 30);
+        btnAdd.Size = new Size(116, 32);
         btnAdd.TabIndex = 7;
         btnAdd.Text = "+ Add Product";
+        btnAdd.UseVisualStyleBackColor = false;
         btnAdd.Click += BtnAdd_Click;
-        // 
-        // grid
-        // 
+
+        // ---- grid ----
         grid.AllowUserToAddRows = false;
         grid.AllowUserToDeleteRows = false;
+        grid.AllowUserToResizeRows = false;
         grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-        grid.ColumnHeadersHeight = 29;
+        grid.BackgroundColor = Color.White;
+        grid.BorderStyle = BorderStyle.FixedSingle;
+        grid.ColumnHeadersHeight = 34;
         grid.Dock = DockStyle.Fill;
-        grid.Location = new Point(0, 84);
+        grid.Location = new Point(0, 96);
         grid.MultiSelect = false;
         grid.Name = "grid";
         grid.ReadOnly = true;
-        grid.RowHeadersWidth = 51;
+        grid.RowHeadersVisible = false;
         grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        grid.Size = new Size(1318, 476);
-        grid.TabIndex = 8;
+        grid.Size = new Size(1000, 376);
+        grid.TabIndex = 1;
         grid.CellContentClick += Grid_CellContentClick;
-        // 
-        // lblCount
-        // 
-        lblCount.Dock = DockStyle.Bottom;
-        lblCount.Font = new Font("Segoe UI", 9F);
-        lblCount.ForeColor = Color.FromArgb(139, 155, 180);
-        lblCount.Location = new Point(0, 560);
-        lblCount.Name = "lblCount";
-        lblCount.Size = new Size(1318, 28);
-        lblCount.TabIndex = 10;
-        lblCount.TextAlign = ContentAlignment.MiddleLeft;
-        // 
-        // lblEmpty
-        // 
+
+        // design-time sample columns so the grid is not empty in View Designer
+        grid.ColumnCount = 5;
+        grid.Columns[0].HeaderText = "Product ID";
+        grid.Columns[1].HeaderText = "Name";
+        grid.Columns[2].HeaderText = "Category";
+        grid.Columns[3].HeaderText = "Qty";
+        grid.Columns[4].HeaderText = "Status";
+
+        // ---- empty / count ----
         lblEmpty.Dock = DockStyle.Fill;
         lblEmpty.Font = new Font("Segoe UI", 10F);
-        lblEmpty.ForeColor = Color.FromArgb(139, 155, 180);
-        lblEmpty.Location = new Point(0, 84);
+        lblEmpty.ForeColor = Color.FromArgb(107, 119, 133);
+        lblEmpty.Location = new Point(0, 96);
         lblEmpty.Name = "lblEmpty";
-        lblEmpty.Size = new Size(1318, 476);
-        lblEmpty.TabIndex = 9;
+        lblEmpty.Size = new Size(1000, 376);
+        lblEmpty.TabIndex = 2;
         lblEmpty.Text = "No products yet. Add your first product to get started.";
         lblEmpty.TextAlign = ContentAlignment.MiddleCenter;
         lblEmpty.Visible = false;
-        // 
-        // ProductListForm
-        // 
-        AutoScaleDimensions = new SizeF(9F, 23F);
+
+        lblCount.BackColor = Color.FromArgb(244, 246, 248);
+        lblCount.Dock = DockStyle.Bottom;
+        lblCount.Font = new Font("Segoe UI", 9F);
+        lblCount.ForeColor = Color.FromArgb(107, 119, 133);
+        lblCount.Location = new Point(0, 472);
+        lblCount.Name = "lblCount";
+        lblCount.Padding = new Padding(8, 0, 0, 0);
+        lblCount.Size = new Size(1000, 28);
+        lblCount.TabIndex = 3;
+        lblCount.Text = "0 products";
+        lblCount.TextAlign = ContentAlignment.MiddleLeft;
+
+        // ---- form ----
+        AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        BackColor = Color.FromArgb(15, 20, 25);
-        ClientSize = new Size(1318, 588);
+        BackColor = Color.FromArgb(244, 246, 248);
+        ClientSize = new Size(1000, 500);
         Controls.Add(grid);
         Controls.Add(lblEmpty);
         Controls.Add(lblCount);
@@ -198,6 +268,7 @@ partial class ProductListForm
         FormBorderStyle = FormBorderStyle.None;
         Name = "ProductListForm";
         Text = "Products";
+
         toolbar.ResumeLayout(false);
         toolbar.PerformLayout();
         ((System.ComponentModel.ISupportInitialize)grid).EndInit();
