@@ -1,18 +1,23 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Windows.Forms;
 
 namespace NovaTechIMS.Utilities;
 
 /// <summary>
-/// Loads PNG icons from the Resources folder (copied next to the EXE).
+/// Loads PNG icons from Resources and draws lightweight grid action icons.
 /// Safe: returns null if a file is missing so UI still works.
 /// </summary>
 internal static class AppIcons
 {
     private static readonly Dictionary<string, Image> Cache = new(StringComparer.OrdinalIgnoreCase);
+
+    // Grid action icon colors (secondary to data — not loud buttons)
+    private static readonly Color EditStroke = Color.FromArgb(75, 85, 99);       // blue-gray
+    private static readonly Color DeleteStroke = Color.FromArgb(185, 55, 55);    // muted destructive
 
     public static string ResourcesDirectory
     {
@@ -48,7 +53,7 @@ internal static class AppIcons
             var resized = new Bitmap(size, size);
             using (var g = Graphics.FromImage(resized))
             {
-                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                 g.Clear(Color.Transparent);
                 g.DrawImage(original, 0, 0, size, size);
             }
@@ -86,48 +91,139 @@ internal static class AppIcons
             lbl.Text = "  " + lbl.Text.TrimStart();
     }
 
-    /// <summary>Icon-only Edit action column (icons-edit.png).</summary>
-    public static DataGridViewImageColumn CreateEditColumn(float fillWeight = 0.4f)
+    /// <summary>
+    /// Lightweight outline pencil icon for grid actions (~16–18px).
+    /// Drawn in code so appearance is consistent and not dependent on heavy bitmaps.
+    /// </summary>
+    public static Image CreateOutlineEditIcon(int size = 16)
     {
-        var img = Get("icons-edit.png", 16);
+        var key = "__outline_edit@" + size;
+        if (Cache.TryGetValue(key, out var cached))
+            return cached;
+
+        var bmp = new Bitmap(size, size);
+        using (var g = Graphics.FromImage(bmp))
+        {
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            g.Clear(Color.Transparent);
+
+            // Coordinate space 0..16 scaled to size
+            float s = size / 16f;
+            using var pen = new Pen(EditStroke, Math.Max(1.2f, 1.35f * s))
+            {
+                StartCap = LineCap.Round,
+                EndCap = LineCap.Round,
+                LineJoin = LineJoin.Round
+            };
+
+            // Pencil body (diagonal)
+            g.DrawLine(pen, 11.5f * s, 3.2f * s, 5.2f * s, 9.5f * s);
+            // Tip
+            g.DrawLine(pen, 5.2f * s, 9.5f * s, 3.8f * s, 12.2f * s);
+            g.DrawLine(pen, 3.8f * s, 12.2f * s, 6.5f * s, 10.8f * s);
+            // Eraser end (small rectangle angle)
+            g.DrawLine(pen, 11.5f * s, 3.2f * s, 13.0f * s, 4.7f * s);
+            g.DrawLine(pen, 13.0f * s, 4.7f * s, 11.8f * s, 5.9f * s);
+            g.DrawLine(pen, 11.8f * s, 5.9f * s, 10.3f * s, 4.4f * s);
+        }
+
+        Cache[key] = bmp;
+        return bmp;
+    }
+
+    /// <summary>
+    /// Lightweight outline trash icon for grid actions (~16–18px).
+    /// Muted destructive color — icon, not a red square button.
+    /// </summary>
+    public static Image CreateOutlineDeleteIcon(int size = 16)
+    {
+        var key = "__outline_delete@" + size;
+        if (Cache.TryGetValue(key, out var cached))
+            return cached;
+
+        var bmp = new Bitmap(size, size);
+        using (var g = Graphics.FromImage(bmp))
+        {
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            g.Clear(Color.Transparent);
+
+            float s = size / 16f;
+            using var pen = new Pen(DeleteStroke, Math.Max(1.2f, 1.35f * s))
+            {
+                StartCap = LineCap.Round,
+                EndCap = LineCap.Round,
+                LineJoin = LineJoin.Round
+            };
+
+            // Lid
+            g.DrawLine(pen, 3.5f * s, 5.0f * s, 12.5f * s, 5.0f * s);
+            // Handle on lid
+            g.DrawLine(pen, 6.2f * s, 3.4f * s, 9.8f * s, 3.4f * s);
+            g.DrawLine(pen, 6.2f * s, 3.4f * s, 6.2f * s, 5.0f * s);
+            g.DrawLine(pen, 9.8f * s, 3.4f * s, 9.8f * s, 5.0f * s);
+            // Can body
+            g.DrawLine(pen, 4.5f * s, 5.0f * s, 5.2f * s, 13.0f * s);
+            g.DrawLine(pen, 11.5f * s, 5.0f * s, 10.8f * s, 13.0f * s);
+            g.DrawLine(pen, 5.2f * s, 13.0f * s, 10.8f * s, 13.0f * s);
+            // Inner lines
+            g.DrawLine(pen, 7.0f * s, 6.5f * s, 7.2f * s, 11.5f * s);
+            g.DrawLine(pen, 9.0f * s, 6.5f * s, 8.8f * s, 11.5f * s);
+        }
+
+        Cache[key] = bmp;
+        return bmp;
+    }
+
+    /// <summary>Icon-only Edit action column — outline pencil, centered, non-dominant.</summary>
+    public static DataGridViewImageColumn CreateEditColumn(float fillWeight = 0.35f)
+    {
+        var img = CreateOutlineEditIcon(16);
         return new DataGridViewImageColumn
         {
             Name = "colEdit",
             HeaderText = "",
             Image = img,
-            ImageLayout = DataGridViewImageCellLayout.Zoom,
+            ImageLayout = DataGridViewImageCellLayout.Normal,
             FillWeight = fillWeight,
-            MinimumWidth = 36,
+            MinimumWidth = 32,
+            Width = 36,
+            Resizable = DataGridViewTriState.False,
             ToolTipText = "Edit",
             Description = "Edit",
             DefaultCellStyle = new DataGridViewCellStyle
             {
                 Alignment = DataGridViewContentAlignment.MiddleCenter,
                 NullValue = null,
+                Padding = new Padding(0),
                 BackColor = UiTheme.Surface,
                 SelectionBackColor = UiTheme.RowSelected
             }
         };
     }
 
-    /// <summary>Icon-only Delete action column (icon-delete.png).</summary>
-    public static DataGridViewImageColumn CreateDeleteColumn(float fillWeight = 0.4f)
+    /// <summary>Icon-only Delete action column — outline trash, muted destructive color.</summary>
+    public static DataGridViewImageColumn CreateDeleteColumn(float fillWeight = 0.35f)
     {
-        var img = Get("icon-delete.png", 16);
+        var img = CreateOutlineDeleteIcon(16);
         return new DataGridViewImageColumn
         {
             Name = "colDelete",
             HeaderText = "",
             Image = img,
-            ImageLayout = DataGridViewImageCellLayout.Zoom,
+            ImageLayout = DataGridViewImageCellLayout.Normal,
             FillWeight = fillWeight,
-            MinimumWidth = 36,
+            MinimumWidth = 32,
+            Width = 36,
+            Resizable = DataGridViewTriState.False,
             ToolTipText = "Delete",
             Description = "Delete",
             DefaultCellStyle = new DataGridViewCellStyle
             {
                 Alignment = DataGridViewContentAlignment.MiddleCenter,
                 NullValue = null,
+                Padding = new Padding(0),
                 BackColor = UiTheme.Surface,
                 SelectionBackColor = UiTheme.RowSelected
             }
@@ -135,20 +231,19 @@ internal static class AppIcons
     }
 
     /// <summary>
-    /// After DataSource bind, force every row to show the column icon
-    /// (image columns need a non-null cell value or they stay blank).
+    /// After DataSource bind, force every row to show the outline action icons.
     /// </summary>
     public static void FillActionIcons(DataGridView grid)
     {
-        var editImg = Get("icons-edit.png", 16);
-        var delImg = Get("icon-delete.png", 16);
+        var editImg = CreateOutlineEditIcon(16);
+        var delImg = CreateOutlineDeleteIcon(16);
 
         foreach (DataGridViewRow row in grid.Rows)
         {
             if (row.IsNewRow) continue;
-            if (grid.Columns.Contains("colEdit") && editImg is not null)
+            if (grid.Columns.Contains("colEdit"))
                 row.Cells["colEdit"].Value = editImg;
-            if (grid.Columns.Contains("colDelete") && delImg is not null)
+            if (grid.Columns.Contains("colDelete"))
                 row.Cells["colDelete"].Value = delImg;
         }
     }
@@ -165,8 +260,8 @@ internal static class AppIcons
     public static Image? Report => Get("icons-report.png");
     public static Image? User => Get("icons-user.png");
     public static Image? Search => Get("icons-search.png");
-    public static Image? Edit => Get("icons-edit.png");
-    public static Image? Delete => Get("icon-delete.png");
+    public static Image? Edit => CreateOutlineEditIcon(16);
+    public static Image? Delete => CreateOutlineDeleteIcon(16);
     public static Image? Print => Get("icons-print.png");
     public static Image? Warning => Get("icons-warning.png");
     public static Image? Error => Get("icons-x-error.png");
