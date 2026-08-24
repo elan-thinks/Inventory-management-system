@@ -8,15 +8,24 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Inventory Adjustment (FR-ADJ) — mockup-style sections + confirm.</summary>
+/// <summary>Inventory Adjustment (FR-ADJ) — designer owns layout.</summary>
 public partial class AdjustmentForm : Form
 {
-    private readonly AdjustmentService _service = new();
+    private AdjustmentService? _service;
     private int _previousQty;
+
+    private AdjustmentService Service => _service ??= new AdjustmentService();
 
     public AdjustmentForm()
     {
         InitializeComponent();
+
+        if (DesignTime.IsActive)
+            return;
+
+        grid.Columns.Clear();
+        grid.ColumnCount = 0;
+
         ApplyRuntimeStyling();
         Load += (_, _) =>
         {
@@ -64,7 +73,6 @@ public partial class AdjustmentForm : Form
         lblHint.Font = UiTheme.Label;
         lblHint.ForeColor = UiTheme.TextMuted;
 
-        UiTheme.ApplyDarkInputs(this);
         UiTheme.StyleComboBox(cboProduct);
         UiTheme.StyleTextBox(txtReason);
         UiTheme.StyleTextBox(txtNotes);
@@ -80,7 +88,11 @@ public partial class AdjustmentForm : Form
         dtpDate.Value = DateTime.Today;
     }
 
-    private void NudNewQty_ValueChanged(object? sender, EventArgs e) => UpdateDifference();
+    private void NudNewQty_ValueChanged(object? sender, EventArgs e)
+    {
+        if (DesignTime.IsActive) return;
+        UpdateDifference();
+    }
 
     private void LoadProducts()
     {
@@ -88,20 +100,22 @@ public partial class AdjustmentForm : Form
         {
             cboProduct.Items.Clear();
             cboProduct.Items.Add(new LookupItem(0, "— Select product —"));
-            foreach (var p in _service.GetActiveProducts())
+            foreach (var p in Service.GetActiveProducts())
                 cboProduct.Items.Add(new LookupItem(p.ProductID,
                     $"{p.ProductName} — On hand: {p.QuantityOnHand}"));
             cboProduct.SelectedIndex = 0;
         }
         catch (Exception ex)
         {
-            lblError.Text = "Could not load products. " + ex.Message;
+            lblError.Text = "Could not load products. " + ErrorPresenter.Classify(DbExceptionMapper.Map(ex)).Message;
             lblError.Visible = true;
         }
     }
 
     private void CboProduct_SelectedIndexChanged(object? sender, EventArgs e)
     {
+        if (DesignTime.IsActive) return;
+
         if (cboProduct.SelectedItem is not LookupItem item || item.Value <= 0)
         {
             _previousQty = 0;
@@ -112,10 +126,10 @@ public partial class AdjustmentForm : Form
 
         try
         {
-            var p = _service.GetProduct(item.Value);
+            var p = Service.GetProduct(item.Value);
             _previousQty = p.QuantityOnHand;
             lblPreviousQty.Text = _previousQty.ToString(CultureInfo.InvariantCulture);
-            nudNewQty.Value = _previousQty;
+            nudNewQty.Value = Math.Min(nudNewQty.Maximum, Math.Max(nudNewQty.Minimum, _previousQty));
             UpdateDifference();
         }
         catch
@@ -140,6 +154,7 @@ public partial class AdjustmentForm : Form
 
     private void BtnSave_Click(object? sender, EventArgs e)
     {
+        if (DesignTime.IsActive) return;
         lblError.Visible = false;
 
         try
@@ -167,7 +182,7 @@ public partial class AdjustmentForm : Form
 
             btnSave.Enabled = false;
 
-            var txnId = _service.Record(
+            var txnId = Service.Record(
                 prod.Value,
                 newQty,
                 dtpDate.Value.Date,
@@ -193,7 +208,7 @@ public partial class AdjustmentForm : Form
         }
         catch (Exception ex)
         {
-            lblError.Text = "Could not record adjustment. " + ex.Message;
+            lblError.Text = "Could not record adjustment. " + ErrorPresenter.Classify(DbExceptionMapper.Map(ex)).Message;
             lblError.Visible = true;
         }
         finally
@@ -206,7 +221,7 @@ public partial class AdjustmentForm : Form
     {
         try
         {
-            var rows = _service.GetRecentAdjustments(30);
+            var rows = Service.GetRecentAdjustments(30);
             grid.DataSource = null;
             grid.Columns.Clear();
             grid.DataSource = rows;

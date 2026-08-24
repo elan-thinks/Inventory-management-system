@@ -10,17 +10,25 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms.Inventory;
 
 /// <summary>
-/// SCR-015 Inventory History — append-only read-only (mockup layout).
-/// No Edit/Delete controls.
+/// SCR-015 Inventory History — append-only read-only; designer owns layout.
 /// </summary>
 public partial class InventoryHistoryForm : Form
 {
-    private readonly InventoryHistoryService _service = new();
+    private InventoryHistoryService? _service;
     private int _printRow;
+
+    private InventoryHistoryService Service => _service ??= new InventoryHistoryService();
 
     public InventoryHistoryForm()
     {
         InitializeComponent();
+
+        if (DesignTime.IsActive)
+            return;
+
+        grid.Columns.Clear();
+        grid.ColumnCount = 0;
+
         ApplyRuntimeStyling();
         Load += (_, _) =>
         {
@@ -54,14 +62,12 @@ public partial class InventoryHistoryForm : Form
         lblEmpty.ForeColor = UiTheme.TextMuted;
         lblEmpty.BackColor = UiTheme.Background;
 
-        UiTheme.ApplyDarkInputs(this);
         UiTheme.StyleDatePicker(dtpFrom);
         UiTheme.StyleDatePicker(dtpTo);
         UiTheme.StyleComboBox(cboType);
         UiTheme.StyleComboBox(cboProduct);
         UiTheme.StyleButton(btnClear, UiTheme.ButtonKind.Ghost);
         UiTheme.StyleButton(btnPrint, UiTheme.ButtonKind.Secondary);
-        AppIcons.ApplyToButton(btnPrint, "icons-print.png", 14);
 
         UiTheme.ApplyGridTheme(grid);
         UiTheme.WireStatusBadgeColumn(grid, nameof(TransactionHistoryRow.TypeLabel), value => (value?.ToString() ?? "") switch
@@ -70,10 +76,25 @@ public partial class InventoryHistoryForm : Form
             "Stock-Out" => ("Stock Out", UiTheme.BadgeTone.Error, '\u2715'),
             _ => ("Adjustment", UiTheme.BadgeTone.Info, '!')
         });
+
+        Toolbar_Resize(toolbar, EventArgs.Empty);
+    }
+
+    private void Toolbar_Resize(object? sender, EventArgs e)
+    {
+        if (toolbar is null || btnPrint is null) return;
+        btnPrint.Left = Math.Max(8, toolbar.ClientSize.Width - btnPrint.Width - 4);
+    }
+
+    private void Filter_Changed(object? sender, EventArgs e)
+    {
+        if (DesignTime.IsActive) return;
+        ReloadGrid();
     }
 
     private void BtnClear_Click(object? sender, EventArgs e)
     {
+        if (DesignTime.IsActive) return;
         dtpFrom.Value = DateTime.Today.AddDays(-30);
         dtpTo.Value = DateTime.Today;
         cboType.SelectedIndex = 0;
@@ -88,7 +109,7 @@ public partial class InventoryHistoryForm : Form
         {
             cboProduct.Items.Clear();
             cboProduct.Items.Add(new LookupItem(0, "Product: All"));
-            foreach (var p in _service.GetProductsForFilter())
+            foreach (var p in Service.GetProductsForFilter())
                 cboProduct.Items.Add(new LookupItem(p.ProductID, p.ProductName));
             cboProduct.SelectedIndex = 0;
         }
@@ -111,7 +132,7 @@ public partial class InventoryHistoryForm : Form
                 _ => null
             };
 
-            var rows = _service.GetHistory(
+            var rows = Service.GetHistory(
                 dtpFrom.Value.Date,
                 dtpTo.Value.Date,
                 type,
@@ -135,7 +156,6 @@ public partial class InventoryHistoryForm : Form
             foreach (DataGridViewColumn col in grid.Columns)
                 col.Visible = false;
 
-            // Mockup columns — no Edit/Delete
             void Show(string name, string header, float w = 1f)
             {
                 if (grid.Columns[name] is not DataGridViewColumn c) return;
@@ -157,7 +177,6 @@ public partial class InventoryHistoryForm : Form
             if (grid.Columns[nameof(TransactionHistoryRow.TransactionDate)] is DataGridViewColumn dateCol)
                 dateCol.DefaultCellStyle.Format = "g";
 
-            // Color quantity: positive green-ish, negative red (Stock-Out / downward adjust)
             if (grid.Columns[nameof(TransactionHistoryRow.Quantity)] is DataGridViewColumn qtyCol)
             {
                 qtyCol.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
@@ -180,7 +199,7 @@ public partial class InventoryHistoryForm : Form
         {
             grid.Visible = false;
             lblEmpty.Visible = true;
-            lblEmpty.Text = "Unable to load history.\n" + ex.Message;
+            lblEmpty.Text = "Unable to load history.\n" + ErrorPresenter.Classify(DbExceptionMapper.Map(ex)).Message;
             lblCount.Text = "";
         }
     }
@@ -194,7 +213,6 @@ public partial class InventoryHistoryForm : Form
         {
             if (grid.Rows[e.RowIndex].DataBoundItem is TransactionHistoryRow row)
             {
-                // Display sign from type when quantity is absolute
                 if (row.TypeLabel == "Stock-Out" || (row.TypeLabel == "Adjustment" && row.Difference < 0))
                 {
                     e.Value = q > 0 ? $"−{q}" : q.ToString();
@@ -215,6 +233,8 @@ public partial class InventoryHistoryForm : Form
 
     private void BtnPrint_Click(object? sender, EventArgs e)
     {
+        if (DesignTime.IsActive) return;
+
         using var doc = new PrintDocument();
         doc.DocumentName = "Inventory History";
         doc.PrintPage += Doc_PrintPage;

@@ -3,6 +3,7 @@ using System.Windows.Forms;
 
 namespace NovaTechIMS.Forms.Inventory;
 
+/// <summary>Inventory Adjustment layout — full controls on design surface.</summary>
 partial class AdjustmentForm
 {
     private System.ComponentModel.IContainer components = null;
@@ -79,12 +80,12 @@ partial class AdjustmentForm
         ((System.ComponentModel.ISupportInitialize)grid).BeginInit();
         SuspendLayout();
 
+        AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         Font = new Font("Segoe UI", 10F);
         BackColor = Color.FromArgb(244, 246, 248);
+        ClientSize = new Size(900, 620);
         FormBorderStyle = FormBorderStyle.None;
-        Dock = DockStyle.Fill;
-        TopLevel = false;
         Name = "AdjustmentForm";
         Text = "Inventory Adjustment";
         Padding = new Padding(8);
@@ -97,12 +98,13 @@ partial class AdjustmentForm
         formPanel.Location = new Point(0, 0);
         formPanel.Size = new Size(720, 490);
         formPanel.BackColor = Color.White;
+        formPanel.BorderStyle = BorderStyle.FixedSingle;
         formPanel.Padding = new Padding(20);
         formPanel.Name = "formPanel";
 
         secProduct.Text = "PRODUCT";
         secProduct.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-        secProduct.ForeColor = Color.FromArgb(59, 122, 143);
+        secProduct.ForeColor = Color.FromArgb(30, 75, 143);
         secProduct.Location = new Point(20, 12);
         secProduct.AutoSize = true;
         secProduct.Name = "secProduct";
@@ -114,6 +116,7 @@ partial class AdjustmentForm
 
         cboProduct.DropDownStyle = ComboBoxStyle.DropDownList;
         cboProduct.FlatStyle = FlatStyle.Flat;
+        cboProduct.Items.AddRange(new object[] { "— Select product —" });
         cboProduct.Location = new Point(20, 56);
         cboProduct.Size = new Size(400, 28);
         cboProduct.Name = "cboProduct";
@@ -129,7 +132,7 @@ partial class AdjustmentForm
 
         secMovement.Text = "ADJUSTMENT DETAILS";
         secMovement.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-        secMovement.ForeColor = Color.FromArgb(59, 122, 143);
+        secMovement.ForeColor = Color.FromArgb(30, 75, 143);
         secMovement.Location = new Point(20, 120);
         secMovement.AutoSize = true;
         secMovement.Name = "secMovement";
@@ -141,6 +144,7 @@ partial class AdjustmentForm
 
         lblPreviousQty.Text = "—";
         lblPreviousQty.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+        lblPreviousQty.ForeColor = Color.FromArgb(107, 119, 133);
         lblPreviousQty.Location = new Point(20, 164);
         lblPreviousQty.AutoSize = true;
         lblPreviousQty.Name = "lblPreviousQty";
@@ -194,7 +198,7 @@ partial class AdjustmentForm
 
         secReason.Text = "REASON & NOTES";
         secReason.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-        secReason.ForeColor = Color.FromArgb(59, 122, 143);
+        secReason.ForeColor = Color.FromArgb(30, 75, 143);
         secReason.Location = new Point(20, 284);
         secReason.AutoSize = true;
         secReason.Name = "secReason";
@@ -229,14 +233,21 @@ partial class AdjustmentForm
 
         lblError.Location = new Point(20, 440);
         lblError.Size = new Size(280, 32);
+        lblError.ForeColor = Color.FromArgb(192, 57, 43);
         lblError.Visible = false;
         lblError.Name = "lblError";
 
+        btnSave.BackColor = Color.FromArgb(30, 75, 143);
+        btnSave.FlatAppearance.BorderSize = 0;
+        btnSave.FlatStyle = FlatStyle.Flat;
+        btnSave.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        btnSave.ForeColor = Color.White;
         btnSave.Location = new Point(320, 440);
         btnSave.Size = new Size(180, 36);
         btnSave.Text = "Record Adjustment";
         btnSave.Name = "btnSave";
         btnSave.TabIndex = 5;
+        btnSave.UseVisualStyleBackColor = false;
         btnSave.Click += BtnSave_Click;
 
         formPanel.Controls.Add(secProduct);
@@ -267,6 +278,7 @@ partial class AdjustmentForm
         lblHint.Height = 28;
         lblHint.Text = "  Recent adjustments";
         lblHint.TextAlign = ContentAlignment.MiddleLeft;
+        lblHint.ForeColor = Color.FromArgb(107, 119, 133);
         lblHint.Name = "lblHint";
 
         grid.Dock = DockStyle.Fill;
@@ -278,10 +290,17 @@ partial class AdjustmentForm
         grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         grid.RowHeadersVisible = false;
-        grid.BorderStyle = BorderStyle.None;
+        grid.BorderStyle = BorderStyle.FixedSingle;
         grid.BackgroundColor = Color.White;
+        grid.ColumnHeadersHeight = 34;
         grid.Name = "grid";
         grid.TabIndex = 6;
+        grid.ColumnCount = 5;
+        grid.Columns[0].HeaderText = "ID";
+        grid.Columns[1].HeaderText = "Date";
+        grid.Columns[2].HeaderText = "Product";
+        grid.Columns[3].HeaderText = "Diff";
+        grid.Columns[4].HeaderText = "Reason";
 
         Controls.Add(grid);
         Controls.Add(lblHint);
