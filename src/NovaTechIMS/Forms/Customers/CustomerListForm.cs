@@ -7,50 +7,81 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms.Customers;
 
 /// <summary>
-/// SCR-010 Customer List — Designer-based (partial).
+/// SCR-010 Customer List — designer owns layout; this file is data + filters only.
 /// </summary>
 public partial class CustomerListForm : Form
 {
-    private readonly CustomerService _service = new();
+    private CustomerService? _service;
+    private CustomerService Service => _service ??= new CustomerService();
 
     public CustomerListForm()
     {
         InitializeComponent();
+
+        if (DesignTime.IsActive)
+            return;
+
+        grid.Columns.Clear();
+        grid.ColumnCount = 0;
+
         ApplyRuntimeStyling();
         Load += (_, _) => ReloadGrid();
     }
 
     private void ApplyRuntimeStyling()
     {
+        BackColor = UiTheme.Background;
+        toolbar.BackColor = UiTheme.Background;
+        lblCount.BackColor = UiTheme.Background;
+        lblCount.ForeColor = UiTheme.TextMuted;
+        lblEmpty.ForeColor = UiTheme.TextMuted;
+        lblEmpty.BackColor = UiTheme.Background;
+
+        if (lblSearch is not null) lblSearch.ForeColor = UiTheme.TextMuted;
+        if (lblStatus is not null) lblStatus.ForeColor = UiTheme.TextMuted;
+
         UiTheme.StyleTextBox(txtSearch);
         UiTheme.StyleComboBox(cboStatus);
         UiTheme.StyleButton(btnClearFilters, UiTheme.ButtonKind.Ghost);
         UiTheme.StyleButton(btnRefresh, UiTheme.ButtonKind.Secondary);
         UiTheme.StyleButton(btnAdd, UiTheme.ButtonKind.Primary);
         UiTheme.ApplyGridTheme(grid);
-        UiTheme.WireStatusBadgeColumn(grid, "Status", value => (value?.ToString() ?? "") switch
+        UiTheme.WireStatusBadgeColumn(grid, nameof(CustomerListRow.Status), value => (value?.ToString() ?? "") switch
         {
             "Active" => ("Active", UiTheme.BadgeTone.Success, '\u2713'),
             _ => ("Inactive", UiTheme.BadgeTone.Muted, '\u2715')
         });
-        lblEmpty.Text = "No customers yet. Add your first customer to get started.";
+
+        btnClearFilters.Visible = false;
         Toolbar_Resize(toolbar, EventArgs.Empty);
     }
 
     private void Toolbar_Resize(object? sender, EventArgs e)
     {
-        btnAdd.Left = toolbar.ClientSize.Width - btnAdd.Width;
+        if (toolbar is null || btnAdd is null || btnRefresh is null) return;
+        btnAdd.Left = Math.Max(8, toolbar.ClientSize.Width - btnAdd.Width - 8);
         btnRefresh.Left = btnAdd.Left - btnRefresh.Width - 8;
     }
 
-    private void TxtSearch_TextChanged(object? sender, EventArgs e) => ReloadGrid();
-    private void CboStatus_SelectedIndexChanged(object? sender, EventArgs e) => ReloadGrid();
+    private void TxtSearch_TextChanged(object? sender, EventArgs e)
+    {
+        if (DesignTime.IsActive) return;
+        ReloadGrid();
+    }
+
+    private void CboStatus_SelectedIndexChanged(object? sender, EventArgs e)
+    {
+        if (DesignTime.IsActive) return;
+        ReloadGrid();
+    }
+
     private void BtnRefresh_Click(object? sender, EventArgs e) => ReloadGrid();
 
     private void BtnClearFilters_Click(object? sender, EventArgs e)
     {
         txtSearch.Clear();
-        cboStatus.SelectedIndex = 0;
+        if (cboStatus.Items.Count > 0)
+            cboStatus.SelectedIndex = 0;
         ReloadGrid();
     }
 
@@ -68,7 +99,7 @@ public partial class CustomerListForm : Form
 
             btnClearFilters.Visible = search is not null || activeFilter is not null;
 
-            var rows = _service.GetList(search, activeFilter);
+            var rows = Service.GetList(search, activeFilter);
 
             grid.DataSource = null;
             grid.Columns.Clear();
@@ -94,7 +125,8 @@ public partial class CustomerListForm : Form
         {
             grid.Visible = false;
             lblEmpty.Visible = true;
-            lblEmpty.Text = "Unable to load customers. Check the database connection.\n" + ex.Message;
+            var mapped = DbExceptionMapper.Map(ex);
+            lblEmpty.Text = "Unable to load customers.\n" + ErrorPresenter.Classify(mapped).Message;
             lblCount.Text = "";
         }
     }
@@ -171,7 +203,7 @@ public partial class CustomerListForm : Form
 
         try
         {
-            _service.DeleteOrThrowIfReferenced(row.CustomerID);
+            Service.DeleteOrThrowIfReferenced(row.CustomerID);
             MessageBox.Show(FindForm(), "Customer deleted.", "Customers",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
             ReloadGrid();
@@ -189,7 +221,7 @@ public partial class CustomerListForm : Form
             {
                 try
                 {
-                    _service.Deactivate(row.CustomerID);
+                    Service.Deactivate(row.CustomerID);
                     MessageBox.Show(FindForm(), "Customer marked Inactive.", "Customers",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                     ReloadGrid();
