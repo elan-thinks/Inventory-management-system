@@ -7,50 +7,81 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms.Suppliers;
 
 /// <summary>
-/// SCR-008 Supplier List — Designer-based (partial).
+/// SCR-008 Supplier List — designer owns layout; this file is data + filters only.
 /// </summary>
 public partial class SupplierListForm : Form
 {
-    private readonly SupplierService _service = new();
+    private SupplierService? _service;
+    private SupplierService Service => _service ??= new SupplierService();
 
     public SupplierListForm()
     {
         InitializeComponent();
+
+        if (DesignTime.IsActive)
+            return;
+
+        grid.Columns.Clear();
+        grid.ColumnCount = 0;
+
         ApplyRuntimeStyling();
         Load += (_, _) => ReloadGrid();
     }
 
     private void ApplyRuntimeStyling()
     {
+        BackColor = UiTheme.Background;
+        toolbar.BackColor = UiTheme.Background;
+        lblCount.BackColor = UiTheme.Background;
+        lblCount.ForeColor = UiTheme.TextMuted;
+        lblEmpty.ForeColor = UiTheme.TextMuted;
+        lblEmpty.BackColor = UiTheme.Background;
+
+        if (lblSearch is not null) lblSearch.ForeColor = UiTheme.TextMuted;
+        if (lblStatus is not null) lblStatus.ForeColor = UiTheme.TextMuted;
+
         UiTheme.StyleTextBox(txtSearch);
         UiTheme.StyleComboBox(cboStatus);
         UiTheme.StyleButton(btnClearFilters, UiTheme.ButtonKind.Ghost);
         UiTheme.StyleButton(btnRefresh, UiTheme.ButtonKind.Secondary);
         UiTheme.StyleButton(btnAdd, UiTheme.ButtonKind.Primary);
         UiTheme.ApplyGridTheme(grid);
-        UiTheme.WireStatusBadgeColumn(grid, "Status", value => (value?.ToString() ?? "") switch
+        UiTheme.WireStatusBadgeColumn(grid, nameof(SupplierListRow.Status), value => (value?.ToString() ?? "") switch
         {
             "Active" => ("Active", UiTheme.BadgeTone.Success, '\u2713'),
             _ => ("Inactive", UiTheme.BadgeTone.Muted, '\u2715')
         });
-        lblEmpty.Text = "No suppliers yet. Add your first supplier to get started.";
+
+        btnClearFilters.Visible = false;
         Toolbar_Resize(toolbar, EventArgs.Empty);
     }
 
     private void Toolbar_Resize(object? sender, EventArgs e)
     {
-        btnAdd.Left = toolbar.ClientSize.Width - btnAdd.Width;
+        if (toolbar is null || btnAdd is null || btnRefresh is null) return;
+        btnAdd.Left = Math.Max(8, toolbar.ClientSize.Width - btnAdd.Width - 8);
         btnRefresh.Left = btnAdd.Left - btnRefresh.Width - 8;
     }
 
-    private void TxtSearch_TextChanged(object? sender, EventArgs e) => ReloadGrid();
-    private void CboStatus_SelectedIndexChanged(object? sender, EventArgs e) => ReloadGrid();
+    private void TxtSearch_TextChanged(object? sender, EventArgs e)
+    {
+        if (DesignTime.IsActive) return;
+        ReloadGrid();
+    }
+
+    private void CboStatus_SelectedIndexChanged(object? sender, EventArgs e)
+    {
+        if (DesignTime.IsActive) return;
+        ReloadGrid();
+    }
+
     private void BtnRefresh_Click(object? sender, EventArgs e) => ReloadGrid();
 
     private void BtnClearFilters_Click(object? sender, EventArgs e)
     {
         txtSearch.Clear();
-        cboStatus.SelectedIndex = 0;
+        if (cboStatus.Items.Count > 0)
+            cboStatus.SelectedIndex = 0;
         ReloadGrid();
     }
 
@@ -68,7 +99,7 @@ public partial class SupplierListForm : Form
 
             btnClearFilters.Visible = search is not null || activeFilter is not null;
 
-            var rows = _service.GetList(search, activeFilter);
+            var rows = Service.GetList(search, activeFilter);
 
             grid.DataSource = null;
             grid.Columns.Clear();
@@ -94,7 +125,8 @@ public partial class SupplierListForm : Form
         {
             grid.Visible = false;
             lblEmpty.Visible = true;
-            lblEmpty.Text = "Unable to load suppliers. Check the database connection.\n" + ex.Message;
+            var mapped = DbExceptionMapper.Map(ex);
+            lblEmpty.Text = "Unable to load suppliers.\n" + ErrorPresenter.Classify(mapped).Message;
             lblCount.Text = "";
         }
     }
@@ -172,7 +204,7 @@ public partial class SupplierListForm : Form
 
         try
         {
-            _service.DeleteOrThrowIfReferenced(row.SupplierID);
+            Service.DeleteOrThrowIfReferenced(row.SupplierID);
             MessageBox.Show(FindForm(), "Supplier deleted.", "Suppliers",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
             ReloadGrid();
@@ -190,7 +222,7 @@ public partial class SupplierListForm : Form
             {
                 try
                 {
-                    _service.Deactivate(row.SupplierID);
+                    Service.Deactivate(row.SupplierID);
                     MessageBox.Show(FindForm(), "Supplier marked Inactive.", "Suppliers",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                     ReloadGrid();
