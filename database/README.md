@@ -1,15 +1,7 @@
 # Database scripts — NovaTech IMS
 
 **Engine:** PostgreSQL  
-**Milestone:** 3 — schema only (application connection is Milestone 4)
-
-## Amendment
-
-| Item | Value |
-|------|--------|
-| **Previous engine** | SQL Server LocalDB |
-| **Current engine** | PostgreSQL |
-| **Reason** | Already available in developer environment; avoids second server install; full relational features. |
+**Branch:** `version1.3`
 
 ## Files
 
@@ -17,31 +9,37 @@
 |--------|---------|
 | `01-CreateDatabase.sql` | Creates database `NovaTechIMS` |
 | `02-CreateTables.sql` | Tables, FKs, CHECKs, indexes |
-| `03-SeedOptional.sql` | Optional sample Category / Supplier / Customer |
+| `03-SeedOptional.sql` | Small optional Category / Supplier / Customer sample |
+| **`04-SeedDemoData.sql`** | **Demo pack: 10 categories, 10 suppliers, 10 customers, 10 products, admin + 10 staff** |
+| `15-delegation.sql` | Delegation-related support (if used) |
 
 ## How to run (psql)
 
 ```bash
 psql -U postgres -f database/01-CreateDatabase.sql
 psql -U postgres -d NovaTechIMS -f database/02-CreateTables.sql
-psql -U postgres -d NovaTechIMS -f database/03-SeedOptional.sql
+psql -U postgres -d NovaTechIMS -f database/04-SeedDemoData.sql
 ```
 
-Or use **pgAdmin**: create DB `NovaTechIMS`, then run `02` (and optional `03`) on that database.
+Or **pgAdmin**: open database `NovaTechIMS`, run `02`, then `04`.
 
-## Verify
+`04-SeedDemoData.sql` is **idempotent** for the demo names (skips existing username / category / product names).
 
-```sql
-SELECT table_name FROM information_schema.tables
-WHERE table_schema = 'public' ORDER BY table_name;
-```
+## Demo logins (after `04-SeedDemoData.sql`)
 
-Expect: Category, Customer, Delegation, InventoryTransaction, Product, Supplier, User.
+| Username | Password | Role |
+|----------|----------|------|
+| `admin` | `Admin@123` | Administrator |
+| `staff01` … `staff10` | `Staff@123` | InventoryStaff |
 
-## Connection string (Milestone 4 only — not used in app yet)
+Hashes match app `PasswordHasher` (PBKDF2-SHA256, 100k iterations).
+
+If you already had an empty `User` table and logged in once, bootstrap may have created `admin` already — the seed skips duplicate usernames.
+
+## Connection string (app)
+
+`src/NovaTechIMS/App.config` — example:
 
 ```
 Host=localhost;Port=5432;Database=NovaTechIMS;Username=postgres;Password=YOUR_PASSWORD
 ```
-
-Provider later: **Npgsql** (not added in Milestone 3).
