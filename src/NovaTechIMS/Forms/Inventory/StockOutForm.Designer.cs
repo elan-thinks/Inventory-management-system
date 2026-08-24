@@ -3,6 +3,7 @@ using System.Windows.Forms;
 
 namespace NovaTechIMS.Forms.Inventory;
 
+/// <summary>Stock-Out layout — full controls on design surface.</summary>
 partial class StockOutForm
 {
     private System.ComponentModel.IContainer components = null;
@@ -79,12 +80,12 @@ partial class StockOutForm
         ((System.ComponentModel.ISupportInitialize)grid).BeginInit();
         SuspendLayout();
 
+        AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         Font = new Font("Segoe UI", 10F);
         BackColor = Color.FromArgb(244, 246, 248);
+        ClientSize = new Size(900, 600);
         FormBorderStyle = FormBorderStyle.None;
-        Dock = DockStyle.Fill;
-        TopLevel = false;
         Name = "StockOutForm";
         Text = "Stock-Out";
         Padding = new Padding(8);
@@ -97,6 +98,7 @@ partial class StockOutForm
         formPanel.Location = new Point(0, 0);
         formPanel.Size = new Size(720, 470);
         formPanel.BackColor = Color.White;
+        formPanel.BorderStyle = BorderStyle.FixedSingle;
         formPanel.Padding = new Padding(20);
         formPanel.Name = "formPanel";
 
@@ -114,6 +116,7 @@ partial class StockOutForm
 
         cboProduct.DropDownStyle = ComboBoxStyle.DropDownList;
         cboProduct.FlatStyle = FlatStyle.Flat;
+        cboProduct.Items.AddRange(new object[] { "— Select product —" });
         cboProduct.Location = new Point(20, 56);
         cboProduct.Size = new Size(400, 28);
         cboProduct.Name = "cboProduct";
@@ -134,6 +137,7 @@ partial class StockOutForm
 
         cboCustomer.DropDownStyle = ComboBoxStyle.DropDownList;
         cboCustomer.FlatStyle = FlatStyle.Flat;
+        cboCustomer.Items.AddRange(new object[] { "— None (optional) —" });
         cboCustomer.Location = new Point(20, 132);
         cboCustomer.Size = new Size(400, 28);
         cboCustomer.Name = "cboCustomer";
@@ -165,7 +169,7 @@ partial class StockOutForm
         nudQuantity.Size = new Size(120, 28);
         nudQuantity.Name = "nudQuantity";
         nudQuantity.TabIndex = 2;
-        nudQuantity.ValueChanged += (_, _) => UpdatePreview();
+        nudQuantity.ValueChanged += NudQuantity_ValueChanged;
 
         lblDate.Text = "Date *";
         lblDate.Location = new Point(160, 220);
@@ -229,14 +233,21 @@ partial class StockOutForm
 
         lblError.Location = new Point(20, 424);
         lblError.Size = new Size(300, 32);
+        lblError.ForeColor = Color.FromArgb(192, 57, 43);
         lblError.Visible = false;
         lblError.Name = "lblError";
 
+        btnSave.BackColor = Color.FromArgb(30, 75, 143);
+        btnSave.FlatAppearance.BorderSize = 0;
+        btnSave.FlatStyle = FlatStyle.Flat;
+        btnSave.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        btnSave.ForeColor = Color.White;
         btnSave.Location = new Point(340, 424);
         btnSave.Size = new Size(160, 36);
         btnSave.Text = "Record Stock-Out";
         btnSave.Name = "btnSave";
         btnSave.TabIndex = 6;
+        btnSave.UseVisualStyleBackColor = false;
         btnSave.Click += BtnSave_Click;
 
         formPanel.Controls.Add(secProduct);
@@ -267,6 +278,7 @@ partial class StockOutForm
         lblHint.Height = 28;
         lblHint.Text = "  Recent Stock-Out transactions";
         lblHint.TextAlign = ContentAlignment.MiddleLeft;
+        lblHint.ForeColor = Color.FromArgb(107, 119, 133);
         lblHint.Name = "lblHint";
 
         grid.Dock = DockStyle.Fill;
@@ -278,10 +290,17 @@ partial class StockOutForm
         grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         grid.RowHeadersVisible = false;
-        grid.BorderStyle = BorderStyle.None;
+        grid.BorderStyle = BorderStyle.FixedSingle;
         grid.BackgroundColor = Color.White;
+        grid.ColumnHeadersHeight = 34;
         grid.Name = "grid";
         grid.TabIndex = 7;
+        grid.ColumnCount = 5;
+        grid.Columns[0].HeaderText = "Txn ID";
+        grid.Columns[1].HeaderText = "Product";
+        grid.Columns[2].HeaderText = "Qty";
+        grid.Columns[3].HeaderText = "Date";
+        grid.Columns[4].HeaderText = "Customer";
 
         Controls.Add(grid);
         Controls.Add(lblHint);

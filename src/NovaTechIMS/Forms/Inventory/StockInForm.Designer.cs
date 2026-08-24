@@ -3,6 +3,7 @@ using System.Windows.Forms;
 
 namespace NovaTechIMS.Forms.Inventory;
 
+/// <summary>Stock-In layout — full controls on design surface.</summary>
 partial class StockInForm
 {
     private System.ComponentModel.IContainer components = null;
@@ -32,8 +33,6 @@ partial class StockInForm
     private Button btnSave;
     private Label lblHint;
     private DataGridView grid;
-
-    // Kept for logic compatibility (updated in code)
     private Label lblCurrentQty;
 
     protected override void Dispose(bool disposing)
@@ -81,28 +80,28 @@ partial class StockInForm
         ((System.ComponentModel.ISupportInitialize)grid).BeginInit();
         SuspendLayout();
 
+        AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         Font = new Font("Segoe UI", 10F);
         BackColor = Color.FromArgb(244, 246, 248);
+        ClientSize = new Size(900, 600);
         FormBorderStyle = FormBorderStyle.None;
-        Dock = DockStyle.Fill;
-        TopLevel = false;
         Name = "StockInForm";
         Text = "Stock-In";
         Padding = new Padding(8);
 
         scrollHost.Dock = DockStyle.Top;
-        scrollHost.Height = 420;
+        scrollHost.Height = 480;
         scrollHost.AutoScroll = true;
         scrollHost.Name = "scrollHost";
 
         formPanel.Location = new Point(0, 0);
-        formPanel.Size = new Size(720, 400);
+        formPanel.Size = new Size(720, 470);
         formPanel.BackColor = Color.White;
+        formPanel.BorderStyle = BorderStyle.FixedSingle;
         formPanel.Padding = new Padding(20);
         formPanel.Name = "formPanel";
 
-        // ---- PRODUCT & SUPPLIER ----
         secProduct.Text = "PRODUCT & SUPPLIER";
         secProduct.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
         secProduct.ForeColor = Color.FromArgb(59, 122, 143);
@@ -117,6 +116,7 @@ partial class StockInForm
 
         cboProduct.DropDownStyle = ComboBoxStyle.DropDownList;
         cboProduct.FlatStyle = FlatStyle.Flat;
+        cboProduct.Items.AddRange(new object[] { "— Select product —" });
         cboProduct.Location = new Point(20, 56);
         cboProduct.Size = new Size(400, 28);
         cboProduct.Name = "cboProduct";
@@ -137,6 +137,7 @@ partial class StockInForm
 
         cboSupplier.DropDownStyle = ComboBoxStyle.DropDownList;
         cboSupplier.FlatStyle = FlatStyle.Flat;
+        cboSupplier.Items.AddRange(new object[] { "— Select supplier —" });
         cboSupplier.Location = new Point(20, 132);
         cboSupplier.Size = new Size(400, 28);
         cboSupplier.Name = "cboSupplier";
@@ -149,7 +150,6 @@ partial class StockInForm
         helpSupplier.AutoSize = true;
         helpSupplier.Name = "helpSupplier";
 
-        // ---- MOVEMENT DETAILS ----
         secMovement.Text = "MOVEMENT DETAILS";
         secMovement.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
         secMovement.ForeColor = Color.FromArgb(59, 122, 143);
@@ -169,7 +169,7 @@ partial class StockInForm
         nudQuantity.Size = new Size(120, 28);
         nudQuantity.Name = "nudQuantity";
         nudQuantity.TabIndex = 2;
-        nudQuantity.ValueChanged += (_, _) => UpdatePreview();
+        nudQuantity.ValueChanged += NudQuantity_ValueChanged;
 
         lblDate.Text = "Date *";
         lblDate.Location = new Point(160, 220);
@@ -209,7 +209,6 @@ partial class StockInForm
         lblCurrentQty.Name = "lblCurrentQty";
         lblCurrentQty.Text = "—";
 
-        // ---- NOTES ----
         secNotes.Text = "NOTES";
         secNotes.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
         secNotes.ForeColor = Color.FromArgb(59, 122, 143);
@@ -234,17 +233,23 @@ partial class StockInForm
 
         lblError.Location = new Point(20, 424);
         lblError.Size = new Size(300, 32);
+        lblError.ForeColor = Color.FromArgb(192, 57, 43);
         lblError.Visible = false;
         lblError.Name = "lblError";
 
+        btnSave.BackColor = Color.FromArgb(30, 75, 143);
+        btnSave.FlatAppearance.BorderSize = 0;
+        btnSave.FlatStyle = FlatStyle.Flat;
+        btnSave.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        btnSave.ForeColor = Color.White;
         btnSave.Location = new Point(340, 424);
         btnSave.Size = new Size(160, 36);
         btnSave.Text = "Record Stock-In";
         btnSave.Name = "btnSave";
         btnSave.TabIndex = 6;
+        btnSave.UseVisualStyleBackColor = false;
         btnSave.Click += BtnSave_Click;
 
-        formPanel.Height = 470;
         formPanel.Controls.Add(secProduct);
         formPanel.Controls.Add(lblProduct);
         formPanel.Controls.Add(cboProduct);
@@ -267,13 +272,13 @@ partial class StockInForm
         formPanel.Controls.Add(lblError);
         formPanel.Controls.Add(btnSave);
 
-        scrollHost.Height = 480;
         scrollHost.Controls.Add(formPanel);
 
         lblHint.Dock = DockStyle.Top;
         lblHint.Height = 28;
         lblHint.Text = "  Recent Stock-In transactions";
         lblHint.TextAlign = ContentAlignment.MiddleLeft;
+        lblHint.ForeColor = Color.FromArgb(107, 119, 133);
         lblHint.Name = "lblHint";
 
         grid.Dock = DockStyle.Fill;
@@ -285,10 +290,17 @@ partial class StockInForm
         grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         grid.RowHeadersVisible = false;
-        grid.BorderStyle = BorderStyle.None;
+        grid.BorderStyle = BorderStyle.FixedSingle;
         grid.BackgroundColor = Color.White;
+        grid.ColumnHeadersHeight = 34;
         grid.Name = "grid";
         grid.TabIndex = 7;
+        grid.ColumnCount = 5;
+        grid.Columns[0].HeaderText = "Txn ID";
+        grid.Columns[1].HeaderText = "Product";
+        grid.Columns[2].HeaderText = "Qty";
+        grid.Columns[3].HeaderText = "Date";
+        grid.Columns[4].HeaderText = "Supplier";
 
         Controls.Add(grid);
         Controls.Add(lblHint);
