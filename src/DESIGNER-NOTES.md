@@ -1,57 +1,35 @@
-# WinForms View Designer — version1.3
+# Designer notes — NovaTech IMS (`version1.3`)
 
-## Status
+## Hybrid UI
 
-Almost every screen already has:
+This project is **not** pure drag-and-drop and **not** pure code UI.
 
-- `SomethingForm.cs` (logic)
-- `SomethingForm.Designer.cs` (`InitializeComponent` + controls)
-- `SomethingForm.resx` (resources)
+- **`.Designer.cs`** — layout you edit in **View Designer (Shift+F7)**
+- **`.cs`** — behaviour: load data, save, filters, permissions, theme
 
-That is the structure Visual Studio needs for **View Designer**.
+Runtime will always differ slightly from the designer: live data, role-based menu, `UiTheme` polish.
 
-## Why the designer was empty / failed
+## Design-time safety
 
-1. **Constructor ran runtime code** (DB lookups, services, nav build).
-2. **MainForm had no parameterless constructor** (designer requires one).
-3. **Service fields** were created with `= new()` before the form finished loading.
+`Utilities/DesignTime.cs` detects the Visual Studio designer host so constructors skip services and database work.
 
-## What we fixed
+## MainForm sidebar
 
-- `Utilities/DesignTime.cs` — detects design-time host
-- Constructors return early when `DesignTime.IsActive` after `InitializeComponent()`
-- Services are **lazy** (created only when used at runtime)
-- `MainForm()` parameterless ctor for the designer
+- Designer: sample nav buttons for visibility
+- Runtime: `BuildNavigation()` clears and rebuilds from `AuthorizationService` / permissions
 
-## How to open a form in the designer
+To change **labels or order of real menu items**, edit `MainForm.cs` (`BuildNavigation` / `AddNavItem`), not only the sample designer buttons.
 
-1. `git pull origin version1.3`
-2. Build the project (must succeed)
-3. Solution Explorer → form `.cs` file → right-click → **View Designer**
-   - Or open `.cs` and press **Shift+F7**
+## Preview one form alone
 
-### Forms that should design well
+Temporarily in `Program.cs`:
 
-| Form | Notes |
-|------|--------|
-| LoginForm | Standalone dialog |
-| MainForm | Shell; design-time uses placeholder user |
-| CategoryListForm / ProductListForm | Layout from Designer.cs |
-| Other *ListForm / *EditForm / Stock* / Reports* | Already have Designer.cs |
+```csharp
+Application.Run(new NovaTechIMS.Forms.Categories.CategoryListForm());
+```
 
-### Still normal limitations
+Restore `Application.Run(new LoginForm());` when finished.
 
-- Child forms use `FormBorderStyle.None` (look borderless in designer — OK).
-- **Theme colors / icons** applied at runtime may differ slightly from design surface.
-- **Grid columns / data** appear only when the app runs (bound at runtime).
-- Report cards or dynamic nav buttons created in code may be incomplete on the design surface.
+## Theme
 
-## If designer still fails
-
-1. Close all designer tabs
-2. **Build → Rebuild Solution**
-3. Delete `bin` / `obj` under `src/NovaTechIMS`, rebuild
-4. Open **LoginForm** first (simplest)
-5. Check Error List for design-time exceptions
-
-Do **not** edit only the `.cs` file expecting layout changes — layout lives in **`.Designer.cs`**. After drag-drop in the designer, Visual Studio updates that file.
+Light tokens in `Utilities/UiTheme.cs` (background `#F4F6F8`, primary `#1E4B8F`).

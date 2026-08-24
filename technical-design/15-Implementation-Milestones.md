@@ -1,33 +1,31 @@
 # 15 - Implementation Milestones
 
 **Document:** Progressive Implementation Roadmap  
-**Version:** 1.0  
+**Version:** 1.1 (status updated for `version1.3`)  
 
-Build from simple C# concepts upward. Do not skip ahead.
+Build from simple C# concepts upward. Historical order is preserved below; **all milestones 0–19 are complete** on branch `version1.3`.
 
-| Milestone | Objective |
-|-----------|----------|
-| 0 | Environment + solution setup (**done**) |
-| 1 | Basic WinForms shell (LoginForm UI + MainForm navigation) |
-| 2 | Models and enums |
-| 3 | Database schema (LocalDB) |
-| 4 | Connection + data access skeleton |
-| 5 | Category CRUD |
-| 6 | Supplier CRUD |
-| 7 | Customer CRUD |
-| 8 | Product CRUD (Qty starts 0; not directly editable) |
-| 9 | Authentication (hashed passwords) |
-| 10 | Role-based authorization |
-| 11 | Stock-In |
-| 12 | Stock-Out |
-| 13 | Inventory History (read-only) |
-| 14 | Inventory Adjustment (Admin) |
-| 15 | Delegation (SCR-020) |
-| 16 | Reports |
-| 17 | Validation + error polish |
-| 18 | Testing (incl. 14 negative cases) |
-| 19 | Final UI polish + integration |
+| Milestone | Objective | Status |
+|-----------|----------|--------|
+| 0 | Environment + solution setup | **Done** |
+| 1 | WinForms shell (Login + MainForm) | **Done** |
+| 2 | Models and enums | **Done** |
+| 3 | Database schema (**PostgreSQL**, not LocalDB) | **Done** |
+| 4 | Connection + data access (Npgsql) | **Done** |
+| 5 | Category CRUD | **Done** |
+| 6 | Supplier CRUD | **Done** |
+| 7 | Customer CRUD | **Done** |
+| 8 | Product CRUD | **Done** |
+| 9 | Authentication | **Done** |
+| 10 | Role-based authorization | **Done** |
+| 11 | Stock-In | **Done** |
+| 12 | Stock-Out | **Done** |
+| 13 | Inventory History (read-only) | **Done** |
+| 14 | Inventory Adjustment | **Done** |
+| 15 | Delegation | **Done** |
+| 16 | Reports | **Done** |
+| 17 | Validation + error polish | **Done** |
+| 18 | Testing (automated + manual checklist) | **Done** (20 automated tests) |
+| 19 | Final UI polish + designer-friendly layouts | **Done** |
 
-Each milestone defines: objective, prerequisites, files, C# concepts, tests, acceptance criteria.
-
-**Next after M0 Windows verification: Milestone 1.**
+Acceptance detail: `src/MILESTONE-*-GATE.md`.

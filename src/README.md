@@ -1,57 +1,49 @@
-# NovaTech IMS — Source
+# Source — NovaTech IMS
 
+**Branch:** `version1.3`  
 **Solution:** `NovaTechIMS.sln`  
-**Project:** `NovaTechIMS` (Windows Forms, .NET 8)  
-**Branch:** `version1.2`  
-**Technical Design:** `/technical-design/` (v1.0 APPROVED)
+**Projects:** `NovaTechIMS` (WinForms app) · `NovaTechIMS.Tests` (xUnit)
 
----
+## Build & run application
 
-## Milestone 0 status
-
-| Check | Status |
-|-------|--------|
-| Solution opens | Ready (open in Visual Studio 2022 on Windows) |
-| Project builds | Ready on Windows with .NET 8 SDK |
-| WinForms starts | Placeholder form launches |
-| Git structure matches TD | Yes |
-| Business logic | **None** (correct for M0) |
-
----
-
-## How to open and run (Windows)
-
-1. Install **Visual Studio 2022** with workload: .NET desktop development
-2. Install **.NET 8 SDK** if not already present.
-3. Open `src/NovaTechIMS.sln`.
-4. Set configuration to **Debug | Any CPU**.
-5. Press **F5**.
-6. You should see the Milestone 0 placeholder window.
-
----
-
-## Folder map (matches Technical Design §03)
-
-```
-NovaTechIMS/
-├── Forms/           Presentation (WinForms)
-├── Models/          Domain classes + Enums/
-├── Services/        Business logic
-├── Data/            ADO.NET data access
-├── Security/        Password hashing helpers
-├── Utilities/       Helpers, custom exceptions
-├── Properties/
-├── Program.cs
-└── NovaTechIMS.csproj
+```powershell
+cd src
+dotnet build NovaTechIMS.sln
+dotnet run --project NovaTechIMS\NovaTechIMS.csproj
 ```
 
----
+Visual Studio: open the solution → startup project **NovaTechIMS** → **F5**.
 
-## Target framework
+Requires **PostgreSQL** and a valid connection string in `NovaTechIMS/App.config`.
 
-- **net8.0-windows** with UseWindowsForms
+## Run tests
 
-## Next milestone
+```powershell
+cd src
+dotnet test NovaTechIMS.Tests\NovaTechIMS.Tests.csproj
+```
 
-**Milestone 1 — Basic WinForms application shell**  
-See `technical-design/15-Implementation-Milestones.md`.
+Or **Test Explorer** in Visual Studio → Run All.
+
+See also: `../docs/HOW-TO-RUN-TESTS.md`.
+
+## Architecture (short)
+
+```
+Forms (UI)
+  → Services (rules, auth, stock)
+    → Data / Npgsql
+      → PostgreSQL
+```
+
+- **Hybrid UI:** `.Designer.cs` for layout; `.cs` for behaviour and data.
+- **MainForm** hosts feature forms in the content panel.
+- **UiTheme** applies light styling at runtime.
+
+## Milestone gates
+
+`MILESTONE-0-GATE.md` … `MILESTONE-19-GATE.md` — acceptance criteria for each implementation step. M0–M19 are implemented on this branch.
+
+## Designer notes
+
+See `DESIGNER-NOTES.md` and `../docs/UI-DESIGNER-CONVERSION.md`.
