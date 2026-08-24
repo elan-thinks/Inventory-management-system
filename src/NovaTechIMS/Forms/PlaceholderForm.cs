@@ -1,4 +1,3 @@
-using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -7,13 +6,12 @@ namespace NovaTechIMS.Forms;
 /// <summary>
 /// Temporary form used only for Milestone 0 verification.
 /// Confirms the WinForms project builds, starts, and displays a window.
-/// This form will be removed or replaced when Milestone 1 (application shell) begins.
 /// </summary>
 public class PlaceholderForm : Form
 {
     public PlaceholderForm()
     {
-        Text = "NovaTech IMS — Milestone 0";
+        Text = "Inventory Management System (IMS)";
         StartPosition = FormStartPosition.CenterScreen;
         Size = new Size(520, 280);
         FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -22,7 +20,7 @@ public class PlaceholderForm : Form
 
         var title = new Label
         {
-            Text = "NovaTech Electronics\nInventory Management System",
+            Text = "Inventory Management System\n(IMS)",
             Font = new Font("Segoe UI", 14F, FontStyle.Bold),
             AutoSize = false,
             TextAlign = ContentAlignment.MiddleCenter,
@@ -45,7 +43,7 @@ public class PlaceholderForm : Form
 
         var footer = new Label
         {
-            Text = "Technical Design v1.0  |  Branch: version1.2",
+            Text = "Inventory Management System (IMS)  |  Branch: version1.3",
             Font = new Font("Segoe UI", 8F),
             ForeColor = Color.Gray,
             AutoSize = false,
