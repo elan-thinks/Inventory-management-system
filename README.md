@@ -3,10 +3,33 @@
 **Repository:** https://github.com/elan-thinks/Inventory-management-system  
 **Active branch:** `version1.3`  
 **Product name:** **Inventory Management System (IMS)**  
+**Business context:** **A small-to-medium electronics retail business**  
 **Stack:** C# · .NET 8 · Windows Forms · PostgreSQL · Npgsql · xUnit  
 **Release:** Approved for delivery — `docs/RELEASE-STATUS.md`
 
-> **Note:** The C# project/namespace remains `NovaTechIMS` for build stability. User-facing titles and branding use **Inventory Management System (IMS)**.
+> **Business focus:** This system is specifically designed for the day-to-day inventory needs of a small-to-medium electronics retail business. It supports product catalog management, suppliers, customers, stock movements, inventory adjustments, users, delegations, and reporting.
+>
+> **Implementation note:** The C# project/namespace remains `NovaTechIMS` for build stability. User-facing titles and branding use **Inventory Management System (IMS)**.
+
+---
+
+## Business Context
+
+The system models an electronics retail business that manages products such as computers, monitors, storage devices, networking equipment, cables, chargers, and other electronic accessories. Its purpose is to provide a centralized application for maintaining product information, tracking inventory quantities, recording stock movements, managing related business data, controlling user access, and producing reports.
+
+## Core Capabilities
+
+- Product catalog management
+- Category management
+- Supplier management
+- Customer management
+- Stock-In and Stock-Out operations
+- Inventory adjustments
+- Inventory history and tracking
+- User management and role-based authorization
+- Delegation management
+- Reporting
+- Input validation and error handling
 
 ---
 
