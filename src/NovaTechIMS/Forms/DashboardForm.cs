@@ -12,6 +12,7 @@ namespace NovaTechIMS.Forms;
 
 /// <summary>
 /// SCR-002 Dashboard — layout is designer-owned; this file is data + permissions only.
+/// Visual target: UI/update-ui/.../dashboard.html (light mockup).
 /// </summary>
 public partial class DashboardForm : Form
 {
@@ -39,6 +40,8 @@ public partial class DashboardForm : Form
             return;
 
         ApplyRuntimeTouches();
+        ApplyMetricIcons();
+        ApplyQuickActionIcons();
         ApplyQuickActionVisibility();
         Load += (_, _) =>
         {
@@ -64,6 +67,38 @@ public partial class DashboardForm : Form
             if (c is Button b)
                 b.Width = w;
         }
+    }
+
+    private void ApplyMetricIcons()
+    {
+        void Set(PictureBox box, string file)
+        {
+            var img = AppIcons.Get(file, 16);
+            if (img is not null)
+                box.Image = img;
+        }
+
+        Set(icoProducts, "icons-totalProduct.png");
+        Set(icoCategories, "icons-catagory-tag.png");
+        Set(icoSuppliers, "icons-suppliers.png");
+        Set(icoTotalQty, "icons-dashboard.png");
+        Set(icoLow, "icons-warning.png");
+        Set(icoOut, "icons-x-error.png");
+    }
+
+    private void ApplyQuickActionIcons()
+    {
+        AppIcons.ApplyToButton(btnQaStockIn, "icons-stockIn.png", 16);
+        AppIcons.ApplyToButton(btnQaStockOut, "icons-stockOut.png", 16);
+        AppIcons.ApplyToButton(btnQaProducts, "icons-search.png", 16);
+        AppIcons.ApplyToButton(btnQaAdjustment, "icons-Inventory-adjust.png", 16);
+        AppIcons.ApplyToButton(btnQaUsers, "icons-user.png", 16);
+
+        // Primary remains white text; secondary mockup uses primary-colored text
+        btnQaStockOut.ForeColor = UiTheme.Primary;
+        btnQaProducts.ForeColor = UiTheme.Primary;
+        btnQaAdjustment.ForeColor = UiTheme.Primary;
+        btnQaUsers.ForeColor = UiTheme.Primary;
     }
 
     private void ApplyRuntimeTouches()
@@ -93,6 +128,16 @@ public partial class DashboardForm : Form
         UiTheme.StyleButton(btnQaProducts, UiTheme.ButtonKind.Secondary);
         UiTheme.StyleButton(btnQaAdjustment, UiTheme.ButtonKind.Secondary);
         UiTheme.StyleButton(btnQaUsers, UiTheme.ButtonKind.Secondary);
+
+        // Mockup secondary QA: primary text color, left-aligned
+        foreach (var b in new[] { btnQaStockOut, btnQaProducts, btnQaAdjustment, btnQaUsers })
+        {
+            b.ForeColor = UiTheme.Primary;
+            b.TextAlign = ContentAlignment.MiddleLeft;
+            b.Padding = new Padding(10, 0, 8, 0);
+        }
+        btnQaStockIn.TextAlign = ContentAlignment.MiddleLeft;
+        btnQaStockIn.Padding = new Padding(10, 0, 8, 0);
 
         UiTheme.ApplyGridTheme(grid);
         ResizeQuickActionButtons();
@@ -165,6 +210,7 @@ public partial class DashboardForm : Form
                 foreach (DataGridViewColumn col in grid.Columns)
                     col.Visible = false;
 
+                // Mockup column order: Date · Type · Product · Qty · User
                 int di = 0;
                 void Show(string name, string header, float w)
                 {
@@ -183,6 +229,9 @@ public partial class DashboardForm : Form
 
                 if (grid.Columns[nameof(TransactionHistoryRow.TransactionDate)] is DataGridViewColumn dateCol)
                     dateCol.DefaultCellStyle.Format = "g";
+
+                grid.CellFormatting -= Grid_CellFormattingQty;
+                grid.CellFormatting += Grid_CellFormattingQty;
 
                 if (!_badgeWired)
                 {
@@ -206,11 +255,33 @@ public partial class DashboardForm : Form
             lblLow.Text = "0";
             lblOut.Text = "0";
 
-            // Safe user message (no stack / SQL)
             var mapped = DbExceptionMapper.Map(ex);
             var friendly = ErrorPresenter.Classify(mapped).Message;
             lblError.Text = "Unable to load dashboard data. " + friendly;
             lblError.Visible = true;
+        }
+    }
+
+    private void Grid_CellFormattingQty(object? sender, DataGridViewCellFormattingEventArgs e)
+    {
+        if (e.RowIndex < 0) return;
+        if (grid.Columns[e.ColumnIndex].Name != nameof(TransactionHistoryRow.Quantity)) return;
+        if (grid.Rows[e.RowIndex].DataBoundItem is not TransactionHistoryRow row) return;
+        if (e.Value is not int q) return;
+
+        if (row.TypeLabel == "Stock-Out" || (row.TypeLabel == "Adjustment" && row.Difference < 0))
+        {
+            e.Value = q > 0 ? $"−{q}" : q.ToString();
+            e.FormattingApplied = true;
+            e.CellStyle.ForeColor = UiTheme.Error;
+            e.CellStyle.Font = UiTheme.LabelSemibold;
+        }
+        else if (row.TypeLabel == "Stock-In" || (row.TypeLabel == "Adjustment" && row.Difference > 0))
+        {
+            e.Value = q > 0 ? $"+{q}" : q.ToString();
+            e.FormattingApplied = true;
+            e.CellStyle.ForeColor = UiTheme.Success;
+            e.CellStyle.Font = UiTheme.LabelSemibold;
         }
     }
 }
