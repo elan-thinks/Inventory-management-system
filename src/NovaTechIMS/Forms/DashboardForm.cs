@@ -64,8 +64,7 @@ public partial class DashboardForm : Form
 
         Load += (_, _) =>
         {
-            var first = _user.FullName.Split(' ')[0];
-            lblWelcome.Text = $"Welcome, {first}";
+            lblWelcome.Text = $"Welcome, {GetDisplayName()}";
             PositionViewAllLink();
             UpdateClock();
             Reload();
@@ -245,7 +244,7 @@ public partial class DashboardForm : Form
     private void EnsureWelcomeExtras()
     {
         metricsPanel.AutoScroll = false;
-        welcomePanel.Height = 52;
+        welcomePanel.Height = 56;
 
         if (_lblClock is null)
         {
@@ -266,15 +265,16 @@ public partial class DashboardForm : Form
             _lblTodayMoves = new Label
             {
                 AutoSize = true,
-                Font = UiTheme.HelperText,
-                ForeColor = UiTheme.TextMuted,
-                Location = new Point(4, 30),
+                Font = new Font("Segoe UI", 9.25f),
+                ForeColor = Color.FromArgb(90, 100, 112),
+                Location = new Point(4, 32),
                 Name = "lblTodayMoves"
             };
             welcomePanel.Controls.Add(_lblTodayMoves);
         }
 
         lblWelcomeSub.Visible = false;
+        lblWelcomeSub.Text = "";
 
         if (_clockTimer is null)
         {
@@ -300,6 +300,26 @@ public partial class DashboardForm : Form
         var now = DateTime.Now;
         _lblClock.Text = now.ToString("dddd, d MMM yyyy  ·  HH:mm");
         PositionClock();
+    }
+
+    /// <summary>
+    /// Prefer login username so we never show "System" from "System Administrator".
+    /// </summary>
+    private string GetDisplayName()
+    {
+        if (!string.IsNullOrWhiteSpace(_user.Username))
+            return _user.Username.Trim();
+
+        if (!string.IsNullOrWhiteSpace(_user.FullName))
+        {
+            var name = _user.FullName.Trim();
+            if (name.StartsWith("System ", StringComparison.OrdinalIgnoreCase)
+                || name.Equals("System", StringComparison.OrdinalIgnoreCase))
+                return "Administrator";
+            return name;
+        }
+
+        return "User";
     }
 
     private void Navigate(string key) => _navigate?.Invoke(key);
@@ -351,9 +371,12 @@ public partial class DashboardForm : Form
 
             int todayCount = rows.Count(r => r.TransactionDate.Date == DateTime.Today);
             if (_lblTodayMoves is not null)
+            {
+                _lblTodayMoves.ForeColor = Color.FromArgb(90, 100, 112);
                 _lblTodayMoves.Text = todayCount == 0
-                    ? "No movements recorded today yet."
-                    : $"{todayCount} movement{(todayCount == 1 ? "" : "s")} today · stock health at a glance.";
+                    ? "No stock movements recorded today."
+                    : $"{todayCount} stock movement{(todayCount == 1 ? "" : "s")} today · overview of inventory health.";
+            }
 
             var display = rows.Take(10).ToList();
             if (display.Count == 0)
