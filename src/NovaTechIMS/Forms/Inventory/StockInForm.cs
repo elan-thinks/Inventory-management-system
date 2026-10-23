@@ -8,7 +8,10 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Stock-In (FR-SIN) — scrollable form + pinned recent grid.</summary>
+/// <summary>
+/// Stock-In — full-width page layout. The form uses the entire content panel;
+/// AutoScroll is on the form itself (not a nested box).
+/// </summary>
 public partial class StockInForm : Form
 {
     private StockInService? _service;
@@ -27,52 +30,54 @@ public partial class StockInForm : Form
         ApplyRuntimeStyling();
         Load += (_, _) =>
         {
-            LayoutWidths();
+            LayoutFullWidth();
             LoadLookups();
             ReloadRecent();
             UpdatePreview();
         };
-        Resize += (_, _) => LayoutWidths();
+        Resize += (_, _) => LayoutFullWidth();
     }
 
-    /// <summary>Keep card/fields matching the scroll host width; buttons stay on-screen.</summary>
-    private void LayoutWidths()
+    /// <summary>Stretch every card to the full content width (minus padding).</summary>
+    private void LayoutFullWidth()
     {
-        if (scrollHost is null || formCard is null) return;
+        int left = Padding.Left;
+        int rightPad = Padding.Right + (VerticalScroll.Visible ? SystemInformation.VerticalScrollBarWidth : 0);
+        int w = Math.Max(640, ClientSize.Width - left - rightPad);
 
-        int pad = 8;
-        int w = Math.Max(640, scrollHost.ClientSize.Width - pad - SystemInformation.VerticalScrollBarWidth);
-        formCard.Width = w;
+        secProductPanel.Left = left;
+        secProductPanel.Width = w;
+        secMovementPanel.Left = left;
+        secMovementPanel.Width = w;
+        secNotesPanel.Left = left;
+        secNotesPanel.Width = w;
+        actionsBar.Left = left;
+        actionsBar.Width = w;
+        lblHint.Left = left;
+        lblHint.Width = w;
+        grid.Left = left;
+        grid.Width = w;
 
-        int inner = Math.Max(560, w - 32);
-        secProductPanel.Width = inner;
-        secMovementPanel.Width = inner;
-        secNotesPanel.Width = inner;
-        actionsBar.Width = inner;
-
-        int fieldW = Math.Max(400, inner - 32);
+        int fieldW = Math.Max(400, w - 40);
         cboProduct.Width = fieldW;
         cboSupplier.Width = fieldW;
         txtNotes.Width = fieldW;
         previewBanner.Width = fieldW;
 
-        // Pin action buttons to the right of the actions bar
         btnSave.Left = Math.Max(200, actionsBar.Width - btnSave.Width - 4);
         btnClear.Left = btnSave.Left - btnClear.Width - 12;
 
-        // Ensure AutoScrollMinSize so vertical scroll appears when needed
-        scrollHost.AutoScrollMinSize = new Size(0, formCard.Bottom + 12);
+        // Page scroll extent includes grid bottom
+        AutoScrollMinSize = new Size(0, grid.Bottom + Padding.Bottom + 8);
     }
 
     private void ApplyRuntimeStyling()
     {
         Font = UiTheme.Body;
         BackColor = UiTheme.Background;
-        formCard.BackColor = UiTheme.Surface;
-        recentPanel.BackColor = UiTheme.Background;
 
         foreach (var p in new[] { secProductPanel, secMovementPanel, secNotesPanel })
-            p.BackColor = Color.FromArgb(252, 253, 254);
+            p.BackColor = UiTheme.Surface;
 
         foreach (var sec in new[] { secProduct, secMovement, secNotes })
         {
@@ -93,7 +98,7 @@ public partial class StockInForm : Form
         lblPreview.ForeColor = UiTheme.Text;
         lblError.Font = UiTheme.Label;
         lblError.ForeColor = UiTheme.Error;
-        lblHint.Font = UiTheme.LabelSemibold;
+        lblHint.Font = UiTheme.SectionTitle;
         lblHint.ForeColor = UiTheme.Text;
 
         UiTheme.StyleComboBox(cboProduct);
@@ -107,7 +112,6 @@ public partial class StockInForm : Form
         btnClear.FlatAppearance.BorderColor = UiTheme.Primary;
 
         AppIcons.ApplyToButton(btnSave, "icons-stockIn.png", 16);
-
         UiTheme.ApplyGridTheme(grid);
 
         dtpDate.MaxDate = DateTime.Today;
