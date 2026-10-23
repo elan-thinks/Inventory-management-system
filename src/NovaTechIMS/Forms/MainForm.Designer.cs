@@ -4,7 +4,7 @@ using System.Windows.Forms;
 namespace NovaTechIMS.Forms;
 
 /// <summary>
-/// Application shell — light Catalox-style sidebar (View Designer).
+/// Application shell — soft iOS / Fusion light sidebar (View Designer).
 /// </summary>
 partial class MainForm
 {
@@ -76,7 +76,7 @@ partial class MainForm
 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        BackColor = Color.FromArgb(246, 248, 250);
+        BackColor = Color.FromArgb(244, 245, 247);
         ClientSize = new Size(1100, 700);
         MinimumSize = new Size(1024, 768);
         Name = "MainForm";
@@ -85,27 +85,27 @@ partial class MainForm
         Font = new Font("Segoe UI", 10F);
         Load += MainForm_Load;
 
-        // Light sidebar (Catalox)
+        // Soft white sidebar
         pnlSidebar.Dock = DockStyle.Left;
-        pnlSidebar.Width = 228;
+        pnlSidebar.Width = 232;
         pnlSidebar.BackColor = Color.White;
         pnlSidebar.Name = "pnlSidebar";
 
         lblBrand.Text = "  IMS";
-        lblBrand.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-        lblBrand.ForeColor = Color.FromArgb(28, 35, 43);
+        lblBrand.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
+        lblBrand.ForeColor = Color.FromArgb(26, 29, 33);
         lblBrand.BackColor = Color.White;
         lblBrand.Dock = DockStyle.Top;
-        lblBrand.Height = 56;
+        lblBrand.Height = 60;
         lblBrand.TextAlign = ContentAlignment.MiddleLeft;
-        lblBrand.Padding = new Padding(8, 0, 0, 0);
+        lblBrand.Padding = new Padding(12, 0, 0, 0);
         lblBrand.Name = "lblBrand";
 
         flpNav.Dock = DockStyle.Fill;
         flpNav.FlowDirection = FlowDirection.TopDown;
         flpNav.WrapContents = false;
         flpNav.AutoScroll = true;
-        flpNav.Padding = new Padding(0, 8, 0, 8);
+        flpNav.Padding = new Padding(8, 10, 8, 10);
         flpNav.BackColor = Color.White;
         flpNav.Name = "flpNav";
 
@@ -113,39 +113,42 @@ partial class MainForm
         btnNavDashboard.FlatStyle = FlatStyle.Flat;
         btnNavDashboard.FlatAppearance.BorderSize = 0;
         btnNavDashboard.ForeColor = Color.FromArgb(15, 118, 70);
-        btnNavDashboard.BackColor = Color.FromArgb(232, 245, 238);
+        btnNavDashboard.BackColor = Color.FromArgb(232, 246, 239);
         btnNavDashboard.TextAlign = ContentAlignment.MiddleLeft;
-        btnNavDashboard.Size = new Size(208, 36);
-        btnNavDashboard.Margin = new Padding(10, 2, 10, 2);
+        btnNavDashboard.Size = new Size(208, 40);
+        btnNavDashboard.Margin = new Padding(4, 2, 4, 2);
+        btnNavDashboard.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
         btnNavDashboard.Name = "btnNavDashboard";
 
         lblNavGroupCatalog.Text = "CATALOG";
-        lblNavGroupCatalog.ForeColor = Color.FromArgb(160, 168, 178);
+        lblNavGroupCatalog.ForeColor = Color.FromArgb(168, 176, 186);
         lblNavGroupCatalog.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
         lblNavGroupCatalog.AutoSize = false;
-        lblNavGroupCatalog.Size = new Size(196, 28);
-        lblNavGroupCatalog.Padding = new Padding(12, 12, 0, 0);
+        lblNavGroupCatalog.Size = new Size(200, 28);
+        lblNavGroupCatalog.Padding = new Padding(12, 14, 0, 0);
         lblNavGroupCatalog.Margin = new Padding(0, 8, 0, 0);
         lblNavGroupCatalog.Name = "lblNavGroupCatalog";
 
         btnNavProducts.Text = "  Products";
         btnNavProducts.FlatStyle = FlatStyle.Flat;
         btnNavProducts.FlatAppearance.BorderSize = 0;
-        btnNavProducts.ForeColor = Color.FromArgb(90, 101, 112);
+        btnNavProducts.ForeColor = Color.FromArgb(92, 101, 112);
         btnNavProducts.BackColor = Color.White;
         btnNavProducts.TextAlign = ContentAlignment.MiddleLeft;
-        btnNavProducts.Size = new Size(208, 36);
-        btnNavProducts.Margin = new Padding(10, 2, 10, 2);
+        btnNavProducts.Size = new Size(208, 40);
+        btnNavProducts.Margin = new Padding(4, 2, 4, 2);
+        btnNavProducts.Font = new Font("Segoe UI", 9.75F);
         btnNavProducts.Name = "btnNavProducts";
 
         btnNavCategories.Text = "  Categories";
         btnNavCategories.FlatStyle = FlatStyle.Flat;
         btnNavCategories.FlatAppearance.BorderSize = 0;
-        btnNavCategories.ForeColor = Color.FromArgb(90, 101, 112);
+        btnNavCategories.ForeColor = Color.FromArgb(92, 101, 112);
         btnNavCategories.BackColor = Color.White;
         btnNavCategories.TextAlign = ContentAlignment.MiddleLeft;
-        btnNavCategories.Size = new Size(208, 36);
-        btnNavCategories.Margin = new Padding(10, 2, 10, 2);
+        btnNavCategories.Size = new Size(208, 40);
+        btnNavCategories.Margin = new Padding(4, 2, 4, 2);
+        btnNavCategories.Font = new Font("Segoe UI", 9.75F);
         btnNavCategories.Name = "btnNavCategories";
 
         flpNav.Controls.Add(btnNavDashboard);
@@ -155,12 +158,12 @@ partial class MainForm
 
         btnLogout.Text = "  Sign Out";
         btnLogout.Font = new Font("Segoe UI", 9.5F);
-        btnLogout.ForeColor = Color.FromArgb(90, 101, 112);
+        btnLogout.ForeColor = Color.FromArgb(92, 101, 112);
         btnLogout.BackColor = Color.White;
         btnLogout.FlatStyle = FlatStyle.Flat;
         btnLogout.FlatAppearance.BorderSize = 0;
         btnLogout.Dock = DockStyle.Bottom;
-        btnLogout.Height = 44;
+        btnLogout.Height = 48;
         btnLogout.TextAlign = ContentAlignment.MiddleLeft;
         btnLogout.Cursor = Cursors.Hand;
         btnLogout.Name = "btnLogout";
@@ -172,35 +175,35 @@ partial class MainForm
         pnlSidebar.Controls.Add(lblBrand);
 
         pnlMain.Dock = DockStyle.Fill;
-        pnlMain.BackColor = Color.FromArgb(246, 248, 250);
+        pnlMain.BackColor = Color.FromArgb(244, 245, 247);
         pnlMain.Name = "pnlMain";
 
         pnlHeader.Dock = DockStyle.Top;
-        pnlHeader.Height = 72;
+        pnlHeader.Height = 76;
         pnlHeader.BackColor = Color.White;
-        pnlHeader.Padding = new Padding(24, 12, 24, 12);
+        pnlHeader.Padding = new Padding(28, 14, 28, 14);
         pnlHeader.Name = "pnlHeader";
 
         lblBreadcrumb.Text = "Home";
         lblBreadcrumb.Font = new Font("Segoe UI", 9F);
-        lblBreadcrumb.ForeColor = Color.FromArgb(130, 140, 152);
+        lblBreadcrumb.ForeColor = Color.FromArgb(139, 148, 158);
         lblBreadcrumb.AutoSize = true;
-        lblBreadcrumb.Location = new Point(24, 12);
+        lblBreadcrumb.Location = new Point(28, 14);
         lblBreadcrumb.Name = "lblBreadcrumb";
 
         lblScreenTitle.Text = "Dashboard";
-        lblScreenTitle.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
-        lblScreenTitle.ForeColor = Color.FromArgb(28, 35, 43);
+        lblScreenTitle.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+        lblScreenTitle.ForeColor = Color.FromArgb(26, 29, 33);
         lblScreenTitle.AutoSize = true;
-        lblScreenTitle.Location = new Point(24, 32);
+        lblScreenTitle.Location = new Point(28, 36);
         lblScreenTitle.Name = "lblScreenTitle";
 
         lblRoleBadge.Text = "v1.3";
         lblRoleBadge.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
         lblRoleBadge.ForeColor = Color.FromArgb(15, 118, 70);
-        lblRoleBadge.BackColor = Color.FromArgb(228, 245, 234);
+        lblRoleBadge.BackColor = Color.FromArgb(232, 246, 239);
         lblRoleBadge.AutoSize = false;
-        lblRoleBadge.Size = new Size(44, 20);
+        lblRoleBadge.Size = new Size(48, 22);
         lblRoleBadge.TextAlign = ContentAlignment.MiddleCenter;
         lblRoleBadge.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         lblRoleBadge.Location = new Point(1000, 28);
@@ -211,20 +214,20 @@ partial class MainForm
         pnlHeader.Controls.Add(lblRoleBadge);
 
         pnlContent.Dock = DockStyle.Fill;
-        pnlContent.BackColor = Color.FromArgb(246, 248, 250);
+        pnlContent.BackColor = Color.FromArgb(244, 245, 247);
         pnlContent.Padding = new Padding(24);
         pnlContent.Name = "pnlContent";
 
         lblPlaceholderTitle.Text = "Welcome";
-        lblPlaceholderTitle.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
-        lblPlaceholderTitle.ForeColor = Color.FromArgb(28, 35, 43);
+        lblPlaceholderTitle.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+        lblPlaceholderTitle.ForeColor = Color.FromArgb(26, 29, 33);
         lblPlaceholderTitle.AutoSize = true;
         lblPlaceholderTitle.Location = new Point(32, 40);
         lblPlaceholderTitle.Name = "lblPlaceholderTitle";
 
         lblPlaceholderBody.Text = "Select a navigation item. Content hosts here at runtime.";
         lblPlaceholderBody.Font = new Font("Segoe UI", 10F);
-        lblPlaceholderBody.ForeColor = Color.FromArgb(130, 140, 152);
+        lblPlaceholderBody.ForeColor = Color.FromArgb(139, 148, 158);
         lblPlaceholderBody.AutoSize = false;
         lblPlaceholderBody.MaximumSize = new Size(700, 0);
         lblPlaceholderBody.Size = new Size(700, 80);
@@ -234,7 +237,7 @@ partial class MainForm
         pnlContent.Controls.Add(lblPlaceholderTitle);
         pnlContent.Controls.Add(lblPlaceholderBody);
 
-        statusStrip.BackColor = Color.FromArgb(240, 242, 245);
+        statusStrip.BackColor = Color.FromArgb(244, 245, 247);
         statusStrip.Font = new Font("Segoe UI", 9F);
         statusStrip.SizingGrip = true;
         statusStrip.Name = "statusStrip";
