@@ -14,7 +14,7 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms;
 
 /// <summary>
-/// SCR-002 Dashboard — Fusion-inspired soft metrics, charts, quick actions.
+/// SCR-002 Dashboard — soft metrics, charts, clock, quick actions.
 /// </summary>
 public partial class DashboardForm : Form
 {
@@ -34,6 +34,9 @@ public partial class DashboardForm : Form
     private int _low;
     private int _out;
     private readonly List<(string Label, int TotalQty)> _movementBars = new();
+    private Label? _lblClock;
+    private Label? _lblTodayMoves;
+    private System.Windows.Forms.Timer? _clockTimer;
 
     private DashboardService Service => _service ??= new DashboardService();
 
@@ -57,13 +60,14 @@ public partial class DashboardForm : Form
         ApplyQuickActionIcons();
         ApplyQuickActionVisibility();
         WireChartPaint();
+        EnsureWelcomeExtras();
 
         Load += (_, _) =>
         {
             var first = _user.FullName.Split(' ')[0];
             lblWelcome.Text = $"Welcome, {first}";
-            lblWelcomeSub.Text = "Electronics stock health and recent movement at a glance.";
             PositionViewAllLink();
+            UpdateClock();
             Reload();
         };
         activityHeader.Resize += (_, _) => PositionViewAllLink();
@@ -238,6 +242,66 @@ public partial class DashboardForm : Form
         }
     }
 
+    private void EnsureWelcomeExtras()
+    {
+        metricsPanel.AutoScroll = false;
+        welcomePanel.Height = 52;
+
+        if (_lblClock is null)
+        {
+            _lblClock = new Label
+            {
+                AutoSize = true,
+                Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
+                ForeColor = UiTheme.Text,
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                Name = "lblClock"
+            };
+            welcomePanel.Controls.Add(_lblClock);
+            welcomePanel.Resize += (_, _) => PositionClock();
+        }
+
+        if (_lblTodayMoves is null)
+        {
+            _lblTodayMoves = new Label
+            {
+                AutoSize = true,
+                Font = UiTheme.HelperText,
+                ForeColor = UiTheme.TextMuted,
+                Location = new Point(4, 30),
+                Name = "lblTodayMoves"
+            };
+            welcomePanel.Controls.Add(_lblTodayMoves);
+        }
+
+        lblWelcomeSub.Visible = false;
+
+        if (_clockTimer is null)
+        {
+            _clockTimer = new System.Windows.Forms.Timer { Interval = 1000 };
+            _clockTimer.Tick += (_, _) => UpdateClock();
+            _clockTimer.Start();
+        }
+
+        UpdateClock();
+        PositionClock();
+    }
+
+    private void PositionClock()
+    {
+        if (_lblClock is null || welcomePanel is null) return;
+        _lblClock.Left = Math.Max(200, welcomePanel.ClientSize.Width - _lblClock.PreferredWidth - 4);
+        _lblClock.Top = 6;
+    }
+
+    private void UpdateClock()
+    {
+        if (_lblClock is null) return;
+        var now = DateTime.Now;
+        _lblClock.Text = now.ToString("dddd, d MMM yyyy  ·  HH:mm");
+        PositionClock();
+    }
+
     private void Navigate(string key) => _navigate?.Invoke(key);
 
     private void BtnQaStockIn_Click(object? sender, EventArgs e) => Navigate("Stock In");
@@ -284,6 +348,12 @@ public partial class DashboardForm : Form
             BuildMovementBars(rows);
             pnlStockHealth.Invalidate();
             pnlMovement.Invalidate();
+
+            int todayCount = rows.Count(r => r.TransactionDate.Date == DateTime.Today);
+            if (_lblTodayMoves is not null)
+                _lblTodayMoves.Text = todayCount == 0
+                    ? "No movements recorded today yet."
+                    : $"{todayCount} movement{(todayCount == 1 ? "" : "s")} today · stock health at a glance.";
 
             var display = rows.Take(10).ToList();
             if (display.Count == 0)
