@@ -8,7 +8,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Inventory Adjustment — full-width, no recent grid, pinned actions.</summary>
+/// <summary>Inventory Adjustment — soft field boxes, full panel.</summary>
 public partial class AdjustmentForm : Form
 {
     private AdjustmentService? _service;
@@ -24,34 +24,92 @@ public partial class AdjustmentForm : Form
             return;
 
         ApplyRuntimeStyling();
+        WireSoftFieldBorders();
         Load += (_, _) =>
         {
-            LayoutFullWidth();
+            LayoutResponsive();
             LoadProducts();
         };
-        Resize += (_, _) => LayoutFullWidth();
+        formCard.Resize += (_, _) => LayoutResponsive();
         actionsBar.Resize += (_, _) => LayoutActions();
     }
 
-    private void LayoutFullWidth()
+    private void WireSoftFieldBorders()
     {
-        int w = Math.Max(640, contentHost.ClientSize.Width - 4);
-        secProductPanel.Width = w;
-        secMovementPanel.Width = w;
-        secReasonPanel.Width = w;
+        formCard.Paint += (_, e) =>
+        {
+            using var pen = new Pen(Color.FromArgb(228, 232, 236), 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, formCard.Width - 1, formCard.Height - 1);
+        };
 
-        int fieldW = Math.Max(400, w - 40);
-        cboProduct.Width = fieldW;
-        txtReason.Width = fieldW;
-        txtNotes.Width = fieldW;
-        previewBanner.Width = fieldW;
+        void SoftField(object? s, PaintEventArgs e)
+        {
+            if (s is not Panel p) return;
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            using var pen = new Pen(Color.FromArgb(210, 216, 222), 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, p.Width - 1, p.Height - 1);
+        }
+
+        foreach (var w in new[] { wrapProduct, wrapNewQty, wrapDate, wrapReason, wrapNotes })
+            w.Paint += SoftField;
+
+        previewBanner.Paint += (_, e) =>
+        {
+            using var pen = new Pen(Color.FromArgb(200, 215, 230), 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, previewBanner.Width - 1, previewBanner.Height - 1);
+        };
+    }
+
+    private void LayoutResponsive()
+    {
+        if (formCard is null) return;
+        int pad = 28;
+        int gap = 20;
+        int usable = Math.Max(600, formCard.ClientSize.Width - pad * 2);
+
+        lblProduct.Left = pad;
+        wrapProduct.Left = pad;
+        wrapProduct.Width = usable;
+        helpProduct.Left = pad;
+
+        lblPreviousCaption.Left = pad;
+        lblPreviousQty.Left = pad;
+
+        int col2 = pad + 180;
+        lblNewQty.Left = col2;
+        wrapNewQty.Left = col2;
+        wrapNewQty.Width = 180;
+
+        int col3 = col2 + 200;
+        lblDate.Left = col3;
+        wrapDate.Left = col3;
+        wrapDate.Width = 200;
+
+        int col4 = col3 + 220;
+        lblDiffCaption.Left = col4;
+        lblDifference.Left = col4;
+
+        previewBanner.Left = pad;
+        previewBanner.Width = usable;
+
+        lblReason.Left = pad;
+        wrapReason.Left = pad;
+        wrapReason.Width = usable;
+
+        lblNotes.Left = pad;
+        helpNotes.Left = pad;
+        wrapNotes.Left = pad;
+        wrapNotes.Width = usable;
+        int notesBottom = formCard.ClientSize.Height - actionsBar.Height - 16;
+        wrapNotes.Height = Math.Max(60, notesBottom - wrapNotes.Top);
 
         LayoutActions();
     }
 
     private void LayoutActions()
     {
-        btnSave.Left = Math.Max(200, actionsBar.ClientSize.Width - btnSave.Width - 4);
+        if (actionsBar is null || btnSave is null || btnClear is null) return;
+        btnSave.Left = Math.Max(200, actionsBar.ClientSize.Width - btnSave.Width - 28);
         btnClear.Left = btnSave.Left - btnClear.Width - 12;
     }
 
@@ -59,42 +117,40 @@ public partial class AdjustmentForm : Form
     {
         Font = UiTheme.Body;
         BackColor = UiTheme.Background;
-        actionsBar.BackColor = UiTheme.Background;
+        formCard.BackColor = UiTheme.Surface;
+        actionsBar.BackColor = UiTheme.Surface;
 
-        foreach (var p in new[] { secProductPanel, secMovementPanel, secReasonPanel })
-            p.BackColor = UiTheme.Surface;
-
-        foreach (var sec in new[] { secProduct, secMovement, secReason })
-        {
-            sec.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
-            sec.ForeColor = UiTheme.Primary;
-        }
+        lblFormTitle.ForeColor = UiTheme.Text;
+        lblFormSub.ForeColor = UiTheme.TextMuted;
 
         foreach (var lbl in new[] { lblProduct, lblPreviousCaption, lblNewQty, lblDate, lblDiffCaption, lblReason, lblNotes })
         {
-            lbl.Font = UiTheme.LabelSemibold;
+            lbl.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
             lbl.ForeColor = UiTheme.Text;
         }
 
         helpProduct.ForeColor = UiTheme.TextMuted;
-        previewBanner.BackColor = UiTheme.InfoTint;
-        lblPreview.Font = UiTheme.Label;
-        lblPreview.ForeColor = UiTheme.Text;
+        helpNotes.ForeColor = UiTheme.TextMuted;
         lblPreviousQty.ForeColor = UiTheme.TextMuted;
-        lblError.Font = UiTheme.Label;
+
+        previewBanner.BackColor = UiTheme.InfoTint;
+        lblPreview.ForeColor = UiTheme.Text;
         lblError.ForeColor = UiTheme.Error;
 
-        UiTheme.StyleComboBox(cboProduct);
-        UiTheme.StyleTextBox(txtReason);
-        UiTheme.StyleTextBox(txtNotes);
-        UiTheme.StyleDatePicker(dtpDate);
-        nudNewQty.BackColor = UiTheme.Surface;
-        nudNewQty.ForeColor = UiTheme.Text;
+        cboProduct.FlatStyle = FlatStyle.Flat;
+        cboProduct.BackColor = Color.White;
+        txtReason.BackColor = Color.White;
+        txtNotes.BackColor = Color.White;
+        nudNewQty.BackColor = Color.White;
 
-        UiTheme.StyleButton(btnSave, UiTheme.ButtonKind.Primary);
-        UiTheme.StyleButton(btnClear, UiTheme.ButtonKind.Secondary);
-        btnClear.ForeColor = UiTheme.Primary;
-        btnClear.FlatAppearance.BorderColor = UiTheme.Primary;
+        btnSave.BackColor = UiTheme.Primary;
+        btnSave.ForeColor = Color.White;
+        btnSave.FlatAppearance.BorderSize = 0;
+        btnClear.BackColor = Color.White;
+        btnClear.ForeColor = UiTheme.Text;
+        btnClear.FlatAppearance.BorderColor = UiTheme.Border;
+        btnClear.FlatAppearance.BorderSize = 1;
+
         AppIcons.ApplyToButton(btnSave, "icons-Inventory-adjust.png", 16);
 
         dtpDate.MaxDate = DateTime.Today;
