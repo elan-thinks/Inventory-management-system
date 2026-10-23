@@ -8,7 +8,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Stock-Out — full-width, no recent grid, actions always visible.</summary>
+/// <summary>Stock-Out — soft field boxes, full panel (matches Stock-In).</summary>
 public partial class StockOutForm : Form
 {
     private StockOutService? _service;
@@ -24,35 +24,91 @@ public partial class StockOutForm : Form
             return;
 
         ApplyRuntimeStyling();
+        WireSoftFieldBorders();
         Load += (_, _) =>
         {
-            LayoutFullWidth();
+            LayoutResponsive();
             LoadLookups();
             UpdatePreview();
         };
-        Resize += (_, _) => LayoutFullWidth();
+        formCard.Resize += (_, _) => LayoutResponsive();
         actionsBar.Resize += (_, _) => LayoutActions();
     }
 
-    private void LayoutFullWidth()
+    private void WireSoftFieldBorders()
     {
-        int w = Math.Max(640, contentHost.ClientSize.Width - 4);
-        secProductPanel.Width = w;
-        secMovementPanel.Width = w;
-        secNotesPanel.Width = w;
+        formCard.Paint += (_, e) =>
+        {
+            using var pen = new Pen(Color.FromArgb(228, 232, 236), 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, formCard.Width - 1, formCard.Height - 1);
+        };
 
-        int fieldW = Math.Max(400, w - 40);
-        cboProduct.Width = fieldW;
-        cboCustomer.Width = fieldW;
-        txtNotes.Width = fieldW;
-        previewBanner.Width = fieldW;
+        void SoftField(object? s, PaintEventArgs e)
+        {
+            if (s is not Panel p) return;
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            using var pen = new Pen(Color.FromArgb(210, 216, 222), 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, p.Width - 1, p.Height - 1);
+        }
+
+        foreach (var w in new[] { wrapProduct, wrapCustomer, wrapQty, wrapDate, wrapPrice, wrapNotes })
+            w.Paint += SoftField;
+
+        previewBanner.Paint += (_, e) =>
+        {
+            using var pen = new Pen(Color.FromArgb(230, 190, 185), 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, previewBanner.Width - 1, previewBanner.Height - 1);
+        };
+    }
+
+    private void LayoutResponsive()
+    {
+        if (formCard is null) return;
+        int pad = 28;
+        int gap = 20;
+        int usable = Math.Max(600, formCard.ClientSize.Width - pad * 2);
+        int half = (usable - gap) / 2;
+
+        lblProduct.Left = pad;
+        wrapProduct.Left = pad;
+        wrapProduct.Width = half;
+        helpProduct.Left = pad;
+
+        lblCustomer.Left = pad + half + gap;
+        wrapCustomer.Left = pad + half + gap;
+        wrapCustomer.Width = half;
+        helpCustomer.Left = pad + half + gap;
+
+        int third = (usable - gap * 2) / 3;
+        lblQuantity.Left = pad;
+        wrapQty.Left = pad;
+        wrapQty.Width = third;
+
+        lblDate.Left = pad + third + gap;
+        wrapDate.Left = pad + third + gap;
+        wrapDate.Width = third;
+
+        lblUnitPrice.Left = pad + (third + gap) * 2;
+        wrapPrice.Left = pad + (third + gap) * 2;
+        wrapPrice.Width = third;
+
+        previewBanner.Left = pad;
+        previewBanner.Width = usable;
+
+        lblNotes.Left = pad;
+        helpNotes.Left = pad;
+        wrapNotes.Left = pad;
+        wrapNotes.Width = usable;
+        int notesBottom = formCard.ClientSize.Height - actionsBar.Height - 16;
+        wrapNotes.Height = Math.Max(80, notesBottom - wrapNotes.Top);
 
         LayoutActions();
     }
 
     private void LayoutActions()
     {
-        btnSave.Left = Math.Max(200, actionsBar.ClientSize.Width - btnSave.Width - 4);
+        if (actionsBar is null || btnSave is null || btnClear is null) return;
+        btnSave.Left = Math.Max(200, actionsBar.ClientSize.Width - btnSave.Width - 28);
         btnClear.Left = btnSave.Left - btnClear.Width - 12;
     }
 
@@ -60,40 +116,42 @@ public partial class StockOutForm : Form
     {
         Font = UiTheme.Body;
         BackColor = UiTheme.Background;
-        actionsBar.BackColor = UiTheme.Background;
+        formCard.BackColor = UiTheme.Surface;
+        actionsBar.BackColor = UiTheme.Surface;
 
-        foreach (var p in new[] { secProductPanel, secMovementPanel, secNotesPanel })
-            p.BackColor = UiTheme.Surface;
-
-        foreach (var sec in new[] { secProduct, secMovement, secNotes })
-        {
-            sec.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
-            sec.ForeColor = UiTheme.Secondary;
-        }
+        lblFormTitle.ForeColor = UiTheme.Text;
+        lblFormSub.ForeColor = UiTheme.TextMuted;
 
         foreach (var lbl in new[] { lblProduct, lblCustomer, lblQuantity, lblDate, lblUnitPrice, lblNotes })
         {
-            lbl.Font = UiTheme.LabelSemibold;
+            lbl.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
             lbl.ForeColor = UiTheme.Text;
         }
 
         helpProduct.ForeColor = UiTheme.TextMuted;
         helpCustomer.ForeColor = UiTheme.TextMuted;
+        helpNotes.ForeColor = UiTheme.TextMuted;
+
         previewBanner.BackColor = UiTheme.ErrorTint;
-        lblPreview.Font = UiTheme.Label;
         lblPreview.ForeColor = UiTheme.Text;
-        lblError.Font = UiTheme.Label;
         lblError.ForeColor = UiTheme.Error;
 
-        UiTheme.StyleComboBox(cboProduct);
-        UiTheme.StyleComboBox(cboCustomer);
-        UiTheme.StyleTextBox(txtUnitPrice);
-        UiTheme.StyleTextBox(txtNotes);
-        UiTheme.StyleDatePicker(dtpDate);
-        UiTheme.StyleButton(btnSave, UiTheme.ButtonKind.Primary);
-        UiTheme.StyleButton(btnClear, UiTheme.ButtonKind.Secondary);
-        btnClear.ForeColor = UiTheme.Primary;
-        btnClear.FlatAppearance.BorderColor = UiTheme.Primary;
+        cboProduct.FlatStyle = FlatStyle.Flat;
+        cboCustomer.FlatStyle = FlatStyle.Flat;
+        cboProduct.BackColor = Color.White;
+        cboCustomer.BackColor = Color.White;
+        txtUnitPrice.BackColor = Color.White;
+        txtNotes.BackColor = Color.White;
+        nudQuantity.BackColor = Color.White;
+
+        btnSave.BackColor = UiTheme.Primary;
+        btnSave.ForeColor = Color.White;
+        btnSave.FlatAppearance.BorderSize = 0;
+        btnClear.BackColor = Color.White;
+        btnClear.ForeColor = UiTheme.Text;
+        btnClear.FlatAppearance.BorderColor = UiTheme.Border;
+        btnClear.FlatAppearance.BorderSize = 1;
+
         AppIcons.ApplyToButton(btnSave, "icons-stockOut.png", 16);
 
         dtpDate.MaxDate = DateTime.Today;
