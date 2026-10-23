@@ -8,7 +8,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Stock-In — soft bordered fields, full panel, organized layout.</summary>
+/// <summary>Stock-In — ComboBox styled directly (no wrapper panels).</summary>
 public partial class StockInForm : Form
 {
     private StockInService? _service;
@@ -24,7 +24,7 @@ public partial class StockInForm : Form
             return;
 
         ApplyRuntimeStyling();
-        WireSoftFieldBorders();
+        WireCardBorder();
         Load += (_, _) =>
         {
             LayoutResponsive();
@@ -35,24 +35,13 @@ public partial class StockInForm : Form
         actionsBar.Resize += (_, _) => LayoutActions();
     }
 
-    private void WireSoftFieldBorders()
+    private void WireCardBorder()
     {
         formCard.Paint += (_, e) =>
         {
             using var pen = new Pen(Color.FromArgb(228, 232, 236), 1);
             e.Graphics.DrawRectangle(pen, 0, 0, formCard.Width - 1, formCard.Height - 1);
         };
-
-        void SoftField(object? s, PaintEventArgs e)
-        {
-            if (s is not Panel p) return;
-            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            using var pen = new Pen(Color.FromArgb(210, 216, 222), 1);
-            e.Graphics.DrawRectangle(pen, 0, 0, p.Width - 1, p.Height - 1);
-        }
-
-        foreach (var w in new[] { wrapProduct, wrapSupplier, wrapQty, wrapDate, wrapPrice, wrapNotes })
-            w.Paint += SoftField;
 
         previewBanner.Paint += (_, e) =>
         {
@@ -70,39 +59,37 @@ public partial class StockInForm : Form
         int half = (usable - gap) / 2;
 
         lblProduct.Left = pad;
-        wrapProduct.Left = pad;
-        wrapProduct.Width = half;
+        cboProduct.Left = pad;
+        cboProduct.Width = half;
         helpProduct.Left = pad;
 
         lblSupplier.Left = pad + half + gap;
-        wrapSupplier.Left = pad + half + gap;
-        wrapSupplier.Width = half;
+        cboSupplier.Left = pad + half + gap;
+        cboSupplier.Width = half;
         helpSupplier.Left = pad + half + gap;
 
         int third = (usable - gap * 2) / 3;
         lblQuantity.Left = pad;
-        wrapQty.Left = pad;
-        wrapQty.Width = third;
+        nudQuantity.Left = pad;
+        nudQuantity.Width = third;
 
         lblDate.Left = pad + third + gap;
-        wrapDate.Left = pad + third + gap;
-        wrapDate.Width = third;
+        dtpDate.Left = pad + third + gap;
+        dtpDate.Width = third;
 
         lblUnitPrice.Left = pad + (third + gap) * 2;
-        wrapPrice.Left = pad + (third + gap) * 2;
-        wrapPrice.Width = third;
+        txtUnitPrice.Left = pad + (third + gap) * 2;
+        txtUnitPrice.Width = third;
 
         previewBanner.Left = pad;
         previewBanner.Width = usable;
 
         lblNotes.Left = pad;
         helpNotes.Left = pad;
-        wrapNotes.Left = pad;
-        wrapNotes.Width = usable;
-
-        // Give notes remaining vertical space above actions
+        txtNotes.Left = pad;
+        txtNotes.Width = usable;
         int notesBottom = formCard.ClientSize.Height - actionsBar.Height - 16;
-        wrapNotes.Height = Math.Max(80, notesBottom - wrapNotes.Top);
+        txtNotes.Height = Math.Max(80, notesBottom - txtNotes.Top);
 
         LayoutActions();
     }
@@ -138,13 +125,29 @@ public partial class StockInForm : Form
         lblPreview.ForeColor = UiTheme.Text;
         lblError.ForeColor = UiTheme.Error;
 
-        cboProduct.FlatStyle = FlatStyle.Flat;
-        cboSupplier.FlatStyle = FlatStyle.Flat;
-        cboProduct.BackColor = Color.White;
-        cboSupplier.BackColor = Color.White;
-        txtUnitPrice.BackColor = Color.White;
-        txtNotes.BackColor = Color.White;
+        // Style dropdowns themselves — standard chrome, white background, single control
+        foreach (var cbo in new[] { cboProduct, cboSupplier })
+        {
+            cbo.FlatStyle = FlatStyle.Standard;
+            cbo.BackColor = Color.White;
+            cbo.ForeColor = UiTheme.Text;
+            cbo.Font = UiTheme.Body;
+        }
+
+        nudQuantity.BorderStyle = BorderStyle.FixedSingle;
         nudQuantity.BackColor = Color.White;
+        nudQuantity.ForeColor = UiTheme.Text;
+
+        txtUnitPrice.BorderStyle = BorderStyle.FixedSingle;
+        txtUnitPrice.BackColor = Color.White;
+        txtUnitPrice.ForeColor = UiTheme.Text;
+
+        txtNotes.BorderStyle = BorderStyle.FixedSingle;
+        txtNotes.BackColor = Color.White;
+        txtNotes.ForeColor = UiTheme.Text;
+
+        dtpDate.CalendarForeColor = UiTheme.Text;
+        dtpDate.CalendarMonthBackground = Color.White;
 
         btnSave.BackColor = UiTheme.Primary;
         btnSave.ForeColor = Color.White;
