@@ -5,9 +5,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Customers;
 
-/// <summary>
-/// SCR-011 Customer Add/Edit modal — Designer-based (partial).
-/// </summary>
+/// <summary>SCR-011 Customer Add/Edit modal — soft dialog chrome.</summary>
 public partial class CustomerEditForm : Form
 {
     private readonly CustomerService _service = new();
@@ -17,7 +15,9 @@ public partial class CustomerEditForm : Form
     {
         _customerId = customerId;
         InitializeComponent();
-        ApplyRuntimeStyling();
+
+        if (!DesignTime.IsActive)
+            ApplyRuntimeStyling();
 
         if (_customerId is int id)
         {
@@ -33,20 +33,9 @@ public partial class CustomerEditForm : Form
         }
     }
 
-    private void ApplyRuntimeStyling()
-    {
-        UiTheme.StyleTextBox(txtName);
-        UiTheme.StyleTextBox(txtPhone);
-        UiTheme.StyleTextBox(txtEmail);
-        UiTheme.StyleTextBox(txtAddress);
-        UiTheme.StyleButton(btnSave, UiTheme.ButtonKind.Primary);
-        UiTheme.StyleButton(btnCancel, UiTheme.ButtonKind.Secondary);
-    }
+    private void ApplyRuntimeStyling() => DialogChrome.Apply(this);
 
-    private void BtnCancel_Click(object? sender, EventArgs e)
-    {
-        DialogResult = DialogResult.Cancel;
-    }
+    private void BtnCancel_Click(object? sender, EventArgs e) => DialogResult = DialogResult.Cancel;
 
     private void LoadExisting(int id)
     {
@@ -63,7 +52,7 @@ public partial class CustomerEditForm : Form
         }
         catch (AppException ex)
         {
-            MessageBox.Show(this, ex.Message, "Customer", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            AppDialog.Warning(this, ex.Message, "Customer");
             DialogResult = DialogResult.Cancel;
         }
     }

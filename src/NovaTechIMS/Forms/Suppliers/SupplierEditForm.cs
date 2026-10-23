@@ -5,9 +5,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Suppliers;
 
-/// <summary>
-/// SCR-009 Supplier Add/Edit modal — Designer-based (partial).
-/// </summary>
+/// <summary>SCR-009 Supplier Add/Edit modal — soft dialog chrome.</summary>
 public partial class SupplierEditForm : Form
 {
     private readonly SupplierService _service = new();
@@ -17,7 +15,9 @@ public partial class SupplierEditForm : Form
     {
         _supplierId = supplierId;
         InitializeComponent();
-        ApplyRuntimeStyling();
+
+        if (!DesignTime.IsActive)
+            ApplyRuntimeStyling();
 
         if (_supplierId is int id)
         {
@@ -33,21 +33,9 @@ public partial class SupplierEditForm : Form
         }
     }
 
-    private void ApplyRuntimeStyling()
-    {
-        UiTheme.StyleTextBox(txtName);
-        UiTheme.StyleTextBox(txtContact);
-        UiTheme.StyleTextBox(txtPhone);
-        UiTheme.StyleTextBox(txtEmail);
-        UiTheme.StyleTextBox(txtAddress);
-        UiTheme.StyleButton(btnSave, UiTheme.ButtonKind.Primary);
-        UiTheme.StyleButton(btnCancel, UiTheme.ButtonKind.Secondary);
-    }
+    private void ApplyRuntimeStyling() => DialogChrome.Apply(this);
 
-    private void BtnCancel_Click(object? sender, EventArgs e)
-    {
-        DialogResult = DialogResult.Cancel;
-    }
+    private void BtnCancel_Click(object? sender, EventArgs e) => DialogResult = DialogResult.Cancel;
 
     private void LoadExisting(int id)
     {
@@ -65,7 +53,7 @@ public partial class SupplierEditForm : Form
         }
         catch (AppException ex)
         {
-            MessageBox.Show(this, ex.Message, "Supplier", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            AppDialog.Warning(this, ex.Message, "Supplier");
             DialogResult = DialogResult.Cancel;
         }
     }

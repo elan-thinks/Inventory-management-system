@@ -7,8 +7,7 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms.Products;
 
 /// <summary>
-/// SCR-005 Product Add/Edit modal — Designer-based (partial).
-/// Quantity on hand is display-only; starts at 0 on create.
+/// SCR-005 Product Add/Edit modal — soft dialog chrome.
 /// </summary>
 public partial class ProductEditForm : Form
 {
@@ -21,7 +20,10 @@ public partial class ProductEditForm : Form
     {
         _productId = productId;
         InitializeComponent();
-        ApplyRuntimeStyling();
+
+        if (!DesignTime.IsActive)
+            ApplyRuntimeStyling();
+
         LoadLookups();
 
         if (_productId is int id)
@@ -41,33 +43,11 @@ public partial class ProductEditForm : Form
 
     private void ApplyRuntimeStyling()
     {
-        Font = UiTheme.Body;
-        BackColor = UiTheme.Surface;
-
-        foreach (var lbl in new[] { lblName, lblCategory, lblSupplier, lblDescription, lblPurchase, lblSelling, lblMinStock, lblQty })
-        {
-            lbl.Font = UiTheme.Label;
-            lbl.ForeColor = UiTheme.Text;
-        }
-
-        lblQtyValue.Font = UiTheme.Body;
+        DialogChrome.Apply(this);
         lblQtyValue.ForeColor = UiTheme.TextMuted;
-        lblQtyHint.Font = UiTheme.Label;
         lblQtyHint.ForeColor = UiTheme.TextMuted;
-        lblError.Font = UiTheme.Label;
-        lblError.ForeColor = UiTheme.Error;
-        chkActive.Font = UiTheme.Body;
-        chkActive.ForeColor = UiTheme.Text;
-
-        UiTheme.StyleTextBox(txtName);
-        UiTheme.StyleTextBox(txtDescription);
-        UiTheme.StyleTextBox(txtPurchase);
-        UiTheme.StyleTextBox(txtSelling);
-        UiTheme.StyleTextBox(txtMinStock);
-        UiTheme.StyleComboBox(cboCategory);
-        UiTheme.StyleComboBox(cboSupplier);
-        UiTheme.StyleButton(btnSave, UiTheme.ButtonKind.Primary);
-        UiTheme.StyleButton(btnCancel, UiTheme.ButtonKind.Secondary);
+        cboCategory.FlatStyle = FlatStyle.Standard;
+        cboSupplier.FlatStyle = FlatStyle.Standard;
     }
 
     private void BtnCancel_Click(object? sender, EventArgs e)
@@ -118,7 +98,7 @@ public partial class ProductEditForm : Form
         }
         catch (AppException ex)
         {
-            MessageBox.Show(this, ex.Message, "Product", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            AppDialog.Warning(this, ex.Message, "Product");
             DialogResult = DialogResult.Cancel;
         }
     }

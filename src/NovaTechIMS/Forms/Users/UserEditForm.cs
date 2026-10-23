@@ -6,7 +6,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Users;
 
-/// <summary>User Add/Edit modal — Designer-based (partial).</summary>
+/// <summary>User Add/Edit modal — soft dialog chrome.</summary>
 public partial class UserEditForm : Form
 {
     private readonly UserService _service = new();
@@ -16,7 +16,9 @@ public partial class UserEditForm : Form
     {
         _userId = userId;
         InitializeComponent();
-        ApplyRuntimeStyling();
+
+        if (!DesignTime.IsActive)
+            ApplyRuntimeStyling();
 
         if (_userId is int id)
         {
@@ -37,24 +39,9 @@ public partial class UserEditForm : Form
 
     private void ApplyRuntimeStyling()
     {
-        Font = UiTheme.Body;
-        BackColor = UiTheme.Surface;
-        foreach (var lbl in new[] { lblUsername, lblFullName, lblPassword, lblRole })
-        {
-            lbl.Font = UiTheme.Label;
-            lbl.ForeColor = UiTheme.Text;
-        }
-        lblPasswordHint.Font = UiTheme.Label;
+        DialogChrome.Apply(this);
         lblPasswordHint.ForeColor = UiTheme.TextMuted;
-        lblError.Font = UiTheme.Label;
-        lblError.ForeColor = UiTheme.Error;
-        chkActive.Font = UiTheme.Body;
-        UiTheme.StyleTextBox(txtUsername);
-        UiTheme.StyleTextBox(txtFullName);
-        UiTheme.StyleTextBox(txtPassword);
-        UiTheme.StyleComboBox(cboRole);
-        UiTheme.StyleButton(btnSave, UiTheme.ButtonKind.Primary);
-        UiTheme.StyleButton(btnCancel, UiTheme.ButtonKind.Secondary);
+        cboRole.FlatStyle = FlatStyle.Standard;
     }
 
     private void BtnCancel_Click(object? sender, EventArgs e) => DialogResult = DialogResult.Cancel;
@@ -73,7 +60,7 @@ public partial class UserEditForm : Form
         }
         catch (AppException ex)
         {
-            MessageBox.Show(this, ex.Message, "User", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            AppDialog.Warning(this, ex.Message, "User");
             DialogResult = DialogResult.Cancel;
         }
     }
