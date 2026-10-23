@@ -8,7 +8,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Stock-Out — soft field boxes, full panel (matches Stock-In).</summary>
+/// <summary>Stock-Out — ComboBox styled directly (no wrapper panels).</summary>
 public partial class StockOutForm : Form
 {
     private StockOutService? _service;
@@ -24,7 +24,7 @@ public partial class StockOutForm : Form
             return;
 
         ApplyRuntimeStyling();
-        WireSoftFieldBorders();
+        WireCardBorder();
         Load += (_, _) =>
         {
             LayoutResponsive();
@@ -35,24 +35,13 @@ public partial class StockOutForm : Form
         actionsBar.Resize += (_, _) => LayoutActions();
     }
 
-    private void WireSoftFieldBorders()
+    private void WireCardBorder()
     {
         formCard.Paint += (_, e) =>
         {
             using var pen = new Pen(Color.FromArgb(228, 232, 236), 1);
             e.Graphics.DrawRectangle(pen, 0, 0, formCard.Width - 1, formCard.Height - 1);
         };
-
-        void SoftField(object? s, PaintEventArgs e)
-        {
-            if (s is not Panel p) return;
-            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            using var pen = new Pen(Color.FromArgb(210, 216, 222), 1);
-            e.Graphics.DrawRectangle(pen, 0, 0, p.Width - 1, p.Height - 1);
-        }
-
-        foreach (var w in new[] { wrapProduct, wrapCustomer, wrapQty, wrapDate, wrapPrice, wrapNotes })
-            w.Paint += SoftField;
 
         previewBanner.Paint += (_, e) =>
         {
@@ -70,37 +59,37 @@ public partial class StockOutForm : Form
         int half = (usable - gap) / 2;
 
         lblProduct.Left = pad;
-        wrapProduct.Left = pad;
-        wrapProduct.Width = half;
+        cboProduct.Left = pad;
+        cboProduct.Width = half;
         helpProduct.Left = pad;
 
         lblCustomer.Left = pad + half + gap;
-        wrapCustomer.Left = pad + half + gap;
-        wrapCustomer.Width = half;
+        cboCustomer.Left = pad + half + gap;
+        cboCustomer.Width = half;
         helpCustomer.Left = pad + half + gap;
 
         int third = (usable - gap * 2) / 3;
         lblQuantity.Left = pad;
-        wrapQty.Left = pad;
-        wrapQty.Width = third;
+        nudQuantity.Left = pad;
+        nudQuantity.Width = third;
 
         lblDate.Left = pad + third + gap;
-        wrapDate.Left = pad + third + gap;
-        wrapDate.Width = third;
+        dtpDate.Left = pad + third + gap;
+        dtpDate.Width = third;
 
         lblUnitPrice.Left = pad + (third + gap) * 2;
-        wrapPrice.Left = pad + (third + gap) * 2;
-        wrapPrice.Width = third;
+        txtUnitPrice.Left = pad + (third + gap) * 2;
+        txtUnitPrice.Width = third;
 
         previewBanner.Left = pad;
         previewBanner.Width = usable;
 
         lblNotes.Left = pad;
         helpNotes.Left = pad;
-        wrapNotes.Left = pad;
-        wrapNotes.Width = usable;
+        txtNotes.Left = pad;
+        txtNotes.Width = usable;
         int notesBottom = formCard.ClientSize.Height - actionsBar.Height - 16;
-        wrapNotes.Height = Math.Max(80, notesBottom - wrapNotes.Top);
+        txtNotes.Height = Math.Max(80, notesBottom - txtNotes.Top);
 
         LayoutActions();
     }
@@ -136,13 +125,19 @@ public partial class StockOutForm : Form
         lblPreview.ForeColor = UiTheme.Text;
         lblError.ForeColor = UiTheme.Error;
 
-        cboProduct.FlatStyle = FlatStyle.Flat;
-        cboCustomer.FlatStyle = FlatStyle.Flat;
-        cboProduct.BackColor = Color.White;
-        cboCustomer.BackColor = Color.White;
-        txtUnitPrice.BackColor = Color.White;
-        txtNotes.BackColor = Color.White;
+        foreach (var cbo in new[] { cboProduct, cboCustomer })
+        {
+            cbo.FlatStyle = FlatStyle.Standard;
+            cbo.BackColor = Color.White;
+            cbo.ForeColor = UiTheme.Text;
+        }
+
+        nudQuantity.BorderStyle = BorderStyle.FixedSingle;
         nudQuantity.BackColor = Color.White;
+        txtUnitPrice.BorderStyle = BorderStyle.FixedSingle;
+        txtUnitPrice.BackColor = Color.White;
+        txtNotes.BorderStyle = BorderStyle.FixedSingle;
+        txtNotes.BackColor = Color.White;
 
         btnSave.BackColor = UiTheme.Primary;
         btnSave.ForeColor = Color.White;
