@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Inventory Adjustment — soft field boxes, full panel.</summary>
+/// <summary>Inventory Adjustment — inputs styled directly.</summary>
 partial class AdjustmentForm
 {
     private System.ComponentModel.IContainer components = null;
@@ -14,17 +14,14 @@ partial class AdjustmentForm
     private Label lblFormSub;
 
     private Label lblProduct;
-    private Panel wrapProduct;
     private ComboBox cboProduct;
     private Label helpProduct;
 
     private Label lblPreviousCaption;
     private Label lblPreviousQty;
     private Label lblNewQty;
-    private Panel wrapNewQty;
     private NumericUpDown nudNewQty;
     private Label lblDate;
-    private Panel wrapDate;
     private DateTimePicker dtpDate;
     private Label lblDiffCaption;
     private Label lblDifference;
@@ -33,11 +30,9 @@ partial class AdjustmentForm
     private Label lblPreview;
 
     private Label lblReason;
-    private Panel wrapReason;
     private TextBox txtReason;
     private Label lblNotes;
     private Label helpNotes;
-    private Panel wrapNotes;
     private TextBox txtNotes;
 
     private Panel actionsBar;
@@ -70,17 +65,14 @@ partial class AdjustmentForm
         lblFormSub = new Label();
 
         lblProduct = new Label();
-        wrapProduct = new Panel();
         cboProduct = new ComboBox();
         helpProduct = new Label();
 
         lblPreviousCaption = new Label();
         lblPreviousQty = new Label();
         lblNewQty = new Label();
-        wrapNewQty = new Panel();
         nudNewQty = new NumericUpDown();
         lblDate = new Label();
-        wrapDate = new Panel();
         dtpDate = new DateTimePicker();
         lblDiffCaption = new Label();
         lblDifference = new Label();
@@ -89,11 +81,9 @@ partial class AdjustmentForm
         lblPreview = new Label();
 
         lblReason = new Label();
-        wrapReason = new Panel();
         txtReason = new TextBox();
         lblNotes = new Label();
         helpNotes = new Label();
-        wrapNotes = new Panel();
         txtNotes = new TextBox();
 
         actionsBar = new Panel();
@@ -111,11 +101,6 @@ partial class AdjustmentForm
 
         formCard.SuspendLayout();
         headerPanel.SuspendLayout();
-        wrapProduct.SuspendLayout();
-        wrapNewQty.SuspendLayout();
-        wrapDate.SuspendLayout();
-        wrapReason.SuspendLayout();
-        wrapNotes.SuspendLayout();
         previewBanner.SuspendLayout();
         actionsBar.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)nudNewQty).BeginInit();
@@ -218,102 +203,84 @@ partial class AdjustmentForm
         lblProduct.Location = new Point(28, 80);
         lblProduct.Name = "lblProduct";
 
-        wrapProduct.Location = new Point(28, 102);
-        wrapProduct.Size = new Size(860, 40);
-        wrapProduct.BackColor = Color.White;
-        wrapProduct.Name = "wrapProduct";
-        wrapProduct.Padding = new Padding(8, 6, 8, 6);
-
         cboProduct.DropDownStyle = ComboBoxStyle.DropDownList;
-        cboProduct.FlatStyle = FlatStyle.Flat;
+        cboProduct.FlatStyle = FlatStyle.Standard;
         cboProduct.Font = new Font("Segoe UI", 10F);
-        cboProduct.Dock = DockStyle.Fill;
+        cboProduct.Location = new Point(28, 104);
+        cboProduct.Size = new Size(860, 28);
         cboProduct.Items.AddRange(new object[] { "— Select product —" });
         cboProduct.Name = "cboProduct";
         cboProduct.TabIndex = 0;
         cboProduct.SelectedIndexChanged += CboProduct_SelectedIndexChanged;
-        wrapProduct.Controls.Add(cboProduct);
 
         helpProduct.Text = "Select the product whose on-hand quantity needs correction.";
         helpProduct.Font = new Font("Segoe UI", 8F);
         helpProduct.ForeColor = textMuted;
         helpProduct.AutoSize = true;
-        helpProduct.Location = new Point(28, 146);
+        helpProduct.Location = new Point(28, 136);
         helpProduct.Name = "helpProduct";
 
         lblPreviousCaption.Text = "Current on hand";
         lblPreviousCaption.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
         lblPreviousCaption.ForeColor = textMain;
         lblPreviousCaption.AutoSize = true;
-        lblPreviousCaption.Location = new Point(28, 180);
+        lblPreviousCaption.Location = new Point(28, 172);
         lblPreviousCaption.Name = "lblPreviousCaption";
 
         lblPreviousQty.Text = "—";
         lblPreviousQty.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
         lblPreviousQty.ForeColor = textMuted;
         lblPreviousQty.AutoSize = true;
-        lblPreviousQty.Location = new Point(28, 206);
+        lblPreviousQty.Location = new Point(28, 198);
         lblPreviousQty.Name = "lblPreviousQty";
 
         lblNewQty.Text = "New quantity *";
         lblNewQty.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
         lblNewQty.ForeColor = textMain;
         lblNewQty.AutoSize = true;
-        lblNewQty.Location = new Point(200, 180);
+        lblNewQty.Location = new Point(200, 172);
         lblNewQty.Name = "lblNewQty";
 
-        wrapNewQty.Location = new Point(200, 202);
-        wrapNewQty.Size = new Size(180, 40);
-        wrapNewQty.BackColor = Color.White;
-        wrapNewQty.Name = "wrapNewQty";
-        wrapNewQty.Padding = new Padding(8, 6, 8, 6);
-
         nudNewQty.Font = new Font("Segoe UI", 10F);
-        nudNewQty.Dock = DockStyle.Fill;
+        nudNewQty.Location = new Point(200, 196);
+        nudNewQty.Size = new Size(160, 28);
         nudNewQty.Minimum = 0;
         nudNewQty.Maximum = 1000000;
         nudNewQty.Value = 0;
-        nudNewQty.BorderStyle = BorderStyle.None;
+        nudNewQty.BorderStyle = BorderStyle.FixedSingle;
         nudNewQty.Name = "nudNewQty";
         nudNewQty.TabIndex = 1;
         nudNewQty.ValueChanged += NudNewQty_ValueChanged;
-        wrapNewQty.Controls.Add(nudNewQty);
 
         lblDate.Text = "Date *";
         lblDate.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
         lblDate.ForeColor = textMain;
         lblDate.AutoSize = true;
-        lblDate.Location = new Point(400, 180);
+        lblDate.Location = new Point(384, 172);
         lblDate.Name = "lblDate";
-
-        wrapDate.Location = new Point(400, 202);
-        wrapDate.Size = new Size(200, 40);
-        wrapDate.BackColor = Color.White;
-        wrapDate.Name = "wrapDate";
-        wrapDate.Padding = new Padding(8, 6, 8, 6);
 
         dtpDate.Font = new Font("Segoe UI", 10F);
         dtpDate.Format = DateTimePickerFormat.Short;
-        dtpDate.Dock = DockStyle.Fill;
+        dtpDate.Location = new Point(384, 196);
+        dtpDate.Size = new Size(180, 28);
         dtpDate.Name = "dtpDate";
         dtpDate.TabIndex = 2;
-        wrapDate.Controls.Add(dtpDate);
 
         lblDiffCaption.Text = "Difference";
         lblDiffCaption.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
         lblDiffCaption.ForeColor = textMain;
         lblDiffCaption.AutoSize = true;
-        lblDiffCaption.Location = new Point(620, 180);
+        lblDiffCaption.Location = new Point(588, 172);
         lblDiffCaption.Name = "lblDiffCaption";
 
         lblDifference.Text = "0";
         lblDifference.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
         lblDifference.ForeColor = textMuted;
         lblDifference.AutoSize = true;
-        lblDifference.Location = new Point(620, 206);
+        lblDifference.Location = new Point(588, 198);
         lblDifference.Name = "lblDifference";
 
-        previewBanner.Location = new Point(28, 260);
+        previewBanner.Location = new Point(28, 244);
         previewBanner.Size = new Size(860, 36);
         previewBanner.BackColor = Color.FromArgb(231, 240, 247);
         previewBanner.Name = "previewBanner";
@@ -330,71 +297,59 @@ partial class AdjustmentForm
         lblReason.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
         lblReason.ForeColor = textMain;
         lblReason.AutoSize = true;
-        lblReason.Location = new Point(28, 310);
+        lblReason.Location = new Point(28, 296);
         lblReason.Name = "lblReason";
 
-        wrapReason.Location = new Point(28, 332);
-        wrapReason.Size = new Size(860, 40);
-        wrapReason.BackColor = Color.White;
-        wrapReason.Name = "wrapReason";
-        wrapReason.Padding = new Padding(8, 6, 8, 6);
-
-        txtReason.BorderStyle = BorderStyle.None;
+        txtReason.BorderStyle = BorderStyle.FixedSingle;
         txtReason.Font = new Font("Segoe UI", 10F);
-        txtReason.Dock = DockStyle.Fill;
+        txtReason.Location = new Point(28, 318);
+        txtReason.Size = new Size(860, 28);
         txtReason.Name = "txtReason";
         txtReason.TabIndex = 3;
         txtReason.PlaceholderText = "e.g. Stock count, damaged goods, audit correction";
-        wrapReason.Controls.Add(txtReason);
 
         lblNotes.Text = "Notes";
         lblNotes.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
         lblNotes.ForeColor = textMain;
         lblNotes.AutoSize = true;
-        lblNotes.Location = new Point(28, 386);
+        lblNotes.Location = new Point(28, 360);
         lblNotes.Name = "lblNotes";
 
         helpNotes.Text = "Optional extra detail";
         helpNotes.Font = new Font("Segoe UI", 8F);
         helpNotes.ForeColor = textMuted;
         helpNotes.AutoSize = true;
-        helpNotes.Location = new Point(28, 406);
+        helpNotes.Location = new Point(28, 380);
         helpNotes.Name = "helpNotes";
 
-        wrapNotes.Location = new Point(28, 428);
-        wrapNotes.Size = new Size(860, 80);
-        wrapNotes.BackColor = Color.White;
-        wrapNotes.Name = "wrapNotes";
-        wrapNotes.Padding = new Padding(10, 8, 10, 8);
-
-        txtNotes.BorderStyle = BorderStyle.None;
+        txtNotes.BorderStyle = BorderStyle.FixedSingle;
         txtNotes.Font = new Font("Segoe UI", 10F);
-        txtNotes.Dock = DockStyle.Fill;
+        txtNotes.Location = new Point(28, 400);
+        txtNotes.Size = new Size(860, 80);
         txtNotes.Multiline = true;
         txtNotes.MaxLength = 500;
         txtNotes.ScrollBars = ScrollBars.Vertical;
         txtNotes.Name = "txtNotes";
         txtNotes.TabIndex = 4;
-        wrapNotes.Controls.Add(txtNotes);
 
         formCard.Controls.Add(headerPanel);
         formCard.Controls.Add(lblProduct);
-        formCard.Controls.Add(wrapProduct);
+        formCard.Controls.Add(cboProduct);
         formCard.Controls.Add(helpProduct);
         formCard.Controls.Add(lblPreviousCaption);
         formCard.Controls.Add(lblPreviousQty);
         formCard.Controls.Add(lblNewQty);
-        formCard.Controls.Add(wrapNewQty);
+        formCard.Controls.Add(nudNewQty);
         formCard.Controls.Add(lblDate);
-        formCard.Controls.Add(wrapDate);
+        formCard.Controls.Add(dtpDate);
         formCard.Controls.Add(lblDiffCaption);
         formCard.Controls.Add(lblDifference);
         formCard.Controls.Add(previewBanner);
         formCard.Controls.Add(lblReason);
-        formCard.Controls.Add(wrapReason);
+        formCard.Controls.Add(txtReason);
         formCard.Controls.Add(lblNotes);
         formCard.Controls.Add(helpNotes);
-        formCard.Controls.Add(wrapNotes);
+        formCard.Controls.Add(txtNotes);
         formCard.Controls.Add(actionsBar);
 
         contentHost.Visible = false;
@@ -408,11 +363,6 @@ partial class AdjustmentForm
         formCard.PerformLayout();
         headerPanel.ResumeLayout(false);
         headerPanel.PerformLayout();
-        wrapProduct.ResumeLayout(false);
-        wrapNewQty.ResumeLayout(false);
-        wrapDate.ResumeLayout(false);
-        wrapReason.ResumeLayout(false);
-        wrapNotes.ResumeLayout(false);
         previewBanner.ResumeLayout(false);
         actionsBar.ResumeLayout(false);
         ((System.ComponentModel.ISupportInitialize)nudNewQty).EndInit();

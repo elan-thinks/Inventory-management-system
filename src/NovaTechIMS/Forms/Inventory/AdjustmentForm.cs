@@ -8,7 +8,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Inventory Adjustment — soft field boxes, full panel.</summary>
+/// <summary>Inventory Adjustment — controls styled directly.</summary>
 public partial class AdjustmentForm : Form
 {
     private AdjustmentService? _service;
@@ -24,7 +24,7 @@ public partial class AdjustmentForm : Form
             return;
 
         ApplyRuntimeStyling();
-        WireSoftFieldBorders();
+        WireCardBorder();
         Load += (_, _) =>
         {
             LayoutResponsive();
@@ -34,24 +34,13 @@ public partial class AdjustmentForm : Form
         actionsBar.Resize += (_, _) => LayoutActions();
     }
 
-    private void WireSoftFieldBorders()
+    private void WireCardBorder()
     {
         formCard.Paint += (_, e) =>
         {
             using var pen = new Pen(Color.FromArgb(228, 232, 236), 1);
             e.Graphics.DrawRectangle(pen, 0, 0, formCard.Width - 1, formCard.Height - 1);
         };
-
-        void SoftField(object? s, PaintEventArgs e)
-        {
-            if (s is not Panel p) return;
-            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            using var pen = new Pen(Color.FromArgb(210, 216, 222), 1);
-            e.Graphics.DrawRectangle(pen, 0, 0, p.Width - 1, p.Height - 1);
-        }
-
-        foreach (var w in new[] { wrapProduct, wrapNewQty, wrapDate, wrapReason, wrapNotes })
-            w.Paint += SoftField;
 
         previewBanner.Paint += (_, e) =>
         {
@@ -64,44 +53,40 @@ public partial class AdjustmentForm : Form
     {
         if (formCard is null) return;
         int pad = 28;
-        int gap = 20;
         int usable = Math.Max(600, formCard.ClientSize.Width - pad * 2);
 
         lblProduct.Left = pad;
-        wrapProduct.Left = pad;
-        wrapProduct.Width = usable;
+        cboProduct.Left = pad;
+        cboProduct.Width = usable;
         helpProduct.Left = pad;
 
         lblPreviousCaption.Left = pad;
         lblPreviousQty.Left = pad;
 
-        int col2 = pad + 180;
-        lblNewQty.Left = col2;
-        wrapNewQty.Left = col2;
-        wrapNewQty.Width = 180;
+        lblNewQty.Left = pad + 180;
+        nudNewQty.Left = pad + 180;
+        nudNewQty.Width = 160;
 
-        int col3 = col2 + 200;
-        lblDate.Left = col3;
-        wrapDate.Left = col3;
-        wrapDate.Width = 200;
+        lblDate.Left = pad + 360;
+        dtpDate.Left = pad + 360;
+        dtpDate.Width = 180;
 
-        int col4 = col3 + 220;
-        lblDiffCaption.Left = col4;
-        lblDifference.Left = col4;
+        lblDiffCaption.Left = pad + 560;
+        lblDifference.Left = pad + 560;
 
         previewBanner.Left = pad;
         previewBanner.Width = usable;
 
         lblReason.Left = pad;
-        wrapReason.Left = pad;
-        wrapReason.Width = usable;
+        txtReason.Left = pad;
+        txtReason.Width = usable;
 
         lblNotes.Left = pad;
         helpNotes.Left = pad;
-        wrapNotes.Left = pad;
-        wrapNotes.Width = usable;
+        txtNotes.Left = pad;
+        txtNotes.Width = usable;
         int notesBottom = formCard.ClientSize.Height - actionsBar.Height - 16;
-        wrapNotes.Height = Math.Max(60, notesBottom - wrapNotes.Top);
+        txtNotes.Height = Math.Max(60, notesBottom - txtNotes.Top);
 
         LayoutActions();
     }
@@ -137,11 +122,16 @@ public partial class AdjustmentForm : Form
         lblPreview.ForeColor = UiTheme.Text;
         lblError.ForeColor = UiTheme.Error;
 
-        cboProduct.FlatStyle = FlatStyle.Flat;
+        cboProduct.FlatStyle = FlatStyle.Standard;
         cboProduct.BackColor = Color.White;
-        txtReason.BackColor = Color.White;
-        txtNotes.BackColor = Color.White;
+        cboProduct.ForeColor = UiTheme.Text;
+
+        nudNewQty.BorderStyle = BorderStyle.FixedSingle;
         nudNewQty.BackColor = Color.White;
+        txtReason.BorderStyle = BorderStyle.FixedSingle;
+        txtReason.BackColor = Color.White;
+        txtNotes.BorderStyle = BorderStyle.FixedSingle;
+        txtNotes.BackColor = Color.White;
 
         btnSave.BackColor = UiTheme.Primary;
         btnSave.ForeColor = Color.White;
