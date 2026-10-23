@@ -4,14 +4,19 @@ using System.Windows.Forms;
 namespace NovaTechIMS.Forms.Inventory;
 
 /// <summary>
-/// Stock-In — full-width page layout (no nested scroll-box).
-/// Form itself scrolls if needed; uses entire content panel.
-/// All controls on the design surface for View Designer.
+/// Stock-In — full content panel, no recent grid.
+/// Actions bar Dock=Bottom so buttons never clip.
 /// </summary>
 partial class StockInForm
 {
     private System.ComponentModel.IContainer components = null;
 
+    private Panel actionsBar;
+    private Label lblError;
+    private Button btnClear;
+    private Button btnSave;
+
+    private Panel contentHost;
     private Panel secProductPanel;
     private Label secProduct;
     private Label lblProduct;
@@ -38,14 +43,6 @@ partial class StockInForm
     private Label lblNotes;
     private TextBox txtNotes;
 
-    private Panel actionsBar;
-    private Label lblError;
-    private Button btnClear;
-    private Button btnSave;
-
-    private Label lblHint;
-    private DataGridView grid;
-
     protected override void Dispose(bool disposing)
     {
         if (disposing && components != null)
@@ -57,6 +54,12 @@ partial class StockInForm
     {
         components = new System.ComponentModel.Container();
 
+        actionsBar = new Panel();
+        lblError = new Label();
+        btnClear = new Button();
+        btnSave = new Button();
+
+        contentHost = new Panel();
         secProductPanel = new Panel();
         secProduct = new Label();
         lblProduct = new Label();
@@ -83,40 +86,85 @@ partial class StockInForm
         lblNotes = new Label();
         txtNotes = new TextBox();
 
-        actionsBar = new Panel();
-        lblError = new Label();
-        btnClear = new Button();
-        btnSave = new Button();
-
-        lblHint = new Label();
-        grid = new DataGridView();
-
+        actionsBar.SuspendLayout();
+        contentHost.SuspendLayout();
         secProductPanel.SuspendLayout();
         secMovementPanel.SuspendLayout();
         previewBanner.SuspendLayout();
         secNotesPanel.SuspendLayout();
-        actionsBar.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)nudQuantity).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)grid).BeginInit();
         SuspendLayout();
 
-        // Form = full content area, page scrolls as a whole
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        AutoScroll = true;
         Font = new Font("Segoe UI", 10F);
         BackColor = Color.FromArgb(244, 246, 248);
-        ClientSize = new Size(960, 720);
+        ClientSize = new Size(960, 640);
         FormBorderStyle = FormBorderStyle.None;
         Name = "StockInForm";
         Text = "Stock In";
-        Padding = new Padding(24, 16, 24, 16);
+        Padding = new Padding(20, 12, 20, 8);
 
-        // ========== PRODUCT & SUPPLIER (full width card) ==========
+        // ---- Actions pinned to bottom (always visible) ----
+        actionsBar.Dock = DockStyle.Bottom;
+        actionsBar.Height = 56;
+        actionsBar.BackColor = Color.FromArgb(244, 246, 248);
+        actionsBar.Padding = new Padding(0, 8, 0, 8);
+        actionsBar.Name = "actionsBar";
+
+        lblError.AutoSize = false;
+        lblError.Location = new Point(0, 12);
+        lblError.Size = new Size(480, 28);
+        lblError.ForeColor = Color.FromArgb(192, 57, 43);
+        lblError.Font = new Font("Segoe UI", 9F);
+        lblError.Visible = false;
+        lblError.Name = "lblError";
+
+        btnClear.FlatStyle = FlatStyle.Flat;
+        btnClear.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        btnClear.BackColor = Color.White;
+        btnClear.ForeColor = Color.FromArgb(30, 75, 143);
+        btnClear.FlatAppearance.BorderColor = Color.FromArgb(30, 75, 143);
+        btnClear.FlatAppearance.BorderSize = 1;
+        btnClear.Size = new Size(120, 38);
+        btnClear.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        btnClear.Location = new Point(680, 8);
+        btnClear.Text = "Clear Form";
+        btnClear.Name = "btnClear";
+        btnClear.Cursor = Cursors.Hand;
+        btnClear.TabIndex = 6;
+        btnClear.Click += BtnClear_Click;
+
+        btnSave.FlatStyle = FlatStyle.Flat;
+        btnSave.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        btnSave.BackColor = Color.FromArgb(30, 75, 143);
+        btnSave.ForeColor = Color.White;
+        btnSave.FlatAppearance.BorderSize = 0;
+        btnSave.Size = new Size(170, 38);
+        btnSave.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        btnSave.Location = new Point(810, 8);
+        btnSave.Text = "  Record Stock-In";
+        btnSave.Name = "btnSave";
+        btnSave.Cursor = Cursors.Hand;
+        btnSave.TabIndex = 7;
+        btnSave.UseVisualStyleBackColor = false;
+        btnSave.Click += BtnSave_Click;
+
+        actionsBar.Controls.Add(lblError);
+        actionsBar.Controls.Add(btnClear);
+        actionsBar.Controls.Add(btnSave);
+
+        // ---- Content fills remaining space ----
+        contentHost.Dock = DockStyle.Fill;
+        contentHost.AutoScroll = true;
+        contentHost.Name = "contentHost";
+        contentHost.Padding = new Padding(0, 0, 0, 8);
+
+        // Product & Supplier
         secProductPanel.BackColor = Color.White;
         secProductPanel.BorderStyle = BorderStyle.FixedSingle;
-        secProductPanel.Location = new Point(24, 16);
-        secProductPanel.Size = new Size(900, 176);
+        secProductPanel.Location = new Point(0, 0);
+        secProductPanel.Size = new Size(900, 168);
         secProductPanel.Name = "secProductPanel";
 
         secProduct.Text = "PRODUCT  &  SUPPLIER";
@@ -128,8 +176,7 @@ partial class StockInForm
 
         lblProduct.Text = "Product *";
         lblProduct.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        lblProduct.ForeColor = Color.FromArgb(31, 41, 51);
-        lblProduct.Location = new Point(20, 42);
+        lblProduct.Location = new Point(20, 40);
         lblProduct.AutoSize = true;
         lblProduct.Name = "lblProduct";
 
@@ -137,7 +184,7 @@ partial class StockInForm
         cboProduct.FlatStyle = FlatStyle.Flat;
         cboProduct.Font = new Font("Segoe UI", 10F);
         cboProduct.Items.AddRange(new object[] { "— Select product —" });
-        cboProduct.Location = new Point(20, 64);
+        cboProduct.Location = new Point(20, 62);
         cboProduct.Size = new Size(860, 28);
         cboProduct.Name = "cboProduct";
         cboProduct.TabIndex = 0;
@@ -146,14 +193,13 @@ partial class StockInForm
         helpProduct.Text = "Only active products are listed.";
         helpProduct.Font = new Font("Segoe UI", 8.25F);
         helpProduct.ForeColor = Color.FromArgb(107, 119, 133);
-        helpProduct.Location = new Point(20, 96);
+        helpProduct.Location = new Point(20, 92);
         helpProduct.AutoSize = true;
         helpProduct.Name = "helpProduct";
 
         lblSupplier.Text = "Actual Supplier *";
         lblSupplier.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        lblSupplier.ForeColor = Color.FromArgb(31, 41, 51);
-        lblSupplier.Location = new Point(20, 118);
+        lblSupplier.Location = new Point(20, 112);
         lblSupplier.AutoSize = true;
         lblSupplier.Name = "lblSupplier";
 
@@ -161,7 +207,7 @@ partial class StockInForm
         cboSupplier.FlatStyle = FlatStyle.Flat;
         cboSupplier.Font = new Font("Segoe UI", 10F);
         cboSupplier.Items.AddRange(new object[] { "— Select supplier —" });
-        cboSupplier.Location = new Point(20, 140);
+        cboSupplier.Location = new Point(20, 132);
         cboSupplier.Size = new Size(860, 28);
         cboSupplier.Name = "cboSupplier";
         cboSupplier.TabIndex = 1;
@@ -169,20 +215,9 @@ partial class StockInForm
         helpSupplier.Text = "Defaults to the product’s usual supplier — change if needed.";
         helpSupplier.Font = new Font("Segoe UI", 8.25F);
         helpSupplier.ForeColor = Color.FromArgb(107, 119, 133);
-        helpSupplier.Location = new Point(600, 118);
+        helpSupplier.Location = new Point(480, 112);
         helpSupplier.AutoSize = true;
         helpSupplier.Name = "helpSupplier";
-        helpSupplier.Visible = false; // shown under supplier in runtime text under field
-
-        // helper under supplier
-        var helpSup2 = helpSupplier;
-        helpSupplier.Location = new Point(20, 0); // repositioned - actually put under combo via y
-        // Keep help under supplier row - use location after combo
-        helpSupplier.Visible = true;
-        helpSupplier.Location = new Point(20, 0);
-        // Fix: put help text as part of panel at bottom - expand panel
-        secProductPanel.Size = new Size(900, 190);
-        helpSupplier.Location = new Point(20, 168);
 
         secProductPanel.Controls.Add(secProduct);
         secProductPanel.Controls.Add(lblProduct);
@@ -192,10 +227,10 @@ partial class StockInForm
         secProductPanel.Controls.Add(cboSupplier);
         secProductPanel.Controls.Add(helpSupplier);
 
-        // ========== MOVEMENT DETAILS ==========
+        // Movement
         secMovementPanel.BackColor = Color.White;
         secMovementPanel.BorderStyle = BorderStyle.FixedSingle;
-        secMovementPanel.Location = new Point(24, 218);
+        secMovementPanel.Location = new Point(0, 180);
         secMovementPanel.Size = new Size(900, 120);
         secMovementPanel.Name = "secMovementPanel";
 
@@ -208,7 +243,6 @@ partial class StockInForm
 
         lblQuantity.Text = "Quantity *";
         lblQuantity.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        lblQuantity.ForeColor = Color.FromArgb(31, 41, 51);
         lblQuantity.Location = new Point(20, 40);
         lblQuantity.AutoSize = true;
         lblQuantity.Name = "lblQuantity";
@@ -225,7 +259,6 @@ partial class StockInForm
 
         lblDate.Text = "Date *";
         lblDate.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        lblDate.ForeColor = Color.FromArgb(31, 41, 51);
         lblDate.Location = new Point(190, 40);
         lblDate.AutoSize = true;
         lblDate.Name = "lblDate";
@@ -239,7 +272,6 @@ partial class StockInForm
 
         lblUnitPrice.Text = "Purchase price *";
         lblUnitPrice.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        lblUnitPrice.ForeColor = Color.FromArgb(31, 41, 51);
         lblUnitPrice.Location = new Point(380, 40);
         lblUnitPrice.AutoSize = true;
         lblUnitPrice.Name = "lblUnitPrice";
@@ -259,7 +291,6 @@ partial class StockInForm
 
         lblPreview.Dock = DockStyle.Fill;
         lblPreview.Font = new Font("Segoe UI", 9F);
-        lblPreview.ForeColor = Color.FromArgb(31, 41, 51);
         lblPreview.Text = "  Select a product to see the new quantity on hand.";
         lblPreview.TextAlign = ContentAlignment.MiddleLeft;
         lblPreview.Name = "lblPreview";
@@ -279,11 +310,11 @@ partial class StockInForm
         secMovementPanel.Controls.Add(previewBanner);
         secMovementPanel.Controls.Add(lblCurrentQty);
 
-        // ========== NOTES ==========
+        // Notes
         secNotesPanel.BackColor = Color.White;
         secNotesPanel.BorderStyle = BorderStyle.FixedSingle;
-        secNotesPanel.Location = new Point(24, 350);
-        secNotesPanel.Size = new Size(900, 100);
+        secNotesPanel.Location = new Point(0, 312);
+        secNotesPanel.Size = new Size(900, 110);
         secNotesPanel.Name = "secNotesPanel";
 
         secNotes.Text = "NOTES";
@@ -295,7 +326,6 @@ partial class StockInForm
 
         lblNotes.Text = "Notes";
         lblNotes.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        lblNotes.ForeColor = Color.FromArgb(31, 41, 51);
         lblNotes.Location = new Point(20, 36);
         lblNotes.AutoSize = true;
         lblNotes.Name = "lblNotes";
@@ -306,7 +336,7 @@ partial class StockInForm
         txtNotes.Multiline = true;
         txtNotes.MaxLength = 500;
         txtNotes.ScrollBars = ScrollBars.Vertical;
-        txtNotes.Size = new Size(860, 36);
+        txtNotes.Size = new Size(860, 42);
         txtNotes.Name = "txtNotes";
         txtNotes.TabIndex = 5;
         txtNotes.PlaceholderText = "Optional — e.g. delivery reference, condition of goods";
@@ -315,83 +345,16 @@ partial class StockInForm
         secNotesPanel.Controls.Add(lblNotes);
         secNotesPanel.Controls.Add(txtNotes);
 
-        // ========== ACTIONS (full width, never clipped in a nested box) ==========
-        actionsBar.Location = new Point(24, 462);
-        actionsBar.Size = new Size(900, 48);
-        actionsBar.Name = "actionsBar";
-        actionsBar.BackColor = Color.FromArgb(244, 246, 248);
+        contentHost.Controls.Add(secNotesPanel);
+        contentHost.Controls.Add(secMovementPanel);
+        contentHost.Controls.Add(secProductPanel);
 
-        lblError.Location = new Point(0, 10);
-        lblError.Size = new Size(520, 28);
-        lblError.ForeColor = Color.FromArgb(192, 57, 43);
-        lblError.Font = new Font("Segoe UI", 9F);
-        lblError.Visible = false;
-        lblError.Name = "lblError";
-
-        btnClear.FlatStyle = FlatStyle.Flat;
-        btnClear.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-        btnClear.BackColor = Color.White;
-        btnClear.ForeColor = Color.FromArgb(30, 75, 143);
-        btnClear.FlatAppearance.BorderColor = Color.FromArgb(30, 75, 143);
-        btnClear.FlatAppearance.BorderSize = 1;
-        btnClear.Size = new Size(120, 38);
-        btnClear.Location = new Point(600, 4);
-        btnClear.Text = "Clear Form";
-        btnClear.Name = "btnClear";
-        btnClear.Cursor = Cursors.Hand;
-        btnClear.TabIndex = 6;
-        btnClear.Click += BtnClear_Click;
-
-        btnSave.FlatStyle = FlatStyle.Flat;
-        btnSave.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-        btnSave.BackColor = Color.FromArgb(30, 75, 143);
-        btnSave.ForeColor = Color.White;
-        btnSave.FlatAppearance.BorderSize = 0;
-        btnSave.Size = new Size(170, 38);
-        btnSave.Location = new Point(730, 4);
-        btnSave.Text = "  Record Stock-In";
-        btnSave.Name = "btnSave";
-        btnSave.Cursor = Cursors.Hand;
-        btnSave.TabIndex = 7;
-        btnSave.UseVisualStyleBackColor = false;
-        btnSave.Click += BtnSave_Click;
-
-        actionsBar.Controls.Add(lblError);
-        actionsBar.Controls.Add(btnClear);
-        actionsBar.Controls.Add(btnSave);
-
-        // ========== RECENT GRID (full width, page flow) ==========
-        lblHint.Location = new Point(24, 522);
-        lblHint.Size = new Size(900, 28);
-        lblHint.Text = "Recent Stock-In transactions";
-        lblHint.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-        lblHint.ForeColor = Color.FromArgb(31, 41, 51);
-        lblHint.TextAlign = ContentAlignment.MiddleLeft;
-        lblHint.Name = "lblHint";
-
-        grid.Location = new Point(24, 554);
-        grid.Size = new Size(900, 220);
-        grid.AllowUserToAddRows = false;
-        grid.AllowUserToDeleteRows = false;
-        grid.AllowUserToResizeRows = false;
-        grid.ReadOnly = true;
-        grid.MultiSelect = false;
-        grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-        grid.RowHeadersVisible = false;
-        grid.BorderStyle = BorderStyle.FixedSingle;
-        grid.BackgroundColor = Color.White;
-        grid.ColumnHeadersHeight = 34;
-        grid.Name = "grid";
-        grid.TabIndex = 8;
-
-        Controls.Add(grid);
-        Controls.Add(lblHint);
+        // Dock order: Fill first, Bottom last
+        Controls.Add(contentHost);
         Controls.Add(actionsBar);
-        Controls.Add(secNotesPanel);
-        Controls.Add(secMovementPanel);
-        Controls.Add(secProductPanel);
 
+        actionsBar.ResumeLayout(false);
+        contentHost.ResumeLayout(false);
         secProductPanel.ResumeLayout(false);
         secProductPanel.PerformLayout();
         secMovementPanel.ResumeLayout(false);
@@ -399,9 +362,7 @@ partial class StockInForm
         previewBanner.ResumeLayout(false);
         secNotesPanel.ResumeLayout(false);
         secNotesPanel.PerformLayout();
-        actionsBar.ResumeLayout(false);
         ((System.ComponentModel.ISupportInitialize)nudQuantity).EndInit();
-        ((System.ComponentModel.ISupportInitialize)grid).EndInit();
         ResumeLayout(false);
     }
 }

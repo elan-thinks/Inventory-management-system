@@ -8,10 +8,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>
-/// Stock-In — full-width page layout. The form uses the entire content panel;
-/// AutoScroll is on the form itself (not a nested box).
-/// </summary>
+/// <summary>Stock-In — full-width form, no recent grid, actions always visible.</summary>
 public partial class StockInForm : Form
 {
     private StockInService? _service;
@@ -26,37 +23,23 @@ public partial class StockInForm : Form
         if (DesignTime.IsActive)
             return;
 
-        grid.Columns.Clear();
         ApplyRuntimeStyling();
         Load += (_, _) =>
         {
             LayoutFullWidth();
             LoadLookups();
-            ReloadRecent();
             UpdatePreview();
         };
         Resize += (_, _) => LayoutFullWidth();
+        actionsBar.Resize += (_, _) => LayoutActions();
     }
 
-    /// <summary>Stretch every card to the full content width (minus padding).</summary>
     private void LayoutFullWidth()
     {
-        int left = Padding.Left;
-        int rightPad = Padding.Right + (VerticalScroll.Visible ? SystemInformation.VerticalScrollBarWidth : 0);
-        int w = Math.Max(640, ClientSize.Width - left - rightPad);
-
-        secProductPanel.Left = left;
+        int w = Math.Max(640, contentHost.ClientSize.Width - 4);
         secProductPanel.Width = w;
-        secMovementPanel.Left = left;
         secMovementPanel.Width = w;
-        secNotesPanel.Left = left;
         secNotesPanel.Width = w;
-        actionsBar.Left = left;
-        actionsBar.Width = w;
-        lblHint.Left = left;
-        lblHint.Width = w;
-        grid.Left = left;
-        grid.Width = w;
 
         int fieldW = Math.Max(400, w - 40);
         cboProduct.Width = fieldW;
@@ -64,17 +47,20 @@ public partial class StockInForm : Form
         txtNotes.Width = fieldW;
         previewBanner.Width = fieldW;
 
-        btnSave.Left = Math.Max(200, actionsBar.Width - btnSave.Width - 4);
-        btnClear.Left = btnSave.Left - btnClear.Width - 12;
+        LayoutActions();
+    }
 
-        // Page scroll extent includes grid bottom
-        AutoScrollMinSize = new Size(0, grid.Bottom + Padding.Bottom + 8);
+    private void LayoutActions()
+    {
+        btnSave.Left = Math.Max(200, actionsBar.ClientSize.Width - btnSave.Width - 4);
+        btnClear.Left = btnSave.Left - btnClear.Width - 12;
     }
 
     private void ApplyRuntimeStyling()
     {
         Font = UiTheme.Body;
         BackColor = UiTheme.Background;
+        actionsBar.BackColor = UiTheme.Background;
 
         foreach (var p in new[] { secProductPanel, secMovementPanel, secNotesPanel })
             p.BackColor = UiTheme.Surface;
@@ -98,8 +84,6 @@ public partial class StockInForm : Form
         lblPreview.ForeColor = UiTheme.Text;
         lblError.Font = UiTheme.Label;
         lblError.ForeColor = UiTheme.Error;
-        lblHint.Font = UiTheme.SectionTitle;
-        lblHint.ForeColor = UiTheme.Text;
 
         UiTheme.StyleComboBox(cboProduct);
         UiTheme.StyleComboBox(cboSupplier);
@@ -110,9 +94,7 @@ public partial class StockInForm : Form
         UiTheme.StyleButton(btnClear, UiTheme.ButtonKind.Secondary);
         btnClear.ForeColor = UiTheme.Primary;
         btnClear.FlatAppearance.BorderColor = UiTheme.Primary;
-
         AppIcons.ApplyToButton(btnSave, "icons-stockIn.png", 16);
-        UiTheme.ApplyGridTheme(grid);
 
         dtpDate.MaxDate = DateTime.Today;
         dtpDate.Value = DateTime.Today;
@@ -265,7 +247,6 @@ public partial class StockInForm : Form
                 MessageBoxIcon.Information);
 
             BtnClear_Click(null, EventArgs.Empty);
-            ReloadRecent();
         }
         catch (AppException ex)
         {
@@ -281,39 +262,6 @@ public partial class StockInForm : Form
         {
             btnSave.Enabled = true;
         }
-    }
-
-    private void ReloadRecent()
-    {
-        try
-        {
-            var rows = Service.GetRecent(50);
-            grid.DataSource = null;
-            grid.Columns.Clear();
-            grid.DataSource = rows;
-
-            foreach (DataGridViewColumn col in grid.Columns)
-                col.Visible = false;
-
-            void Show(string name, string header, float w = 1f)
-            {
-                if (grid.Columns[name] is not DataGridViewColumn c) return;
-                c.Visible = true;
-                c.HeaderText = header;
-                c.FillWeight = w;
-            }
-
-            Show(nameof(StockInListRow.TransactionID), "Txn ID", 0.5f);
-            Show(nameof(StockInListRow.ProductName), "Product", 1.4f);
-            Show(nameof(StockInListRow.Quantity), "Qty", 0.5f);
-            Show(nameof(StockInListRow.TransactionDate), "Date", 0.7f);
-            Show(nameof(StockInListRow.UnitPrice), "Price", 0.6f);
-            Show(nameof(StockInListRow.SupplierName), "Supplier", 1.0f);
-            Show(nameof(StockInListRow.UserFullName), "User", 1.0f);
-            Show(nameof(StockInListRow.PreviousQuantity), "Prev", 0.5f);
-            Show(nameof(StockInListRow.NewQuantity), "New", 0.5f);
-        }
-        catch { }
     }
 
     private sealed class LookupItem
