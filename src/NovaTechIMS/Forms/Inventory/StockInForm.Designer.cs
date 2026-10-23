@@ -3,9 +3,7 @@ using System.Windows.Forms;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>
-/// Stock-In — full content area, no inner scroll, mockup-style fields.
-/// </summary>
+/// <summary>Stock-In — soft field boxes, full panel, organized mockup layout.</summary>
 partial class StockInForm
 {
     private System.ComponentModel.IContainer components = null;
@@ -15,20 +13,26 @@ partial class StockInForm
     private Label lblFormTitle;
     private Label lblFormSub;
 
-    private TableLayoutPanel gridFields;
-
     private Label lblProduct;
+    private Panel wrapProduct;
     private ComboBox cboProduct;
     private Label helpProduct;
+
     private Label lblSupplier;
+    private Panel wrapSupplier;
     private ComboBox cboSupplier;
     private Label helpSupplier;
 
     private Label lblQuantity;
+    private Panel wrapQty;
     private NumericUpDown nudQuantity;
+
     private Label lblDate;
+    private Panel wrapDate;
     private DateTimePicker dtpDate;
+
     private Label lblUnitPrice;
+    private Panel wrapPrice;
     private TextBox txtUnitPrice;
 
     private Panel previewBanner;
@@ -37,6 +41,7 @@ partial class StockInForm
 
     private Label lblNotes;
     private Label helpNotes;
+    private Panel wrapNotes;
     private TextBox txtNotes;
 
     private Panel actionsBar;
@@ -44,7 +49,7 @@ partial class StockInForm
     private Button btnClear;
     private Button btnSave;
 
-    // Kept for code-behind compatibility (hidden / unused in new layout)
+    // Compatibility (unused visually)
     private Panel contentHost;
     private Panel secProductPanel;
     private Panel secMovementPanel;
@@ -69,20 +74,26 @@ partial class StockInForm
         lblFormTitle = new Label();
         lblFormSub = new Label();
 
-        gridFields = new TableLayoutPanel();
-
         lblProduct = new Label();
+        wrapProduct = new Panel();
         cboProduct = new ComboBox();
         helpProduct = new Label();
+
         lblSupplier = new Label();
+        wrapSupplier = new Panel();
         cboSupplier = new ComboBox();
         helpSupplier = new Label();
 
         lblQuantity = new Label();
+        wrapQty = new Panel();
         nudQuantity = new NumericUpDown();
+
         lblDate = new Label();
+        wrapDate = new Panel();
         dtpDate = new DateTimePicker();
+
         lblUnitPrice = new Label();
+        wrapPrice = new Panel();
         txtUnitPrice = new TextBox();
 
         previewBanner = new Panel();
@@ -91,6 +102,7 @@ partial class StockInForm
 
         lblNotes = new Label();
         helpNotes = new Label();
+        wrapNotes = new Panel();
         txtNotes = new TextBox();
 
         actionsBar = new Panel();
@@ -98,7 +110,6 @@ partial class StockInForm
         btnClear = new Button();
         btnSave = new Button();
 
-        // Compatibility shells (empty, not shown)
         contentHost = new Panel();
         secProductPanel = new Panel();
         secMovementPanel = new Panel();
@@ -109,7 +120,12 @@ partial class StockInForm
 
         formCard.SuspendLayout();
         headerPanel.SuspendLayout();
-        gridFields.SuspendLayout();
+        wrapProduct.SuspendLayout();
+        wrapSupplier.SuspendLayout();
+        wrapQty.SuspendLayout();
+        wrapDate.SuspendLayout();
+        wrapPrice.SuspendLayout();
+        wrapNotes.SuspendLayout();
         previewBanner.SuspendLayout();
         actionsBar.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)nudQuantity).BeginInit();
@@ -119,7 +135,7 @@ partial class StockInForm
         var accent = Color.FromArgb(15, 118, 70);
         var textMain = Color.FromArgb(28, 35, 43);
         var textMuted = Color.FromArgb(120, 130, 145);
-        var borderSoft = Color.FromArgb(218, 224, 230);
+        var borderSoft = Color.FromArgb(210, 216, 222);
 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
@@ -131,44 +147,44 @@ partial class StockInForm
         Text = "Stock In";
         Padding = new Padding(20, 12, 20, 12);
 
-        // ---- Full-area white card (NO AutoScroll) ----
         formCard.Dock = DockStyle.Fill;
         formCard.BackColor = Color.White;
         formCard.BorderStyle = BorderStyle.None;
-        formCard.Padding = new Padding(32, 24, 32, 16);
         formCard.Name = "formCard";
 
         // Header
         headerPanel.Dock = DockStyle.Top;
-        headerPanel.Height = 58;
+        headerPanel.Height = 64;
+        headerPanel.Padding = new Padding(28, 16, 28, 0);
         headerPanel.BackColor = Color.White;
         headerPanel.Name = "headerPanel";
 
         lblFormTitle.AutoSize = true;
         lblFormTitle.Font = new Font("Segoe UI", 15F, FontStyle.Bold);
         lblFormTitle.ForeColor = textMain;
-        lblFormTitle.Location = new Point(0, 2);
+        lblFormTitle.Location = new Point(28, 14);
         lblFormTitle.Name = "lblFormTitle";
         lblFormTitle.Text = "Record Stock-In";
 
         lblFormSub.AutoSize = true;
         lblFormSub.Font = new Font("Segoe UI", 9F);
         lblFormSub.ForeColor = textMuted;
-        lblFormSub.Location = new Point(2, 32);
+        lblFormSub.Location = new Point(30, 40);
         lblFormSub.Name = "lblFormSub";
         lblFormSub.Text = "Receive goods into inventory from a supplier.";
 
         headerPanel.Controls.Add(lblFormTitle);
         headerPanel.Controls.Add(lblFormSub);
 
-        // Actions inside card bottom (like mockup)
+        // Actions
         actionsBar.Dock = DockStyle.Bottom;
-        actionsBar.Height = 56;
+        actionsBar.Height = 60;
         actionsBar.BackColor = Color.White;
+        actionsBar.Padding = new Padding(28, 0, 28, 0);
         actionsBar.Name = "actionsBar";
 
         lblError.AutoSize = false;
-        lblError.Location = new Point(0, 14);
+        lblError.Location = new Point(28, 16);
         lblError.Size = new Size(360, 28);
         lblError.ForeColor = Color.FromArgb(180, 55, 50);
         lblError.Font = new Font("Segoe UI", 9F);
@@ -183,7 +199,7 @@ partial class StockInForm
         btnClear.FlatAppearance.BorderSize = 1;
         btnClear.Size = new Size(110, 38);
         btnClear.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnClear.Location = new Point(620, 8);
+        btnClear.Location = new Point(620, 10);
         btnClear.Text = "Reset";
         btnClear.Name = "btnClear";
         btnClear.Cursor = Cursors.Hand;
@@ -197,7 +213,7 @@ partial class StockInForm
         btnSave.FlatAppearance.BorderSize = 0;
         btnSave.Size = new Size(168, 38);
         btnSave.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnSave.Location = new Point(742, 8);
+        btnSave.Location = new Point(742, 10);
         btnSave.Text = "  Record Stock-In";
         btnSave.Name = "btnSave";
         btnSave.Cursor = Cursors.Hand;
@@ -209,50 +225,22 @@ partial class StockInForm
         actionsBar.Controls.Add(btnClear);
         actionsBar.Controls.Add(btnSave);
 
-        // ---- Field grid: 2 columns ----
-        gridFields.Dock = DockStyle.Fill;
-        gridFields.ColumnCount = 2;
-        gridFields.RowCount = 10;
-        gridFields.BackColor = Color.White;
-        gridFields.Name = "gridFields";
-        gridFields.Padding = new Padding(0, 8, 0, 0);
-
-        gridFields.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-        gridFields.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-
-        // Row heights
-        gridFields.RowStyles.Add(new RowStyle(SizeType.Absolute, 22F));  // label product
-        gridFields.RowStyles.Add(new RowStyle(SizeType.Absolute, 36F));  // combo product
-        gridFields.RowStyles.Add(new RowStyle(SizeType.Absolute, 22F));  // help product
-        gridFields.RowStyles.Add(new RowStyle(SizeType.Absolute, 16F));  // spacer
-        gridFields.RowStyles.Add(new RowStyle(SizeType.Absolute, 22F));  // label qty/date/price row
-        gridFields.RowStyles.Add(new RowStyle(SizeType.Absolute, 36F));  // inputs qty/date/price
-        gridFields.RowStyles.Add(new RowStyle(SizeType.Absolute, 16F));  // spacer
-        gridFields.RowStyles.Add(new RowStyle(SizeType.Absolute, 36F));  // preview
-        gridFields.RowStyles.Add(new RowStyle(SizeType.Absolute, 22F));  // notes label
-        gridFields.RowStyles.Add(new RowStyle(SizeType.Percent, 100F)); // notes box fills rest
-
-        // --- Product | Supplier labels ---
+        // Absolute layout body (organized, no scroll)
+        // Product column left
         lblProduct.Text = "Product *";
         lblProduct.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
         lblProduct.ForeColor = textMain;
-        lblProduct.Dock = DockStyle.Fill;
-        lblProduct.TextAlign = ContentAlignment.BottomLeft;
+        lblProduct.AutoSize = true;
+        lblProduct.Location = new Point(28, 80);
         lblProduct.Name = "lblProduct";
-        lblProduct.Margin = new Padding(0, 0, 12, 0);
 
-        lblSupplier.Text = "Supplier *";
-        lblSupplier.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-        lblSupplier.ForeColor = textMain;
-        lblSupplier.Dock = DockStyle.Fill;
-        lblSupplier.TextAlign = ContentAlignment.BottomLeft;
-        lblSupplier.Name = "lblSupplier";
-        lblSupplier.Margin = new Padding(12, 0, 0, 0);
+        wrapProduct.Location = new Point(28, 102);
+        wrapProduct.Size = new Size(420, 40);
+        wrapProduct.BackColor = Color.White;
+        wrapProduct.BorderStyle = BorderStyle.None;
+        wrapProduct.Name = "wrapProduct";
+        wrapProduct.Padding = new Padding(8, 6, 8, 6);
 
-        gridFields.Controls.Add(lblProduct, 0, 0);
-        gridFields.Controls.Add(lblSupplier, 1, 0);
-
-        // --- Combos ---
         cboProduct.DropDownStyle = ComboBoxStyle.DropDownList;
         cboProduct.FlatStyle = FlatStyle.Flat;
         cboProduct.Font = new Font("Segoe UI", 10F);
@@ -260,8 +248,30 @@ partial class StockInForm
         cboProduct.Items.AddRange(new object[] { "— Select product —" });
         cboProduct.Name = "cboProduct";
         cboProduct.TabIndex = 0;
-        cboProduct.Margin = new Padding(0, 4, 12, 0);
         cboProduct.SelectedIndexChanged += CboProduct_SelectedIndexChanged;
+        wrapProduct.Controls.Add(cboProduct);
+
+        helpProduct.Text = "Only active products are listed.";
+        helpProduct.Font = new Font("Segoe UI", 8F);
+        helpProduct.ForeColor = textMuted;
+        helpProduct.AutoSize = true;
+        helpProduct.Location = new Point(28, 146);
+        helpProduct.Name = "helpProduct";
+
+        // Supplier column right
+        lblSupplier.Text = "Supplier *";
+        lblSupplier.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+        lblSupplier.ForeColor = textMain;
+        lblSupplier.AutoSize = true;
+        lblSupplier.Location = new Point(468, 80);
+        lblSupplier.Name = "lblSupplier";
+
+        wrapSupplier.Location = new Point(468, 102);
+        wrapSupplier.Size = new Size(420, 40);
+        wrapSupplier.BackColor = Color.White;
+        wrapSupplier.BorderStyle = BorderStyle.None;
+        wrapSupplier.Name = "wrapSupplier";
+        wrapSupplier.Padding = new Padding(8, 6, 8, 6);
 
         cboSupplier.DropDownStyle = ComboBoxStyle.DropDownList;
         cboSupplier.FlatStyle = FlatStyle.Flat;
@@ -270,118 +280,86 @@ partial class StockInForm
         cboSupplier.Items.AddRange(new object[] { "— Select supplier —" });
         cboSupplier.Name = "cboSupplier";
         cboSupplier.TabIndex = 1;
-        cboSupplier.Margin = new Padding(12, 4, 0, 0);
-
-        gridFields.Controls.Add(cboProduct, 0, 1);
-        gridFields.Controls.Add(cboSupplier, 1, 1);
-
-        // --- Help text ---
-        helpProduct.Text = "Only active products are listed.";
-        helpProduct.Font = new Font("Segoe UI", 8F);
-        helpProduct.ForeColor = textMuted;
-        helpProduct.Dock = DockStyle.Fill;
-        helpProduct.Name = "helpProduct";
-        helpProduct.Margin = new Padding(0, 2, 12, 0);
+        wrapSupplier.Controls.Add(cboSupplier);
 
         helpSupplier.Text = "Defaults to the product’s usual supplier.";
         helpSupplier.Font = new Font("Segoe UI", 8F);
         helpSupplier.ForeColor = textMuted;
-        helpSupplier.Dock = DockStyle.Fill;
+        helpSupplier.AutoSize = true;
+        helpSupplier.Location = new Point(468, 146);
         helpSupplier.Name = "helpSupplier";
-        helpSupplier.Margin = new Padding(12, 2, 0, 0);
 
-        gridFields.Controls.Add(helpProduct, 0, 2);
-        gridFields.Controls.Add(helpSupplier, 1, 2);
-
-        // spacer row 3 — empty
-
-        // --- Qty / Date / Price labels in a nested 3-col panel spanning both columns ---
-        var movementHost = new Panel { Dock = DockStyle.Fill, BackColor = Color.White, Name = "movementHost" };
-        var movementGrid = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            ColumnCount = 3,
-            RowCount = 2,
-            BackColor = Color.White,
-            Name = "movementGrid"
-        };
-        movementGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28F));
-        movementGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 36F));
-        movementGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 36F));
-        movementGrid.RowStyles.Add(new RowStyle(SizeType.Absolute, 22F));
-        movementGrid.RowStyles.Add(new RowStyle(SizeType.Absolute, 36F));
-
+        // Qty / Date / Price
         lblQuantity.Text = "Quantity *";
         lblQuantity.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
         lblQuantity.ForeColor = textMain;
-        lblQuantity.Dock = DockStyle.Fill;
-        lblQuantity.TextAlign = ContentAlignment.BottomLeft;
+        lblQuantity.AutoSize = true;
+        lblQuantity.Location = new Point(28, 180);
         lblQuantity.Name = "lblQuantity";
-        lblQuantity.Margin = new Padding(0, 0, 8, 0);
 
-        lblDate.Text = "Date *";
-        lblDate.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-        lblDate.ForeColor = textMain;
-        lblDate.Dock = DockStyle.Fill;
-        lblDate.TextAlign = ContentAlignment.BottomLeft;
-        lblDate.Name = "lblDate";
-        lblDate.Margin = new Padding(8, 0, 8, 0);
-
-        lblUnitPrice.Text = "Purchase price *";
-        lblUnitPrice.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-        lblUnitPrice.ForeColor = textMain;
-        lblUnitPrice.Dock = DockStyle.Fill;
-        lblUnitPrice.TextAlign = ContentAlignment.BottomLeft;
-        lblUnitPrice.Name = "lblUnitPrice";
-        lblUnitPrice.Margin = new Padding(8, 0, 0, 0);
+        wrapQty.Location = new Point(28, 202);
+        wrapQty.Size = new Size(200, 40);
+        wrapQty.BackColor = Color.White;
+        wrapQty.Name = "wrapQty";
+        wrapQty.Padding = new Padding(8, 6, 8, 6);
 
         nudQuantity.Font = new Font("Segoe UI", 10F);
         nudQuantity.Dock = DockStyle.Fill;
         nudQuantity.Minimum = 1;
         nudQuantity.Maximum = 1000000;
         nudQuantity.Value = 1;
+        nudQuantity.BorderStyle = BorderStyle.None;
         nudQuantity.Name = "nudQuantity";
         nudQuantity.TabIndex = 2;
-        nudQuantity.Margin = new Padding(0, 4, 8, 0);
         nudQuantity.ValueChanged += NudQuantity_ValueChanged;
+        wrapQty.Controls.Add(nudQuantity);
+
+        lblDate.Text = "Date *";
+        lblDate.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+        lblDate.ForeColor = textMain;
+        lblDate.AutoSize = true;
+        lblDate.Location = new Point(248, 180);
+        lblDate.Name = "lblDate";
+
+        wrapDate.Location = new Point(248, 202);
+        wrapDate.Size = new Size(220, 40);
+        wrapDate.BackColor = Color.White;
+        wrapDate.Name = "wrapDate";
+        wrapDate.Padding = new Padding(8, 6, 8, 6);
 
         dtpDate.Font = new Font("Segoe UI", 10F);
         dtpDate.Format = DateTimePickerFormat.Short;
         dtpDate.Dock = DockStyle.Fill;
         dtpDate.Name = "dtpDate";
         dtpDate.TabIndex = 3;
-        dtpDate.Margin = new Padding(8, 4, 8, 0);
+        wrapDate.Controls.Add(dtpDate);
 
-        txtUnitPrice.BorderStyle = BorderStyle.FixedSingle;
+        lblUnitPrice.Text = "Purchase price *";
+        lblUnitPrice.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+        lblUnitPrice.ForeColor = textMain;
+        lblUnitPrice.AutoSize = true;
+        lblUnitPrice.Location = new Point(488, 180);
+        lblUnitPrice.Name = "lblUnitPrice";
+
+        wrapPrice.Location = new Point(488, 202);
+        wrapPrice.Size = new Size(200, 40);
+        wrapPrice.BackColor = Color.White;
+        wrapPrice.Name = "wrapPrice";
+        wrapPrice.Padding = new Padding(8, 6, 8, 6);
+
+        txtUnitPrice.BorderStyle = BorderStyle.None;
         txtUnitPrice.Font = new Font("Segoe UI", 10F);
         txtUnitPrice.Dock = DockStyle.Fill;
         txtUnitPrice.Name = "txtUnitPrice";
         txtUnitPrice.TabIndex = 4;
         txtUnitPrice.Text = "0.00";
-        txtUnitPrice.Margin = new Padding(8, 4, 0, 0);
+        wrapPrice.Controls.Add(txtUnitPrice);
 
-        movementGrid.Controls.Add(lblQuantity, 0, 0);
-        movementGrid.Controls.Add(lblDate, 1, 0);
-        movementGrid.Controls.Add(lblUnitPrice, 2, 0);
-        movementGrid.Controls.Add(nudQuantity, 0, 1);
-        movementGrid.Controls.Add(dtpDate, 1, 1);
-        movementGrid.Controls.Add(txtUnitPrice, 2, 1);
-        movementHost.Controls.Add(movementGrid);
-
-        // Span movement across both columns of rows 4-5 by merging via single panel in row 4 spanning
-        // Simpler: put movement host in row 4 spanning 2 cols, and empty row 5
-        gridFields.SetColumnSpan(movementHost, 2);
-        // Actually we need labels+inputs in consecutive rows. Put whole movement block as one cell spanning 2 cols in row 4, with taller row.
-        gridFields.RowStyles[4] = new RowStyle(SizeType.Absolute, 64F);
-        gridFields.RowStyles[5] = new RowStyle(SizeType.Absolute, 8F); // thin spacer
-        gridFields.Controls.Add(movementHost, 0, 4);
-
-        // Preview spanning 2 cols
-        previewBanner.Dock = DockStyle.Fill;
+        // Preview
+        previewBanner.Location = new Point(28, 260);
+        previewBanner.Size = new Size(860, 36);
         previewBanner.BackColor = Color.FromArgb(232, 245, 238);
-        previewBanner.BorderStyle = BorderStyle.None;
         previewBanner.Name = "previewBanner";
-        previewBanner.Margin = new Padding(0, 4, 0, 4);
 
         lblPreview.Dock = DockStyle.Fill;
         lblPreview.Font = new Font("Segoe UI", 9.5F);
@@ -395,32 +373,28 @@ partial class StockInForm
         lblCurrentQty.Name = "lblCurrentQty";
         lblCurrentQty.Text = "—";
 
-        gridFields.SetColumnSpan(previewBanner, 2);
-        gridFields.Controls.Add(previewBanner, 0, 7);
-
-        // Notes label spanning
-        var notesLabelHost = new Panel { Dock = DockStyle.Fill, BackColor = Color.White };
+        // Notes
         lblNotes.Text = "Notes";
         lblNotes.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
         lblNotes.ForeColor = textMain;
         lblNotes.AutoSize = true;
-        lblNotes.Location = new Point(0, 0);
+        lblNotes.Location = new Point(28, 310);
         lblNotes.Name = "lblNotes";
 
         helpNotes.Text = "Optional — delivery reference, condition of goods";
         helpNotes.Font = new Font("Segoe UI", 8F);
         helpNotes.ForeColor = textMuted;
         helpNotes.AutoSize = true;
-        helpNotes.Location = new Point(0, 18);
+        helpNotes.Location = new Point(28, 330);
         helpNotes.Name = "helpNotes";
 
-        notesLabelHost.Controls.Add(lblNotes);
-        notesLabelHost.Controls.Add(helpNotes);
-        gridFields.RowStyles[8] = new RowStyle(SizeType.Absolute, 40F);
-        gridFields.SetColumnSpan(notesLabelHost, 2);
-        gridFields.Controls.Add(notesLabelHost, 0, 8);
+        wrapNotes.Location = new Point(28, 352);
+        wrapNotes.Size = new Size(860, 100);
+        wrapNotes.BackColor = Color.White;
+        wrapNotes.Name = "wrapNotes";
+        wrapNotes.Padding = new Padding(10, 8, 10, 8);
 
-        txtNotes.BorderStyle = BorderStyle.FixedSingle;
+        txtNotes.BorderStyle = BorderStyle.None;
         txtNotes.Font = new Font("Segoe UI", 10F);
         txtNotes.Dock = DockStyle.Fill;
         txtNotes.Multiline = true;
@@ -429,17 +403,28 @@ partial class StockInForm
         txtNotes.Name = "txtNotes";
         txtNotes.TabIndex = 5;
         txtNotes.PlaceholderText = "Describe details here…";
-        txtNotes.Margin = new Padding(0, 4, 0, 0);
+        wrapNotes.Controls.Add(txtNotes);
 
-        gridFields.SetColumnSpan(txtNotes, 2);
-        gridFields.Controls.Add(txtNotes, 0, 9);
-
-        // Assemble formCard: header top, actions bottom, grid fill
-        formCard.Controls.Add(gridFields);
-        formCard.Controls.Add(actionsBar);
         formCard.Controls.Add(headerPanel);
+        formCard.Controls.Add(lblProduct);
+        formCard.Controls.Add(wrapProduct);
+        formCard.Controls.Add(helpProduct);
+        formCard.Controls.Add(lblSupplier);
+        formCard.Controls.Add(wrapSupplier);
+        formCard.Controls.Add(helpSupplier);
+        formCard.Controls.Add(lblQuantity);
+        formCard.Controls.Add(wrapQty);
+        formCard.Controls.Add(lblDate);
+        formCard.Controls.Add(wrapDate);
+        formCard.Controls.Add(lblUnitPrice);
+        formCard.Controls.Add(wrapPrice);
+        formCard.Controls.Add(previewBanner);
+        formCard.Controls.Add(lblCurrentQty);
+        formCard.Controls.Add(lblNotes);
+        formCard.Controls.Add(helpNotes);
+        formCard.Controls.Add(wrapNotes);
+        formCard.Controls.Add(actionsBar);
 
-        // Hide unused compatibility controls
         contentHost.Visible = false;
         secProductPanel.Visible = false;
         secMovementPanel.Visible = false;
@@ -448,9 +433,15 @@ partial class StockInForm
         Controls.Add(formCard);
 
         formCard.ResumeLayout(false);
+        formCard.PerformLayout();
         headerPanel.ResumeLayout(false);
         headerPanel.PerformLayout();
-        gridFields.ResumeLayout(false);
+        wrapProduct.ResumeLayout(false);
+        wrapSupplier.ResumeLayout(false);
+        wrapQty.ResumeLayout(false);
+        wrapDate.ResumeLayout(false);
+        wrapPrice.ResumeLayout(false);
+        wrapNotes.ResumeLayout(false);
         previewBanner.ResumeLayout(false);
         actionsBar.ResumeLayout(false);
         ((System.ComponentModel.ISupportInitialize)nudQuantity).EndInit();
