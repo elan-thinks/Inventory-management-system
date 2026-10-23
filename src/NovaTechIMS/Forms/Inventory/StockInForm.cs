@@ -8,7 +8,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Stock-In — full-width form, no recent grid, actions always visible.</summary>
+/// <summary>Stock-In — soft modern form card, actions always visible.</summary>
 public partial class StockInForm : Form
 {
     private StockInService? _service;
@@ -24,6 +24,7 @@ public partial class StockInForm : Form
             return;
 
         ApplyRuntimeStyling();
+        WireSoftBorders();
         Load += (_, _) =>
         {
             LayoutFullWidth();
@@ -34,18 +35,42 @@ public partial class StockInForm : Form
         actionsBar.Resize += (_, _) => LayoutActions();
     }
 
+    private void WireSoftBorders()
+    {
+        formCard.Paint += (_, e) =>
+        {
+            using var pen = new Pen(Color.FromArgb(228, 232, 236), 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, formCard.Width - 1, formCard.Height - 1);
+        };
+
+        previewBanner.Paint += (_, e) =>
+        {
+            using var pen = new Pen(Color.FromArgb(200, 230, 210), 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, previewBanner.Width - 1, previewBanner.Height - 1);
+        };
+    }
+
     private void LayoutFullWidth()
     {
-        int w = Math.Max(640, contentHost.ClientSize.Width - 4);
-        secProductPanel.Width = w;
-        secMovementPanel.Width = w;
-        secNotesPanel.Width = w;
+        int w = Math.Max(640, contentHost.ClientSize.Width - 8);
+        formCard.Width = w;
 
-        int fieldW = Math.Max(400, w - 40);
-        cboProduct.Width = fieldW;
-        cboSupplier.Width = fieldW;
-        txtNotes.Width = fieldW;
-        previewBanner.Width = fieldW;
+        int inner = Math.Max(560, w - 56);
+        secProductPanel.Width = inner;
+        secMovementPanel.Width = inner;
+        secNotesPanel.Width = inner;
+
+        int half = Math.Max(240, (inner - 20) / 2);
+        cboProduct.Width = half;
+        cboSupplier.Width = half;
+        cboSupplier.Left = half + 20;
+        lblSupplier.Left = cboSupplier.Left;
+        helpSupplier.Left = cboSupplier.Left;
+
+        txtNotes.Width = inner - 24;
+        previewBanner.Width = inner - 24;
+
+        formCard.Height = Math.Max(500, secNotesPanel.Bottom + 28);
 
         LayoutActions();
     }
@@ -61,14 +86,15 @@ public partial class StockInForm : Form
         Font = UiTheme.Body;
         BackColor = UiTheme.Background;
         actionsBar.BackColor = UiTheme.Background;
+        formCard.BackColor = UiTheme.Surface;
 
-        foreach (var p in new[] { secProductPanel, secMovementPanel, secNotesPanel })
-            p.BackColor = UiTheme.Surface;
+        lblFormTitle.ForeColor = UiTheme.Text;
+        lblFormSub.ForeColor = UiTheme.TextMuted;
 
         foreach (var sec in new[] { secProduct, secMovement, secNotes })
         {
-            sec.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
-            sec.ForeColor = UiTheme.Secondary;
+            sec.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
+            sec.ForeColor = UiTheme.TextMuted;
         }
 
         foreach (var lbl in new[] { lblProduct, lblSupplier, lblQuantity, lblDate, lblUnitPrice, lblNotes })
@@ -79,7 +105,7 @@ public partial class StockInForm : Form
 
         helpProduct.ForeColor = UiTheme.TextMuted;
         helpSupplier.ForeColor = UiTheme.TextMuted;
-        previewBanner.BackColor = UiTheme.InfoTint;
+        previewBanner.BackColor = UiTheme.SuccessTint;
         lblPreview.Font = UiTheme.Label;
         lblPreview.ForeColor = UiTheme.Text;
         lblError.Font = UiTheme.Label;
@@ -90,10 +116,15 @@ public partial class StockInForm : Form
         UiTheme.StyleTextBox(txtUnitPrice);
         UiTheme.StyleTextBox(txtNotes);
         UiTheme.StyleDatePicker(dtpDate);
-        UiTheme.StyleButton(btnSave, UiTheme.ButtonKind.Primary);
-        UiTheme.StyleButton(btnClear, UiTheme.ButtonKind.Secondary);
-        btnClear.ForeColor = UiTheme.Primary;
-        btnClear.FlatAppearance.BorderColor = UiTheme.Primary;
+
+        btnSave.BackColor = UiTheme.Primary;
+        btnSave.ForeColor = Color.White;
+        btnSave.FlatAppearance.BorderSize = 0;
+        btnClear.BackColor = Color.White;
+        btnClear.ForeColor = UiTheme.Text;
+        btnClear.FlatAppearance.BorderColor = UiTheme.Border;
+        btnClear.FlatAppearance.BorderSize = 1;
+
         AppIcons.ApplyToButton(btnSave, "icons-stockIn.png", 16);
 
         dtpDate.MaxDate = DateTime.Today;
