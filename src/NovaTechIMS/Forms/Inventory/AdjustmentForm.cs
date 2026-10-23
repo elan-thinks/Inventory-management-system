@@ -8,16 +8,15 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>
-/// Inventory Adjustment — compact fixed layout, action bar INSIDE white card, no scroll/cut.
-/// </summary>
+/// <summary>Inventory Adjustment — same layout pattern as Stock-Out.</summary>
 public partial class AdjustmentForm : Form
 {
     private AdjustmentService? _service;
     private int _previousQty;
     private int _contentRight = 700;
 
-    private const int Pad = 28;
+    private const int Pad = 32;
+    private const int Gap = 20;
 
     private AdjustmentService Service => _service ??= new AdjustmentService();
 
@@ -30,10 +29,6 @@ public partial class AdjustmentForm : Form
 
         ApplyRuntimeStyling();
         WireCardBorder();
-
-        // Dock order: header top, actions bottom, fields free — keep actions above fields
-        actionsBar.BringToFront();
-
         Load += (_, _) =>
         {
             LayoutResponsive();
@@ -47,110 +42,74 @@ public partial class AdjustmentForm : Form
     {
         formCard.Paint += (_, e) =>
         {
-            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            using var pen = new Pen(UiTheme.Border, 1);
-            var r = new Rectangle(0, 0, formCard.Width - 1, formCard.Height - 1);
-            using var path = UiTheme.RoundedRect(r, UiTheme.RadiusMd);
-            e.Graphics.DrawPath(pen, path);
-        };
-
-        // Soft top rule on action bar so it reads as part of the card
-        actionsBar.Paint += (_, e) =>
-        {
-            using var pen = new Pen(UiTheme.Border, 1);
-            e.Graphics.DrawLine(pen, 0, 0, actionsBar.Width, 0);
+            using var pen = new Pen(Color.FromArgb(228, 232, 236), 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, formCard.Width - 1, formCard.Height - 1);
         };
 
         previewBanner.Paint += (_, e) =>
         {
-            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             using var pen = new Pen(Color.FromArgb(200, 215, 230), 1);
-            var r = new Rectangle(0, 0, previewBanner.Width - 1, previewBanner.Height - 1);
-            using var path = UiTheme.RoundedRect(r, UiTheme.RadiusSm);
-            e.Graphics.DrawPath(pen, path);
+            e.Graphics.DrawRectangle(pen, 0, 0, previewBanner.Width - 1, previewBanner.Height - 1);
         };
     }
 
     private void LayoutResponsive()
     {
-        if (formCard is null || actionsBar is null) return;
+        if (formCard is null) return;
 
-        // Content block width — balanced, not edge-to-edge empty stretch
-        int usable = Math.Max(480, formCard.ClientSize.Width - Pad * 2);
-        int blockW = Math.Clamp((int)(usable * 0.70), 460, 620);
+        int usable = Math.Max(520, formCard.ClientSize.Width - Pad * 2);
+        int blockW = Math.Min(usable, Math.Max(560, (int)(usable * 0.78)));
+        blockW = Math.Clamp(blockW, 480, 720);
         _contentRight = Pad + blockW;
 
-        // Compact fixed vertical rhythm (fits typical MDI host without scroll)
-        int y = 72; // under header
-
-        lblProduct.Location = new Point(Pad, y);
-        y += 22;
-        cboProduct.Location = new Point(Pad, y);
+        lblProduct.Left = Pad;
+        cboProduct.Left = Pad;
         cboProduct.Width = blockW;
-        y += 30;
-        helpProduct.Location = new Point(Pad, y);
-        y += 28;
+        helpProduct.Left = Pad;
 
-        // Qty row
-        int qtyW = 110;
-        int dateW = 130;
-        int col2 = Pad + 140;
-        int col3 = col2 + qtyW + 16;
-        int col4 = col3 + dateW + 16;
+        int qtyW = Math.Max(110, blockW / 5);
+        int dateW = Math.Max(130, blockW / 4);
 
-        lblPreviousCaption.Location = new Point(Pad, y);
-        lblNewQty.Location = new Point(col2, y);
-        lblDate.Location = new Point(col3, y);
-        lblDiffCaption.Location = new Point(col4, y);
-        y += 22;
+        lblPreviousCaption.Left = Pad;
+        lblPreviousQty.Left = Pad;
 
-        lblPreviousQty.Location = new Point(Pad, y);
-        nudNewQty.Location = new Point(col2, y);
+        int col2 = Pad + Math.Max(140, qtyW + 40);
+        lblNewQty.Left = col2;
+        nudNewQty.Left = col2;
         nudNewQty.Width = qtyW;
-        dtpDate.Location = new Point(col3, y);
+
+        int col3 = col2 + qtyW + Gap;
+        lblDate.Left = col3;
+        dtpDate.Left = col3;
         dtpDate.Width = dateW;
-        lblDifference.Location = new Point(col4, y);
-        y += 36;
 
-        previewBanner.Location = new Point(Pad, y);
-        previewBanner.Size = new Size(blockW, 34);
-        y += 44;
+        int col4 = col3 + dateW + Gap;
+        lblDiffCaption.Left = col4;
+        lblDifference.Left = col4;
 
-        lblReason.Location = new Point(Pad, y);
-        y += 22;
-        txtReason.Location = new Point(Pad, y);
+        previewBanner.Left = Pad;
+        previewBanner.Width = blockW;
+
+        lblReason.Left = Pad;
+        txtReason.Left = Pad;
         txtReason.Width = blockW;
-        y += 34;
 
-        lblNotes.Location = new Point(Pad, y);
-        y += 20;
-        helpNotes.Location = new Point(Pad, y);
-        y += 18;
-
-        txtNotes.Location = new Point(Pad, y);
+        lblNotes.Left = Pad;
+        helpNotes.Left = Pad;
+        txtNotes.Left = Pad;
         txtNotes.Width = blockW;
-
-        // Notes height: fixed compact, always above action bar — never cut
-        int actionH = Math.Max(56, actionsBar.Height);
-        int maxNotesBottom = formCard.ClientSize.Height - actionH - 12;
-        int notesH = Math.Max(52, Math.Min(72, maxNotesBottom - y));
-        txtNotes.Height = notesH;
+        int notesBottom = formCard.ClientSize.Height - actionsBar.Height - 16;
+        txtNotes.Height = Math.Max(72, Math.Min(130, notesBottom - txtNotes.Top));
 
         LayoutActions();
-        actionsBar.BringToFront();
     }
 
     private void LayoutActions()
     {
         if (actionsBar is null || btnSave is null || btnClear is null) return;
         int right = Math.Min(_contentRight, actionsBar.ClientSize.Width - Pad);
-        btnSave.Top = 10;
-        btnClear.Top = 10;
-        btnSave.Left = Math.Max(Pad + 160, right - btnSave.Width);
-        btnClear.Left = btnSave.Left - btnClear.Width - 10;
-        lblError.Left = Pad;
-        lblError.Top = 14;
-        lblError.Width = Math.Max(100, btnClear.Left - Pad - 8);
+        btnSave.Left = Math.Max(Pad + 200, right - btnSave.Width);
+        btnClear.Left = btnSave.Left - btnClear.Width - 12;
     }
 
     private void ApplyRuntimeStyling()
@@ -158,26 +117,22 @@ public partial class AdjustmentForm : Form
         Font = UiTheme.Body;
         BackColor = UiTheme.Background;
         formCard.BackColor = UiTheme.Surface;
-
-        // IMPORTANT: action bar stays WHITE so it reads as part of the card
         actionsBar.BackColor = UiTheme.Surface;
-        actionsBar.Height = 56;
 
-        lblFormTitle.Font = UiTheme.ScreenTitle;
         lblFormTitle.ForeColor = UiTheme.Text;
         lblFormSub.ForeColor = UiTheme.TextMuted;
 
         foreach (var lbl in new[] { lblProduct, lblPreviousCaption, lblNewQty, lblDate, lblDiffCaption, lblReason, lblNotes })
         {
-            lbl.Font = new Font("Segoe UI", 9.25f, FontStyle.Bold);
+            lbl.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
             lbl.ForeColor = UiTheme.Text;
         }
 
         helpProduct.ForeColor = UiTheme.TextMuted;
         helpNotes.ForeColor = UiTheme.TextMuted;
         lblPreviousQty.ForeColor = UiTheme.TextMuted;
-        lblPreviousQty.Font = new Font("Segoe UI", 15f, FontStyle.Bold);
-        lblDifference.Font = new Font("Segoe UI", 15f, FontStyle.Bold);
+        lblPreviousQty.Font = new Font("Segoe UI", 14f, FontStyle.Bold);
+        lblDifference.Font = new Font("Segoe UI", 14f, FontStyle.Bold);
 
         previewBanner.BackColor = UiTheme.InfoTint;
         lblPreview.ForeColor = UiTheme.Text;
@@ -194,8 +149,6 @@ public partial class AdjustmentForm : Form
         txtReason.BackColor = Color.White;
         txtNotes.BorderStyle = BorderStyle.FixedSingle;
         txtNotes.BackColor = Color.White;
-        // No inner scroll needed for short notes
-        txtNotes.ScrollBars = ScrollBars.None;
 
         btnSave.BackColor = UiTheme.Primary;
         btnSave.ForeColor = Color.White;
@@ -204,9 +157,6 @@ public partial class AdjustmentForm : Form
         btnClear.ForeColor = UiTheme.Text;
         btnClear.FlatAppearance.BorderColor = UiTheme.Border;
         btnClear.FlatAppearance.BorderSize = 1;
-
-        UiTheme.ApplyRoundedRegion(btnSave, UiTheme.RadiusSm);
-        UiTheme.ApplyRoundedRegion(btnClear, UiTheme.RadiusSm);
 
         AppIcons.ApplyToButton(btnSave, "icons-Inventory-adjust.png", 16);
 
@@ -304,14 +254,18 @@ public partial class AdjustmentForm : Form
             var productName = prod.Text.Split('—')[0].Trim();
             var diff = newQty - _previousQty;
 
-            if (!AppDialog.Confirm(
+            var confirm = MessageBox.Show(
                 FindForm(),
                 $"Adjust {productName}?\n\n" +
                 $"Previous on hand: {_previousQty}\n" +
                 $"New on hand:      {newQty}\n" +
                 $"Difference:       {(diff >= 0 ? "+" : "")}{diff}\n" +
                 $"Reason:           {txtReason.Text.Trim()}",
-                "Confirm Adjustment"))
+                "Confirm Adjustment",
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Question);
+
+            if (confirm != DialogResult.OK)
                 return;
 
             btnSave.Enabled = false;
@@ -323,10 +277,12 @@ public partial class AdjustmentForm : Form
                 txtReason.Text,
                 txtNotes.Text);
 
-            AppDialog.Info(
+            MessageBox.Show(
                 FindForm(),
                 $"Adjustment recorded successfully.\nTransaction ID: {txnId}",
-                "Inventory Adjustment");
+                "Inventory Adjustment",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
 
             BtnClear_Click(null, EventArgs.Empty);
         }
