@@ -8,7 +8,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Stock-In — soft modern form card, actions always visible.</summary>
+/// <summary>Stock-In — full panel, no inner scroll, mockup field layout.</summary>
 public partial class StockInForm : Form
 {
     private StockInService? _service;
@@ -27,12 +27,12 @@ public partial class StockInForm : Form
         WireSoftBorders();
         Load += (_, _) =>
         {
-            LayoutFullWidth();
+            LayoutActions();
             LoadLookups();
             UpdatePreview();
         };
-        Resize += (_, _) => LayoutFullWidth();
         actionsBar.Resize += (_, _) => LayoutActions();
+        formCard.Resize += (_, _) => LayoutActions();
     }
 
     private void WireSoftBorders()
@@ -50,33 +50,9 @@ public partial class StockInForm : Form
         };
     }
 
-    private void LayoutFullWidth()
-    {
-        int w = Math.Max(640, contentHost.ClientSize.Width - 8);
-        formCard.Width = w;
-
-        int inner = Math.Max(560, w - 56);
-        secProductPanel.Width = inner;
-        secMovementPanel.Width = inner;
-        secNotesPanel.Width = inner;
-
-        int half = Math.Max(240, (inner - 20) / 2);
-        cboProduct.Width = half;
-        cboSupplier.Width = half;
-        cboSupplier.Left = half + 20;
-        lblSupplier.Left = cboSupplier.Left;
-        helpSupplier.Left = cboSupplier.Left;
-
-        txtNotes.Width = inner - 24;
-        previewBanner.Width = inner - 24;
-
-        formCard.Height = Math.Max(500, secNotesPanel.Bottom + 28);
-
-        LayoutActions();
-    }
-
     private void LayoutActions()
     {
+        if (actionsBar is null || btnSave is null || btnClear is null) return;
         btnSave.Left = Math.Max(200, actionsBar.ClientSize.Width - btnSave.Width - 4);
         btnClear.Left = btnSave.Left - btnClear.Width - 12;
     }
@@ -85,26 +61,22 @@ public partial class StockInForm : Form
     {
         Font = UiTheme.Body;
         BackColor = UiTheme.Background;
-        actionsBar.BackColor = UiTheme.Background;
         formCard.BackColor = UiTheme.Surface;
+        actionsBar.BackColor = UiTheme.Surface;
 
         lblFormTitle.ForeColor = UiTheme.Text;
         lblFormSub.ForeColor = UiTheme.TextMuted;
 
-        foreach (var sec in new[] { secProduct, secMovement, secNotes })
-        {
-            sec.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
-            sec.ForeColor = UiTheme.TextMuted;
-        }
-
         foreach (var lbl in new[] { lblProduct, lblSupplier, lblQuantity, lblDate, lblUnitPrice, lblNotes })
         {
-            lbl.Font = UiTheme.LabelSemibold;
+            lbl.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
             lbl.ForeColor = UiTheme.Text;
         }
 
         helpProduct.ForeColor = UiTheme.TextMuted;
         helpSupplier.ForeColor = UiTheme.TextMuted;
+        helpNotes.ForeColor = UiTheme.TextMuted;
+
         previewBanner.BackColor = UiTheme.SuccessTint;
         lblPreview.Font = UiTheme.Label;
         lblPreview.ForeColor = UiTheme.Text;
@@ -116,6 +88,11 @@ public partial class StockInForm : Form
         UiTheme.StyleTextBox(txtUnitPrice);
         UiTheme.StyleTextBox(txtNotes);
         UiTheme.StyleDatePicker(dtpDate);
+
+        // Taller, softer inputs
+        cboProduct.Height = 32;
+        cboSupplier.Height = 32;
+        txtUnitPrice.Height = 32;
 
         btnSave.BackColor = UiTheme.Primary;
         btnSave.ForeColor = Color.White;
