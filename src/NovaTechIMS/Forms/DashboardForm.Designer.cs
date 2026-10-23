@@ -66,13 +66,6 @@ partial class DashboardForm
     private Button btnQaAdjustment;
     private Button btnQaUsers;
 
-    // Donezo green palette
-    private static readonly Color DonezoGreen = Color.FromArgb(15, 118, 70);
-    private static readonly Color DonezoGreenSoft = Color.FromArgb(232, 245, 238);
-    private static readonly Color DonezoGreenMid = Color.FromArgb(46, 160, 100);
-    private static readonly Color PageBg = Color.FromArgb(245, 247, 250);
-    private static readonly Color CardBorder = Color.FromArgb(228, 232, 238);
-
     protected override void Dispose(bool disposing)
     {
         if (disposing && components != null)
@@ -153,10 +146,14 @@ partial class DashboardForm
         actionsPanel.SuspendLayout();
         SuspendLayout();
 
+        var pageBg = Color.FromArgb(245, 247, 250);
+        var accentGreen = Color.FromArgb(15, 118, 70);
+        var cardBorder = Color.FromArgb(228, 232, 238);
+
         // Welcome
         welcomePanel.Dock = DockStyle.Top;
         welcomePanel.Height = 52;
-        welcomePanel.BackColor = PageBg;
+        welcomePanel.BackColor = pageBg;
         welcomePanel.Name = "welcomePanel";
 
         lblWelcome.AutoSize = true;
@@ -178,7 +175,7 @@ partial class DashboardForm
 
         // Metrics row
         metricsPanel.AutoScroll = true;
-        metricsPanel.BackColor = PageBg;
+        metricsPanel.BackColor = pageBg;
         metricsPanel.Controls.Add(tileProducts);
         metricsPanel.Controls.Add(tileCategories);
         metricsPanel.Controls.Add(tileSuppliers);
@@ -191,10 +188,9 @@ partial class DashboardForm
         metricsPanel.Name = "metricsPanel";
         metricsPanel.WrapContents = false;
 
-        // Donezo-style: first card solid green, rest white
         ConfigureMetricTile(tileProducts, capProducts, lblProducts, subProducts,
             "Active Products", "In catalog",
-            DonezoGreen, Color.White, Color.FromArgb(200, 230, 210), 0, true);
+            accentGreen, Color.White, Color.FromArgb(200, 230, 210), 0, true);
 
         ConfigureMetricTile(tileCategories, capCategories, lblCategories, subCategories,
             "Categories", "Groupings",
@@ -236,7 +232,6 @@ partial class DashboardForm
         bottom.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
         bottom.Padding = new Padding(0, 2, 0, 0);
 
-        // Activity
         activityCard.BackColor = Color.White;
         activityCard.BorderStyle = BorderStyle.FixedSingle;
         activityCard.Controls.Add(grid);
@@ -264,7 +259,7 @@ partial class DashboardForm
         lnkViewAll.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         lnkViewAll.AutoSize = true;
         lnkViewAll.LinkBehavior = LinkBehavior.HoverUnderline;
-        lnkViewAll.LinkColor = DonezoGreen;
+        lnkViewAll.LinkColor = accentGreen;
         lnkViewAll.Location = new Point(360, 6);
         lnkViewAll.Name = "lnkViewAll";
         lnkViewAll.Text = "View all  >";
@@ -292,7 +287,6 @@ partial class DashboardForm
         lblEmpty.TextAlign = ContentAlignment.MiddleCenter;
         lblEmpty.Visible = false;
 
-        // Insights
         insightsCard.BackColor = Color.White;
         insightsCard.BorderStyle = BorderStyle.FixedSingle;
         insightsCard.Dock = DockStyle.Fill;
@@ -337,7 +331,6 @@ partial class DashboardForm
         insightsCard.Controls.Add(lblHealthTitle);
         insightsCard.Controls.Add(lblInsightsTitle);
 
-        // Quick Actions — green primary
         actionsPanel.BackColor = Color.White;
         actionsPanel.BorderStyle = BorderStyle.FixedSingle;
         actionsPanel.Controls.Add(btnQaUsers);
@@ -358,11 +351,11 @@ partial class DashboardForm
         lblQa.Text = "Quick Actions";
         lblQa.TextAlign = ContentAlignment.MiddleLeft;
 
-        ConfigureQaButton(btnQaStockIn, "btnQaStockIn", "  Record Stock-In", 42, true);
-        ConfigureQaButton(btnQaStockOut, "btnQaStockOut", "  Record Stock-Out", 86, false);
-        ConfigureQaButton(btnQaProducts, "btnQaProducts", "  Search Products", 130, false);
-        ConfigureQaButton(btnQaAdjustment, "btnQaAdjustment", "  Inventory Adjustment", 174, false);
-        ConfigureQaButton(btnQaUsers, "btnQaUsers", "  Manage Users", 218, false);
+        ConfigureQaButton(btnQaStockIn, "btnQaStockIn", "  Record Stock-In", 42, true, accentGreen, cardBorder);
+        ConfigureQaButton(btnQaStockOut, "btnQaStockOut", "  Record Stock-Out", 86, false, accentGreen, cardBorder);
+        ConfigureQaButton(btnQaProducts, "btnQaProducts", "  Search Products", 130, false, accentGreen, cardBorder);
+        ConfigureQaButton(btnQaAdjustment, "btnQaAdjustment", "  Inventory Adjustment", 174, false, accentGreen, cardBorder);
+        ConfigureQaButton(btnQaUsers, "btnQaUsers", "  Manage Users", 218, false, accentGreen, cardBorder);
 
         btnQaStockIn.Click += BtnQaStockIn_Click;
         btnQaStockOut.Click += BtnQaStockOut_Click;
@@ -372,7 +365,7 @@ partial class DashboardForm
 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        BackColor = PageBg;
+        BackColor = pageBg;
         ClientSize = new Size(1040, 640);
         Controls.Add(bottom);
         Controls.Add(lblError);
@@ -443,7 +436,9 @@ partial class DashboardForm
         tile.Controls.Add(cap);
     }
 
-    private static void ConfigureQaButton(Button btn, string name, string text, int top, bool primary)
+    private static void ConfigureQaButton(
+        Button btn, string name, string text, int top, bool primary,
+        Color accentGreen, Color cardBorder)
     {
         btn.FlatStyle = FlatStyle.Flat;
         btn.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
@@ -458,15 +453,15 @@ partial class DashboardForm
 
         if (primary)
         {
-            btn.BackColor = DonezoGreen;
+            btn.BackColor = accentGreen;
             btn.ForeColor = Color.White;
             btn.FlatAppearance.BorderSize = 0;
         }
         else
         {
             btn.BackColor = Color.White;
-            btn.ForeColor = DonezoGreen;
-            btn.FlatAppearance.BorderColor = CardBorder;
+            btn.ForeColor = accentGreen;
+            btn.FlatAppearance.BorderColor = cardBorder;
             btn.FlatAppearance.BorderSize = 1;
         }
     }
