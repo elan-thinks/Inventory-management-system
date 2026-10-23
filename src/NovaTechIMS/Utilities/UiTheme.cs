@@ -6,19 +6,19 @@ using System.Windows.Forms;
 namespace NovaTechIMS.Utilities;
 
 /// <summary>
-/// Light-mode design tokens from UI/02-Design-Tokens.md (approved Visual Design).
-/// System-wide — no dark theme.
+/// Light-mode design tokens — Catalox / Donezo inspired soft UI.
+/// Light sidebar, green brand accent.
 /// </summary>
 internal static class UiTheme
 {
-    // ---- Light color tokens (approved) -------------------------------------
-    public static readonly Color Primary = ColorTranslator.FromHtml("#1E4B8F");
-    public static readonly Color PrimaryHover = ColorTranslator.FromHtml("#163A6E");
+    // ---- Brand / surfaces --------------------------------------------------
+    public static readonly Color Primary = ColorTranslator.FromHtml("#0F7646");
+    public static readonly Color PrimaryHover = ColorTranslator.FromHtml("#0B5C37");
     public static readonly Color Secondary = ColorTranslator.FromHtml("#3B7A8F");
-    public static readonly Color Background = ColorTranslator.FromHtml("#F4F6F8");
+    public static readonly Color Background = ColorTranslator.FromHtml("#F6F8FA");
     public static readonly Color Surface = ColorTranslator.FromHtml("#FFFFFF");
-    public static readonly Color Text = ColorTranslator.FromHtml("#1F2933");
-    public static readonly Color TextMuted = ColorTranslator.FromHtml("#6B7785");
+    public static readonly Color Text = ColorTranslator.FromHtml("#1C232B");
+    public static readonly Color TextMuted = ColorTranslator.FromHtml("#828E98");
 
     public static readonly Color Success = ColorTranslator.FromHtml("#2E8B57");
     public static readonly Color SuccessTint = ColorTranslator.FromHtml("#E4F3EA");
@@ -29,21 +29,23 @@ internal static class UiTheme
     public static readonly Color Info = ColorTranslator.FromHtml("#2E6E9E");
     public static readonly Color InfoTint = ColorTranslator.FromHtml("#E7F0F7");
 
-    public static readonly Color Border = ColorTranslator.FromHtml("#D7DCE1");
-    public static readonly Color BorderFocus = ColorTranslator.FromHtml("#1E4B8F");
+    public static readonly Color Border = ColorTranslator.FromHtml("#E4E8EC");
+    public static readonly Color BorderFocus = ColorTranslator.FromHtml("#0F7646");
     public static readonly Color DisabledBackground = ColorTranslator.FromHtml("#ECEEF1");
     public static readonly Color DisabledText = ColorTranslator.FromHtml("#9AA5B1");
 
-    public static readonly Color RowHover = ColorTranslator.FromHtml("#EAF1F8");
-    public static readonly Color RowSelected = ColorTranslator.FromHtml("#D6E4F5");
+    public static readonly Color RowHover = ColorTranslator.FromHtml("#EAF7F0");
+    public static readonly Color RowSelected = ColorTranslator.FromHtml("#D6F0E2");
     public static readonly Color RowAlternate = ColorTranslator.FromHtml("#FAFBFC");
 
-    // Sidebar is the one deliberately dark surface (approved design)
-    public static readonly Color SidebarBackground = ColorTranslator.FromHtml("#16324F");
-    public static readonly Color SidebarText = ColorTranslator.FromHtml("#C7D3E0");
-    public static readonly Color SidebarTextActive = Color.White;
-    public static readonly Color SidebarAccent = ColorTranslator.FromHtml("#5B9BD5");
-    public static readonly Color StatusStripBackground = ColorTranslator.FromHtml("#EEF1F4");
+    // Catalox-style LIGHT sidebar
+    public static readonly Color SidebarBackground = ColorTranslator.FromHtml("#FFFFFF");
+    public static readonly Color SidebarText = ColorTranslator.FromHtml("#5A6570");
+    public static readonly Color SidebarTextActive = ColorTranslator.FromHtml("#0F7646");
+    public static readonly Color SidebarAccent = ColorTranslator.FromHtml("#0F7646");
+    public static readonly Color SidebarHover = ColorTranslator.FromHtml("#F3F5F7");
+    public static readonly Color SidebarActiveBg = ColorTranslator.FromHtml("#E8F5EE");
+    public static readonly Color StatusStripBackground = ColorTranslator.FromHtml("#F0F2F5");
 
     // ---- Typography ---------------------------------------------------
     public static readonly Font ScreenTitle = new("Segoe UI", 14f, FontStyle.Bold);
@@ -63,7 +65,7 @@ internal static class UiTheme
     // ---- Spacing / radius / dimensions ---------------------------------
     public const int Sp1 = 4, Sp2 = 8, Sp3 = 12, Sp4 = 16, Sp6 = 24, Sp8 = 32;
     public const int RadiusSm = 4, RadiusLg = 6;
-    public const int SidebarWidth = 220;
+    public const int SidebarWidth = 228;
     public const int MinWindowWidth = 1024;
     public const int MinWindowHeight = 768;
     public const int InputHeight = 28;
@@ -171,10 +173,6 @@ internal static class UiTheme
         return picker;
     }
 
-    /// <summary>
-    /// Apply light input colors to TextBox / ComboBox / NumericUpDown / DateTimePicker under root.
-    /// Kept name ApplyDarkInputs for call-site compatibility; applies light theme only.
-    /// </summary>
     public static void ApplyDarkInputs(Control root) => ApplyLightInputs(root);
 
     public static void ApplyLightInputs(Control root)
@@ -300,7 +298,7 @@ internal static class UiTheme
     public static void ApplyGridTheme(DataGridView grid)
     {
         grid.BackgroundColor = Surface;
-        grid.BorderStyle = BorderStyle.FixedSingle;
+        grid.BorderStyle = BorderStyle.None;
         grid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
         grid.GridColor = Border;
         grid.RowHeadersVisible = false;
@@ -312,13 +310,15 @@ internal static class UiTheme
         grid.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
         {
             Font = LabelSemibold,
-            BackColor = StatusStripBackground,
-            ForeColor = Text,
+            BackColor = ColorTranslator.FromHtml("#F8FAFC"),
+            ForeColor = TextMuted,
             Alignment = DataGridViewContentAlignment.MiddleLeft,
-            Padding = new Padding(Sp2, 0, 0, 0)
+            Padding = new Padding(Sp2, 0, 0, 0),
+            SelectionBackColor = ColorTranslator.FromHtml("#F8FAFC"),
+            SelectionForeColor = TextMuted
         };
         grid.ColumnHeadersHeight = 34;
-        grid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
+        grid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
 
         grid.DefaultCellStyle = new DataGridViewCellStyle
         {

@@ -18,7 +18,7 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms;
 
 /// <summary>
-/// Application shell — Designer-compatible (parameterless ctor for View Designer).
+/// Application shell — Catalox-style light sidebar + content host.
 /// </summary>
 public partial class MainForm : Form
 {
@@ -26,7 +26,6 @@ public partial class MainForm : Form
     private Button? _activeNavButton;
     private Form? _hostedContent;
 
-    /// <summary>Required by the WinForms designer.</summary>
     public MainForm()
         : this(DesignTime.PlaceholderUser)
     {
@@ -51,17 +50,26 @@ public partial class MainForm : Form
         Font = UiTheme.Body;
         MinimumSize = new Size(UiTheme.MinWindowWidth, UiTheme.MinWindowHeight);
 
+        // Light sidebar
         pnlSidebar.BackColor = UiTheme.SidebarBackground;
         pnlSidebar.Width = UiTheme.SidebarWidth;
         flpNav.BackColor = UiTheme.SidebarBackground;
 
-        lblBrand.Font = UiTheme.SectionTitle;
-        lblBrand.ForeColor = Color.White;
+        // Soft right edge on sidebar
+        pnlSidebar.Paint += (_, e) =>
+        {
+            using var pen = new Pen(UiTheme.Border, 1);
+            e.Graphics.DrawLine(pen, pnlSidebar.Width - 1, 0, pnlSidebar.Width - 1, pnlSidebar.Height);
+        };
+
+        lblBrand.Font = new Font("Segoe UI", 12f, FontStyle.Bold);
+        lblBrand.ForeColor = UiTheme.Text;
+        lblBrand.BackColor = UiTheme.SidebarBackground;
 
         btnLogout.Font = UiTheme.SidebarItem;
         btnLogout.ForeColor = UiTheme.SidebarText;
         btnLogout.BackColor = UiTheme.SidebarBackground;
-        btnLogout.FlatAppearance.MouseOverBackColor = Color.FromArgb(40, 255, 255, 255);
+        btnLogout.FlatAppearance.MouseOverBackColor = UiTheme.SidebarHover;
 
         pnlMain.BackColor = UiTheme.Background;
         pnlHeader.BackColor = UiTheme.Surface;
@@ -78,7 +86,7 @@ public partial class MainForm : Form
 
         lblRoleBadge.Font = UiTheme.BadgeText;
         lblRoleBadge.ForeColor = UiTheme.Primary;
-        lblRoleBadge.BackColor = UiTheme.InfoTint;
+        lblRoleBadge.BackColor = UiTheme.SuccessTint;
         UiTheme.ApplyRoundedRegion(lblRoleBadge, 10);
 
         pnlContent.BackColor = UiTheme.Background;
@@ -153,7 +161,7 @@ public partial class MainForm : Form
         {
             Text = text,
             Font = UiTheme.SidebarGroup,
-            ForeColor = UiTheme.SidebarText,
+            ForeColor = Color.FromArgb(160, 168, 178),
             AutoSize = false,
             Width = UiTheme.SidebarWidth - 24,
             Height = 28,
@@ -173,16 +181,16 @@ public partial class MainForm : Form
             BackColor = UiTheme.SidebarBackground,
             FlatStyle = FlatStyle.Flat,
             TextAlign = ContentAlignment.MiddleLeft,
-            Width = UiTheme.SidebarWidth - 16,
+            Width = UiTheme.SidebarWidth - 20,
             Height = 36,
-            Margin = new Padding(8, 2, 8, 2),
+            Margin = new Padding(10, 2, 10, 2),
             Cursor = Cursors.Hand,
             Tag = text,
             TabStop = true,
             AccessibleName = text
         };
         btn.FlatAppearance.BorderSize = 0;
-        btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(30, 255, 255, 255);
+        btn.FlatAppearance.MouseOverBackColor = UiTheme.SidebarHover;
 
         var iconFile = AppIcons.FileForNavKey(text);
         if (iconFile is not null)
@@ -284,8 +292,9 @@ public partial class MainForm : Form
     private void NavButton_Paint(object? sender, PaintEventArgs e)
     {
         if (sender is not Button btn || btn != _activeNavButton) return;
+        // Green accent bar on the left of active item
         using var brush = new SolidBrush(UiTheme.SidebarAccent);
-        e.Graphics.FillRectangle(brush, 0, 4, 3, btn.Height - 8);
+        e.Graphics.FillRectangle(brush, 0, 6, 3, btn.Height - 12);
     }
 
     private void SetActiveNav(Button btn)
@@ -302,7 +311,7 @@ public partial class MainForm : Form
         }
 
         _activeNavButton = btn;
-        btn.BackColor = Color.FromArgb(40, 255, 255, 255);
+        btn.BackColor = UiTheme.SidebarActiveBg; // soft green tint
         btn.ForeColor = UiTheme.SidebarTextActive;
         btn.Font = UiTheme.SidebarItemActive;
         btn.Invalidate();
