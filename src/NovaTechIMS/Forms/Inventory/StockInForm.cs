@@ -8,7 +8,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Stock-In — full panel, no inner scroll, mockup field layout.</summary>
+/// <summary>Stock-In — soft bordered fields, full panel, organized layout.</summary>
 public partial class StockInForm : Form
 {
     private StockInService? _service;
@@ -24,24 +24,35 @@ public partial class StockInForm : Form
             return;
 
         ApplyRuntimeStyling();
-        WireSoftBorders();
+        WireSoftFieldBorders();
         Load += (_, _) =>
         {
-            LayoutActions();
+            LayoutResponsive();
             LoadLookups();
             UpdatePreview();
         };
+        formCard.Resize += (_, _) => LayoutResponsive();
         actionsBar.Resize += (_, _) => LayoutActions();
-        formCard.Resize += (_, _) => LayoutActions();
     }
 
-    private void WireSoftBorders()
+    private void WireSoftFieldBorders()
     {
         formCard.Paint += (_, e) =>
         {
             using var pen = new Pen(Color.FromArgb(228, 232, 236), 1);
             e.Graphics.DrawRectangle(pen, 0, 0, formCard.Width - 1, formCard.Height - 1);
         };
+
+        void SoftField(object? s, PaintEventArgs e)
+        {
+            if (s is not Panel p) return;
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            using var pen = new Pen(Color.FromArgb(210, 216, 222), 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, p.Width - 1, p.Height - 1);
+        }
+
+        foreach (var w in new[] { wrapProduct, wrapSupplier, wrapQty, wrapDate, wrapPrice, wrapNotes })
+            w.Paint += SoftField;
 
         previewBanner.Paint += (_, e) =>
         {
@@ -50,10 +61,56 @@ public partial class StockInForm : Form
         };
     }
 
+    private void LayoutResponsive()
+    {
+        if (formCard is null) return;
+        int pad = 28;
+        int gap = 20;
+        int usable = Math.Max(600, formCard.ClientSize.Width - pad * 2);
+        int half = (usable - gap) / 2;
+
+        lblProduct.Left = pad;
+        wrapProduct.Left = pad;
+        wrapProduct.Width = half;
+        helpProduct.Left = pad;
+
+        lblSupplier.Left = pad + half + gap;
+        wrapSupplier.Left = pad + half + gap;
+        wrapSupplier.Width = half;
+        helpSupplier.Left = pad + half + gap;
+
+        int third = (usable - gap * 2) / 3;
+        lblQuantity.Left = pad;
+        wrapQty.Left = pad;
+        wrapQty.Width = third;
+
+        lblDate.Left = pad + third + gap;
+        wrapDate.Left = pad + third + gap;
+        wrapDate.Width = third;
+
+        lblUnitPrice.Left = pad + (third + gap) * 2;
+        wrapPrice.Left = pad + (third + gap) * 2;
+        wrapPrice.Width = third;
+
+        previewBanner.Left = pad;
+        previewBanner.Width = usable;
+
+        lblNotes.Left = pad;
+        helpNotes.Left = pad;
+        wrapNotes.Left = pad;
+        wrapNotes.Width = usable;
+
+        // Give notes remaining vertical space above actions
+        int notesBottom = formCard.ClientSize.Height - actionsBar.Height - 16;
+        wrapNotes.Height = Math.Max(80, notesBottom - wrapNotes.Top);
+
+        LayoutActions();
+    }
+
     private void LayoutActions()
     {
         if (actionsBar is null || btnSave is null || btnClear is null) return;
-        btnSave.Left = Math.Max(200, actionsBar.ClientSize.Width - btnSave.Width - 4);
+        btnSave.Left = Math.Max(200, actionsBar.ClientSize.Width - btnSave.Width - 28);
         btnClear.Left = btnSave.Left - btnClear.Width - 12;
     }
 
@@ -78,21 +135,16 @@ public partial class StockInForm : Form
         helpNotes.ForeColor = UiTheme.TextMuted;
 
         previewBanner.BackColor = UiTheme.SuccessTint;
-        lblPreview.Font = UiTheme.Label;
         lblPreview.ForeColor = UiTheme.Text;
-        lblError.Font = UiTheme.Label;
         lblError.ForeColor = UiTheme.Error;
 
-        UiTheme.StyleComboBox(cboProduct);
-        UiTheme.StyleComboBox(cboSupplier);
-        UiTheme.StyleTextBox(txtUnitPrice);
-        UiTheme.StyleTextBox(txtNotes);
-        UiTheme.StyleDatePicker(dtpDate);
-
-        // Taller, softer inputs
-        cboProduct.Height = 32;
-        cboSupplier.Height = 32;
-        txtUnitPrice.Height = 32;
+        cboProduct.FlatStyle = FlatStyle.Flat;
+        cboSupplier.FlatStyle = FlatStyle.Flat;
+        cboProduct.BackColor = Color.White;
+        cboSupplier.BackColor = Color.White;
+        txtUnitPrice.BackColor = Color.White;
+        txtNotes.BackColor = Color.White;
+        nudQuantity.BackColor = Color.White;
 
         btnSave.BackColor = UiTheme.Primary;
         btnSave.ForeColor = Color.White;
