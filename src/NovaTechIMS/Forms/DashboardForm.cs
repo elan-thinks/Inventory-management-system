@@ -14,16 +14,16 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms;
 
 /// <summary>
-/// SCR-002 Dashboard — soft metrics, icons, insights charts.
+/// SCR-002 Dashboard — Fusion-inspired soft metrics, charts, quick actions.
 /// </summary>
 public partial class DashboardForm : Form
 {
     private static readonly Color AccentGreen = Color.FromArgb(15, 118, 70);
     private static readonly Color AccentGreenMid = Color.FromArgb(52, 168, 110);
     private static readonly Color AccentGreenSoft = Color.FromArgb(200, 230, 210);
-    private static readonly Color PageBg = Color.FromArgb(246, 248, 250);
-    private static readonly Color TextMain = Color.FromArgb(28, 35, 43);
-    private static readonly Color TextMuted = Color.FromArgb(130, 140, 152);
+    private static readonly Color PageBg = Color.FromArgb(244, 245, 247);
+    private static readonly Color TextMain = Color.FromArgb(26, 29, 33);
+    private static readonly Color TextMuted = Color.FromArgb(139, 148, 158);
 
     private DashboardService? _service;
     private readonly CurrentUser _user;
@@ -77,7 +77,6 @@ public partial class DashboardForm : Form
             var img = AppIcons.Get(file, 18);
             if (img is null) return;
             box.Image = img;
-            // White hero card: icon sits on green — leave as-is (PNG may be dark).
             box.Visible = true;
         }
 
@@ -99,16 +98,16 @@ public partial class DashboardForm : Form
         void SoftEdge(object? s, PaintEventArgs e)
         {
             if (s is not Panel p) return;
-            using var pen = new Pen(Color.FromArgb(228, 232, 236), 1);
-            e.Graphics.DrawRectangle(pen, 0, 0, p.Width - 1, p.Height - 1);
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            using var pen = new Pen(UiTheme.Border, 1);
+            var r = new Rectangle(0, 0, p.Width - 1, p.Height - 1);
+            using var path = UiTheme.RoundedRect(r, UiTheme.RadiusMd);
+            e.Graphics.DrawPath(pen, path);
         }
 
         activityCard.Paint += SoftEdge;
         insightsCard.Paint += SoftEdge;
         actionsPanel.Paint += SoftEdge;
-
-        foreach (var tile in new[] { tileCategories, tileSuppliers, tileTotalQty, tileLow, tileOut })
-            tile.Paint += SoftEdge;
     }
 
     private void PositionViewAllLink()
@@ -145,10 +144,14 @@ public partial class DashboardForm : Form
     private void ApplyRuntimeTouches()
     {
         Font = UiTheme.Body;
-        BackColor = PageBg;
-        metricsPanel.BackColor = PageBg;
-        welcomePanel.BackColor = PageBg;
-        bottom.BackColor = PageBg;
+        BackColor = UiTheme.Background;
+        metricsPanel.BackColor = UiTheme.Background;
+        welcomePanel.BackColor = UiTheme.Background;
+        bottom.BackColor = UiTheme.Background;
+
+        lblWelcome.Font = UiTheme.ScreenTitle;
+        lblWelcome.ForeColor = UiTheme.Text;
+        lblWelcomeSub.ForeColor = UiTheme.TextMuted;
 
         activityCard.BackColor = Color.White;
         insightsCard.BackColor = Color.White;
@@ -159,36 +162,59 @@ public partial class DashboardForm : Form
         insightsCard.BorderStyle = BorderStyle.None;
         actionsPanel.BorderStyle = BorderStyle.None;
 
-        lblAct.ForeColor = TextMain;
-        lblInsightsTitle.ForeColor = TextMain;
-        lblQa.ForeColor = TextMain;
-        lblEmpty.ForeColor = TextMuted;
-        lblError.ForeColor = Color.FromArgb(180, 55, 50);
+        void StyleTile(Panel tile, Label value, Label sub, Label cap, Color tint, Color valueColor)
+        {
+            tile.BackColor = tint;
+            tile.BorderStyle = BorderStyle.None;
+            UiTheme.ApplyRoundedRegion(tile, UiTheme.RadiusMd);
+            value.Font = UiTheme.MetricValue;
+            value.ForeColor = valueColor;
+            sub.ForeColor = UiTheme.TextMuted;
+            cap.ForeColor = valueColor == Color.White ? Color.FromArgb(200, 232, 215) : UiTheme.TextMuted;
+        }
 
-        lnkViewAll.LinkColor = AccentGreen;
+        StyleTile(tileProducts, lblProducts, subProducts, capProducts, UiTheme.Primary, Color.White);
+        StyleTile(tileCategories, lblCategories, subCategories, capCategories, UiTheme.TileBlue, UiTheme.Text);
+        StyleTile(tileSuppliers, lblSuppliers, subSuppliers, capSuppliers, UiTheme.TilePurple, UiTheme.Text);
+        StyleTile(tileTotalQty, lblTotalQty, subTotalQty, capTotalQty, UiTheme.TileGreen, UiTheme.Text);
+        StyleTile(tileLow, lblLow, subLow, capLow, UiTheme.TileOrange, Color.FromArgb(180, 110, 20));
+        StyleTile(tileOut, lblOut, subOut, capOut, UiTheme.TilePink, UiTheme.Error);
+
+        foreach (var card in new[] { activityCard, insightsCard, actionsPanel })
+            UiTheme.ApplyRoundedRegion(card, UiTheme.RadiusMd);
+
+        lblAct.ForeColor = UiTheme.Text;
+        lblInsightsTitle.ForeColor = UiTheme.Text;
+        lblQa.ForeColor = UiTheme.Text;
+        lblEmpty.ForeColor = UiTheme.TextMuted;
+        lblError.ForeColor = UiTheme.Error;
+
+        lnkViewAll.LinkColor = UiTheme.Primary;
         lnkViewAll.ActiveLinkColor = AccentGreenMid;
 
-        btnQaStockIn.BackColor = AccentGreen;
+        btnQaStockIn.BackColor = UiTheme.Primary;
         btnQaStockIn.ForeColor = Color.White;
         btnQaStockIn.FlatAppearance.BorderSize = 0;
+        UiTheme.ApplyRoundedRegion(btnQaStockIn, UiTheme.RadiusSm);
 
         foreach (var b in new[] { btnQaStockOut, btnQaProducts, btnQaAdjustment, btnQaUsers })
         {
-            b.BackColor = PageBg;
-            b.ForeColor = AccentGreen;
+            b.BackColor = UiTheme.Background;
+            b.ForeColor = UiTheme.Primary;
             b.FlatAppearance.BorderSize = 0;
             b.TextAlign = ContentAlignment.MiddleLeft;
-            b.Padding = new Padding(10, 0, 6, 0);
+            b.Padding = new Padding(12, 0, 6, 0);
+            UiTheme.ApplyRoundedRegion(b, UiTheme.RadiusSm);
         }
         btnQaStockIn.TextAlign = ContentAlignment.MiddleLeft;
-        btnQaStockIn.Padding = new Padding(10, 0, 6, 0);
+        btnQaStockIn.Padding = new Padding(12, 0, 6, 0);
 
         grid.EnableHeadersVisualStyles = false;
         grid.BackgroundColor = Color.White;
         grid.BorderStyle = BorderStyle.None;
-        grid.GridColor = Color.FromArgb(238, 241, 244);
-        grid.DefaultCellStyle.SelectionBackColor = Color.FromArgb(232, 245, 238);
-        grid.DefaultCellStyle.SelectionForeColor = TextMain;
+        grid.GridColor = UiTheme.BorderSubtle;
+        grid.DefaultCellStyle.SelectionBackColor = UiTheme.RowSelected;
+        grid.DefaultCellStyle.SelectionForeColor = UiTheme.Text;
 
         ResizeQuickActionButtons();
     }
@@ -432,9 +458,9 @@ public partial class DashboardForm : Form
 
         int max = Math.Max(1, _movementBars.Max(b => b.TotalQty));
         int left = 8;
-        int bottom = pnlMovement.Height - 22;
+        int bottomY = pnlMovement.Height - 22;
         int top = 8;
-        int chartH = Math.Max(28, bottom - top);
+        int chartH = Math.Max(28, bottomY - top);
         int slotW = Math.Max(22, (pnlMovement.Width - 16) / _movementBars.Count);
         int barW = Math.Max(12, slotW - 10);
 
@@ -456,11 +482,11 @@ public partial class DashboardForm : Form
             using (var barBrush = new SolidBrush(isPeak ? AccentGreen : AccentGreenMid))
             {
                 if (h > 0)
-                    FillRoundedRect(g, barBrush, x, bottom - h, barW, h, 8);
+                    FillRoundedRect(g, barBrush, x, bottomY - h, barW, h, 8);
             }
 
             var labelSize = g.MeasureString(label, dayFont);
-            g.DrawString(label, dayFont, dayBrush, x + (barW - labelSize.Width) / 2f, bottom + 3);
+            g.DrawString(label, dayFont, dayBrush, x + (barW - labelSize.Width) / 2f, bottomY + 3);
         }
     }
 
