@@ -8,11 +8,19 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Stock-In — ComboBox styled directly (no wrapper panels).</summary>
+/// <summary>Stock-In — compact fields, no stretched dropdowns.</summary>
 public partial class StockInForm : Form
 {
     private StockInService? _service;
     private int _currentOnHand;
+
+    // Compact sizes inspired by dense product/admin forms
+    private const int FieldComboW = 300;
+    private const int FieldQtyW = 120;
+    private const int FieldDateW = 140;
+    private const int FieldPriceW = 130;
+    private const int ColGap = 24;
+    private const int Pad = 28;
 
     private StockInService Service => _service ??= new StockInService();
 
@@ -53,43 +61,45 @@ public partial class StockInForm : Form
     private void LayoutResponsive()
     {
         if (formCard is null) return;
-        int pad = 28;
-        int gap = 20;
-        int usable = Math.Max(600, formCard.ClientSize.Width - pad * 2);
-        int half = (usable - gap) / 2;
 
-        lblProduct.Left = pad;
-        cboProduct.Left = pad;
-        cboProduct.Width = half;
-        helpProduct.Left = pad;
+        // Row 1: Product | Supplier — fixed compact widths
+        lblProduct.Left = Pad;
+        cboProduct.Left = Pad;
+        cboProduct.Width = FieldComboW;
+        helpProduct.Left = Pad;
 
-        lblSupplier.Left = pad + half + gap;
-        cboSupplier.Left = pad + half + gap;
-        cboSupplier.Width = half;
-        helpSupplier.Left = pad + half + gap;
+        int col2 = Pad + FieldComboW + ColGap;
+        lblSupplier.Left = col2;
+        cboSupplier.Left = col2;
+        cboSupplier.Width = FieldComboW;
+        helpSupplier.Left = col2;
 
-        int third = (usable - gap * 2) / 3;
-        lblQuantity.Left = pad;
-        nudQuantity.Left = pad;
-        nudQuantity.Width = third;
+        // Row 2: Qty | Date | Price — short controls
+        lblQuantity.Left = Pad;
+        nudQuantity.Left = Pad;
+        nudQuantity.Width = FieldQtyW;
 
-        lblDate.Left = pad + third + gap;
-        dtpDate.Left = pad + third + gap;
-        dtpDate.Width = third;
+        int dLeft = Pad + FieldQtyW + ColGap;
+        lblDate.Left = dLeft;
+        dtpDate.Left = dLeft;
+        dtpDate.Width = FieldDateW;
 
-        lblUnitPrice.Left = pad + (third + gap) * 2;
-        txtUnitPrice.Left = pad + (third + gap) * 2;
-        txtUnitPrice.Width = third;
+        int pLeft = dLeft + FieldDateW + ColGap;
+        lblUnitPrice.Left = pLeft;
+        txtUnitPrice.Left = pLeft;
+        txtUnitPrice.Width = FieldPriceW;
 
-        previewBanner.Left = pad;
-        previewBanner.Width = usable;
+        // Preview + notes span the field block only (not full window)
+        int blockW = FieldComboW * 2 + ColGap;
+        previewBanner.Left = Pad;
+        previewBanner.Width = blockW;
 
-        lblNotes.Left = pad;
-        helpNotes.Left = pad;
-        txtNotes.Left = pad;
-        txtNotes.Width = usable;
+        lblNotes.Left = Pad;
+        helpNotes.Left = Pad;
+        txtNotes.Left = Pad;
+        txtNotes.Width = blockW;
         int notesBottom = formCard.ClientSize.Height - actionsBar.Height - 16;
-        txtNotes.Height = Math.Max(80, notesBottom - txtNotes.Top);
+        txtNotes.Height = Math.Max(72, Math.Min(120, notesBottom - txtNotes.Top));
 
         LayoutActions();
     }
@@ -97,7 +107,7 @@ public partial class StockInForm : Form
     private void LayoutActions()
     {
         if (actionsBar is null || btnSave is null || btnClear is null) return;
-        btnSave.Left = Math.Max(200, actionsBar.ClientSize.Width - btnSave.Width - 28);
+        btnSave.Left = Math.Max(200, actionsBar.ClientSize.Width - btnSave.Width - Pad);
         btnClear.Left = btnSave.Left - btnClear.Width - 12;
     }
 
@@ -125,13 +135,13 @@ public partial class StockInForm : Form
         lblPreview.ForeColor = UiTheme.Text;
         lblError.ForeColor = UiTheme.Error;
 
-        // Style dropdowns themselves — standard chrome, white background, single control
         foreach (var cbo in new[] { cboProduct, cboSupplier })
         {
             cbo.FlatStyle = FlatStyle.Standard;
             cbo.BackColor = Color.White;
             cbo.ForeColor = UiTheme.Text;
             cbo.Font = UiTheme.Body;
+            cbo.DropDownWidth = 360; // list can be wider than control
         }
 
         nudQuantity.BorderStyle = BorderStyle.FixedSingle;
