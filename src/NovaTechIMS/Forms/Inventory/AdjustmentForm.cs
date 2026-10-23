@@ -8,7 +8,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Inventory Adjustment — balanced layout, buttons under content.</summary>
+/// <summary>Inventory Adjustment — fixed action bar, no overlap with notes.</summary>
 public partial class AdjustmentForm : Form
 {
     private AdjustmentService? _service;
@@ -29,6 +29,10 @@ public partial class AdjustmentForm : Form
 
         ApplyRuntimeStyling();
         WireCardBorder();
+
+        // Keep action bar on top of free-positioned fields so notes never cover buttons
+        actionsBar.BringToFront();
+
         Load += (_, _) =>
         {
             LayoutResponsive();
@@ -42,36 +46,45 @@ public partial class AdjustmentForm : Form
     {
         formCard.Paint += (_, e) =>
         {
-            using var pen = new Pen(Color.FromArgb(228, 232, 236), 1);
-            e.Graphics.DrawRectangle(pen, 0, 0, formCard.Width - 1, formCard.Height - 1);
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            using var pen = new Pen(UiTheme.Border, 1);
+            var r = new Rectangle(0, 0, formCard.Width - 1, formCard.Height - 1);
+            using var path = UiTheme.RoundedRect(r, UiTheme.RadiusMd);
+            e.Graphics.DrawPath(pen, path);
         };
 
         previewBanner.Paint += (_, e) =>
         {
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             using var pen = new Pen(Color.FromArgb(200, 215, 230), 1);
-            e.Graphics.DrawRectangle(pen, 0, 0, previewBanner.Width - 1, previewBanner.Height - 1);
+            var r = new Rectangle(0, 0, previewBanner.Width - 1, previewBanner.Height - 1);
+            using var path = UiTheme.RoundedRect(r, UiTheme.RadiusSm);
+            e.Graphics.DrawPath(pen, path);
         };
     }
 
     private void LayoutResponsive()
     {
-        if (formCard is null) return;
+        if (formCard is null || actionsBar is null) return;
 
+        // Content width ~72% of card, max 640 — balanced, not stretched
         int usable = Math.Max(520, formCard.ClientSize.Width - Pad * 2);
-        int blockW = Math.Min(usable, Math.Max(520, (int)(usable * 0.72)));
-        blockW = Math.Clamp(blockW, 480, 640);
+        int blockW = Math.Clamp((int)(usable * 0.72), 480, 640);
         _contentRight = Pad + blockW;
 
+        // Product
         lblProduct.Left = Pad;
         cboProduct.Left = Pad;
         cboProduct.Width = blockW;
         helpProduct.Left = Pad;
 
+        // Qty row: Current | New | Date | Difference
+        int qtyW = 120;
+        int dateW = 140;
+
         lblPreviousCaption.Left = Pad;
         lblPreviousQty.Left = Pad;
 
-        int qtyW = 120;
-        int dateW = 140;
         lblNewQty.Left = Pad + 150;
         nudNewQty.Left = Pad + 150;
         nudNewQty.Width = qtyW;
@@ -94,18 +107,30 @@ public partial class AdjustmentForm : Form
         helpNotes.Left = Pad;
         txtNotes.Left = Pad;
         txtNotes.Width = blockW;
-        int notesBottom = formCard.ClientSize.Height - actionsBar.Height - 16;
-        txtNotes.Height = Math.Max(60, Math.Min(110, notesBottom - txtNotes.Top));
+
+        // Hard stop: notes must end above the docked action bar (never overlap)
+        int actionTop = formCard.ClientSize.Height - actionsBar.Height;
+        int notesMaxBottom = actionTop - 16;
+        int notesDesired = Math.Min(100, Math.Max(64, notesMaxBottom - txtNotes.Top));
+        if (txtNotes.Top + notesDesired > notesMaxBottom)
+            notesDesired = Math.Max(48, notesMaxBottom - txtNotes.Top);
+        txtNotes.Height = notesDesired;
 
         LayoutActions();
+        actionsBar.BringToFront();
     }
 
     private void LayoutActions()
     {
         if (actionsBar is null || btnSave is null || btnClear is null) return;
         int right = Math.Min(_contentRight, actionsBar.ClientSize.Width - Pad);
-        btnSave.Left = Math.Max(Pad + 200, right - btnSave.Width);
+        btnSave.Left = Math.Max(Pad + 180, right - btnSave.Width);
+        btnSave.Top = 12;
         btnClear.Left = btnSave.Left - btnClear.Width - 12;
+        btnClear.Top = 12;
+        lblError.Left = Pad;
+        lblError.Top = 16;
+        lblError.Width = Math.Max(120, btnClear.Left - Pad - 12);
     }
 
     private void ApplyRuntimeStyling()
@@ -113,8 +138,9 @@ public partial class AdjustmentForm : Form
         Font = UiTheme.Body;
         BackColor = UiTheme.Background;
         formCard.BackColor = UiTheme.Surface;
-        actionsBar.BackColor = UiTheme.Surface;
+        actionsBar.BackColor = UiTheme.Background; // subtle bar separation
 
+        lblFormTitle.Font = UiTheme.ScreenTitle;
         lblFormTitle.ForeColor = UiTheme.Text;
         lblFormSub.ForeColor = UiTheme.TextMuted;
 
@@ -127,6 +153,8 @@ public partial class AdjustmentForm : Form
         helpProduct.ForeColor = UiTheme.TextMuted;
         helpNotes.ForeColor = UiTheme.TextMuted;
         lblPreviousQty.ForeColor = UiTheme.TextMuted;
+        lblPreviousQty.Font = new Font("Segoe UI", 16f, FontStyle.Bold);
+        lblDifference.Font = new Font("Segoe UI", 16f, FontStyle.Bold);
 
         previewBanner.BackColor = UiTheme.InfoTint;
         lblPreview.ForeColor = UiTheme.Text;
@@ -151,6 +179,9 @@ public partial class AdjustmentForm : Form
         btnClear.ForeColor = UiTheme.Text;
         btnClear.FlatAppearance.BorderColor = UiTheme.Border;
         btnClear.FlatAppearance.BorderSize = 1;
+
+        UiTheme.ApplyRoundedRegion(btnSave, UiTheme.RadiusSm);
+        UiTheme.ApplyRoundedRegion(btnClear, UiTheme.RadiusSm);
 
         AppIcons.ApplyToButton(btnSave, "icons-Inventory-adjust.png", 16);
 
@@ -248,18 +279,14 @@ public partial class AdjustmentForm : Form
             var productName = prod.Text.Split('—')[0].Trim();
             var diff = newQty - _previousQty;
 
-            var confirm = MessageBox.Show(
+            if (!AppDialog.Confirm(
                 FindForm(),
                 $"Adjust {productName}?\n\n" +
                 $"Previous on hand: {_previousQty}\n" +
                 $"New on hand:      {newQty}\n" +
                 $"Difference:       {(diff >= 0 ? "+" : "")}{diff}\n" +
                 $"Reason:           {txtReason.Text.Trim()}",
-                "Confirm Adjustment",
-                MessageBoxButtons.OKCancel,
-                MessageBoxIcon.Question);
-
-            if (confirm != DialogResult.OK)
+                "Confirm Adjustment"))
                 return;
 
             btnSave.Enabled = false;
@@ -271,12 +298,10 @@ public partial class AdjustmentForm : Form
                 txtReason.Text,
                 txtNotes.Text);
 
-            MessageBox.Show(
+            AppDialog.Info(
                 FindForm(),
                 $"Adjustment recorded successfully.\nTransaction ID: {txnId}",
-                "Inventory Adjustment",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+                "Inventory Adjustment");
 
             BtnClear_Click(null, EventArgs.Empty);
         }
