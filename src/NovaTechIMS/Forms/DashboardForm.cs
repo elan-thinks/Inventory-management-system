@@ -322,11 +322,13 @@ public partial class DashboardForm : Form
 
         if (total <= 0)
         {
-            using var pen = new Pen(Color.FromArgb(220, 225, 230), 14);
-            g.DrawEllipse(pen, rect);
-            using var f = new Font("Segoe UI", 9F, FontStyle.Bold);
-            using var br = new SolidBrush(UiTheme.TextMuted);
-            g.DrawString("No data", f, br, 38, 52);
+            using (var emptyPen = new Pen(Color.FromArgb(220, 225, 230), 14))
+                g.DrawEllipse(emptyPen, rect);
+
+            using (var emptyFont = new Font("Segoe UI", 9F, FontStyle.Bold))
+            using (var emptyBrush = new SolidBrush(UiTheme.TextMuted))
+                g.DrawString("No data", emptyFont, emptyBrush, 38, 52);
+
             DrawLegend(g, 130, 20);
             return;
         }
@@ -336,8 +338,8 @@ public partial class DashboardForm : Form
         {
             if (value <= 0) return;
             float sweep = 360f * value / total;
-            using var pen = new Pen(color, 16) { StartCap = LineCap.Round, EndCap = LineCap.Round };
-            g.DrawArc(pen, rect, start, sweep);
+            using (var slicePen = new Pen(color, 16) { StartCap = LineCap.Round, EndCap = LineCap.Round })
+                g.DrawArc(slicePen, rect, start, sweep);
             start += sweep;
         }
 
@@ -346,19 +348,21 @@ public partial class DashboardForm : Form
         Slice(_out, Color.FromArgb(210, 70, 60));
 
         int healthyPct = (int)Math.Round(100.0 * _healthy / total);
-        using (var f = new Font("Segoe UI", 14F, FontStyle.Bold))
-        using (var br = new SolidBrush(UiTheme.Text))
+
+        using (var pctFont = new Font("Segoe UI", 14F, FontStyle.Bold))
+        using (var pctBrush = new SolidBrush(UiTheme.Text))
         {
             var s = $"{healthyPct}%";
-            var sz = g.MeasureString(s, f);
-            g.DrawString(s, f, br, rect.X + (rect.Width - sz.Width) / 2, rect.Y + 34);
+            var sz = g.MeasureString(s, pctFont);
+            g.DrawString(s, pctFont, pctBrush, rect.X + (rect.Width - sz.Width) / 2, rect.Y + 34);
         }
-        using (var f = new Font("Segoe UI", 7.5F))
-        using (var br = new SolidBrush(UiTheme.TextMuted))
+
+        using (var labelFont = new Font("Segoe UI", 7.5F))
+        using (var labelBrush = new SolidBrush(UiTheme.TextMuted))
         {
-            var s = "healthy";
-            var sz = g.MeasureString(s, f);
-            g.DrawString(s, f, br, rect.X + (rect.Width - sz.Width) / 2, rect.Y + 58);
+            const string s = "healthy";
+            var sz = g.MeasureString(s, labelFont);
+            g.DrawString(s, labelFont, labelBrush, rect.X + (rect.Width - sz.Width) / 2, rect.Y + 58);
         }
 
         DrawLegend(g, 130, 18);
@@ -366,14 +370,15 @@ public partial class DashboardForm : Form
 
     private void DrawLegend(Graphics g, int x, int y)
     {
-        void Row(Color c, string text, int count, int row)
+        void Row(Color c, string text, int count, int rowIndex)
         {
-            int yy = y + row * 28;
-            using var brush = new SolidBrush(c);
-            g.FillEllipse(brush, x, yy + 4, 10, 10);
-            using var f = new Font("Segoe UI", 8F);
-            using var tb = new SolidBrush(UiTheme.Text);
-            g.DrawString($"{text}  ({count})", f, tb, x + 16, yy);
+            int yy = y + rowIndex * 28;
+            using (var brush = new SolidBrush(c))
+                g.FillEllipse(brush, x, yy + 4, 10, 10);
+
+            using (var legendFont = new Font("Segoe UI", 8F))
+            using (var textBrush = new SolidBrush(UiTheme.Text))
+                g.DrawString($"{text}  ({count})", legendFont, textBrush, x + 16, yy);
         }
 
         Row(Color.FromArgb(46, 160, 100), "Healthy", _healthy, 0);
@@ -389,9 +394,9 @@ public partial class DashboardForm : Form
 
         if (_movementBars.Count == 0)
         {
-            using var f = new Font("Segoe UI", 8.5F);
-            using var br = new SolidBrush(UiTheme.TextMuted);
-            g.DrawString("No movement data yet", f, br, 8, 20);
+            using (var emptyFont = new Font("Segoe UI", 8.5F))
+            using (var emptyBrush = new SolidBrush(UiTheme.TextMuted))
+                g.DrawString("No movement data yet", emptyFont, emptyBrush, 8, 20);
             return;
         }
 
@@ -404,8 +409,8 @@ public partial class DashboardForm : Form
 
         using var inBrush = new SolidBrush(Color.FromArgb(46, 160, 100));
         using var outBrush = new SolidBrush(Color.FromArgb(210, 90, 80));
-        using var f = new Font("Segoe UI", 7F);
-        using var tb = new SolidBrush(UiTheme.TextMuted);
+        using var dayFont = new Font("Segoe UI", 7F);
+        using var dayBrush = new SolidBrush(UiTheme.TextMuted);
 
         for (int i = 0; i < _movementBars.Count; i++)
         {
@@ -421,16 +426,15 @@ public partial class DashboardForm : Form
             if (outH > 0)
                 g.FillRectangle(outBrush, x + barW + 2, bottom - outH, barW, outH);
 
-            g.DrawString(label, f, tb, x, bottom + 2);
+            g.DrawString(label, dayFont, dayBrush, x, bottom + 2);
         }
 
-        // tiny legend
         int lx = 8;
         int ly = 0;
         g.FillRectangle(inBrush, lx, ly, 8, 8);
-        g.DrawString("In", f, tb, lx + 10, ly - 2);
+        g.DrawString("In", dayFont, dayBrush, lx + 10, ly - 2);
         g.FillRectangle(outBrush, lx + 36, ly, 8, 8);
-        g.DrawString("Out", f, tb, lx + 46, ly - 2);
+        g.DrawString("Out", dayFont, dayBrush, lx + 46, ly - 2);
     }
 
     private void Grid_CellFormattingQty(object? sender, DataGridViewCellFormattingEventArgs e)
