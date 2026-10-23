@@ -4,7 +4,8 @@ using System.Windows.Forms;
 namespace NovaTechIMS.Forms;
 
 /// <summary>
-/// Dashboard — Donezo-inspired green metrics + insights (Designer-visible).
+/// Dashboard — soft iOS / Donezo-style cards (Designer-visible).
+/// No FixedSingle black borders; white cards on soft page background.
 /// </summary>
 partial class DashboardForm
 {
@@ -146,34 +147,36 @@ partial class DashboardForm
         actionsPanel.SuspendLayout();
         SuspendLayout();
 
-        var pageBg = Color.FromArgb(245, 247, 250);
-        var accentGreen = Color.FromArgb(15, 118, 70);
-        var cardBorder = Color.FromArgb(228, 232, 238);
+        var pageBg = Color.FromArgb(246, 248, 250);
+        var accent = Color.FromArgb(15, 118, 70);
+        var textMain = Color.FromArgb(28, 35, 43);
+        var textMuted = Color.FromArgb(130, 140, 152);
 
-        // Welcome
+        // Welcome — clean title, no extra box
         welcomePanel.Dock = DockStyle.Top;
-        welcomePanel.Height = 52;
+        welcomePanel.Height = 56;
         welcomePanel.BackColor = pageBg;
         welcomePanel.Name = "welcomePanel";
+        welcomePanel.BorderStyle = BorderStyle.None;
 
         lblWelcome.AutoSize = true;
-        lblWelcome.Font = new Font("Segoe UI Semibold", 16F, FontStyle.Bold);
-        lblWelcome.ForeColor = Color.FromArgb(24, 32, 40);
-        lblWelcome.Location = new Point(0, 2);
+        lblWelcome.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
+        lblWelcome.ForeColor = textMain;
+        lblWelcome.Location = new Point(2, 4);
         lblWelcome.Name = "lblWelcome";
         lblWelcome.Text = "Dashboard";
 
         lblWelcomeSub.AutoSize = true;
-        lblWelcomeSub.Font = new Font("Segoe UI", 9F);
-        lblWelcomeSub.ForeColor = Color.FromArgb(120, 130, 145);
-        lblWelcomeSub.Location = new Point(2, 30);
+        lblWelcomeSub.Font = new Font("Segoe UI", 9.5F);
+        lblWelcomeSub.ForeColor = textMuted;
+        lblWelcomeSub.Location = new Point(4, 34);
         lblWelcomeSub.Name = "lblWelcomeSub";
         lblWelcomeSub.Text = "Track inventory health and daily stock movement.";
 
         welcomePanel.Controls.Add(lblWelcome);
         welcomePanel.Controls.Add(lblWelcomeSub);
 
-        // Metrics row
+        // Metrics — soft floating cards
         metricsPanel.AutoScroll = true;
         metricsPanel.BackColor = pageBg;
         metricsPanel.Controls.Add(tileProducts);
@@ -183,41 +186,42 @@ partial class DashboardForm
         metricsPanel.Controls.Add(tileLow);
         metricsPanel.Controls.Add(tileOut);
         metricsPanel.Dock = DockStyle.Top;
-        metricsPanel.Padding = new Padding(0, 4, 0, 12);
-        metricsPanel.Size = new Size(1000, 118);
+        metricsPanel.Padding = new Padding(0, 8, 0, 16);
+        metricsPanel.Size = new Size(1020, 124);
         metricsPanel.Name = "metricsPanel";
         metricsPanel.WrapContents = false;
 
         ConfigureMetricTile(tileProducts, capProducts, lblProducts, subProducts,
             "Active Products", "In catalog",
-            accentGreen, Color.White, Color.FromArgb(200, 230, 210), 0, true);
+            accent, Color.White, Color.FromArgb(190, 225, 205), 0, true);
 
         ConfigureMetricTile(tileCategories, capCategories, lblCategories, subCategories,
             "Categories", "Groupings",
-            Color.White, Color.FromArgb(24, 32, 40), Color.FromArgb(120, 130, 145), 1, false);
+            Color.White, textMain, textMuted, 1, false);
 
         ConfigureMetricTile(tileSuppliers, capSuppliers, lblSuppliers, subSuppliers,
             "Suppliers", "Active vendors",
-            Color.White, Color.FromArgb(24, 32, 40), Color.FromArgb(120, 130, 145), 2, false);
+            Color.White, textMain, textMuted, 2, false);
 
         ConfigureMetricTile(tileTotalQty, capTotalQty, lblTotalQty, subTotalQty,
             "Units on hand", "Total quantity",
-            Color.White, Color.FromArgb(24, 32, 40), Color.FromArgb(120, 130, 145), 3, false);
+            Color.White, textMain, textMuted, 3, false);
 
         ConfigureMetricTile(tileLow, capLow, lblLow, subLow,
             "Low stock", "Below minimum",
-            Color.White, Color.FromArgb(199, 119, 0), Color.FromArgb(160, 120, 60), 4, false);
+            Color.White, Color.FromArgb(180, 110, 20), textMuted, 4, false);
 
         ConfigureMetricTile(tileOut, capOut, lblOut, subOut,
             "Out of stock", "Zero quantity",
-            Color.White, Color.FromArgb(192, 57, 43), Color.FromArgb(160, 90, 80), 5, false);
+            Color.White, Color.FromArgb(180, 55, 50), textMuted, 5, false);
 
         lblError.Dock = DockStyle.Top;
-        lblError.ForeColor = Color.FromArgb(192, 57, 43);
+        lblError.ForeColor = Color.FromArgb(180, 55, 50);
         lblError.Font = new Font("Segoe UI", 9F);
         lblError.Height = 22;
         lblError.Name = "lblError";
         lblError.Visible = false;
+        lblError.BorderStyle = BorderStyle.None;
 
         bottom.ColumnCount = 3;
         bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 44F));
@@ -230,28 +234,30 @@ partial class DashboardForm
         bottom.Name = "bottom";
         bottom.RowCount = 1;
         bottom.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-        bottom.Padding = new Padding(0, 2, 0, 0);
+        bottom.Padding = new Padding(0, 4, 0, 0);
+        bottom.BackColor = pageBg;
 
-        activityCard.BackColor = Color.White;
-        activityCard.BorderStyle = BorderStyle.FixedSingle;
+        // Cards: white, NO black FixedSingle
+        StyleSoftCard(activityCard);
         activityCard.Controls.Add(grid);
         activityCard.Controls.Add(lblEmpty);
         activityCard.Controls.Add(activityHeader);
         activityCard.Dock = DockStyle.Fill;
-        activityCard.Margin = new Padding(0, 0, 10, 0);
-        activityCard.Padding = new Padding(14);
+        activityCard.Margin = new Padding(0, 0, 12, 0);
+        activityCard.Padding = new Padding(18);
         activityCard.Name = "activityCard";
 
         activityHeader.Controls.Add(lblAct);
         activityHeader.Controls.Add(lnkViewAll);
         activityHeader.Dock = DockStyle.Top;
-        activityHeader.Height = 30;
+        activityHeader.Height = 32;
         activityHeader.BackColor = Color.White;
+        activityHeader.BorderStyle = BorderStyle.None;
         activityHeader.Name = "activityHeader";
 
         lblAct.AutoSize = true;
-        lblAct.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold);
-        lblAct.ForeColor = Color.FromArgb(24, 32, 40);
+        lblAct.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
+        lblAct.ForeColor = textMain;
         lblAct.Location = new Point(0, 4);
         lblAct.Name = "lblAct";
         lblAct.Text = "Recent Activity";
@@ -259,10 +265,10 @@ partial class DashboardForm
         lnkViewAll.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         lnkViewAll.AutoSize = true;
         lnkViewAll.LinkBehavior = LinkBehavior.HoverUnderline;
-        lnkViewAll.LinkColor = accentGreen;
-        lnkViewAll.Location = new Point(360, 6);
+        lnkViewAll.LinkColor = accent;
+        lnkViewAll.Location = new Point(360, 8);
         lnkViewAll.Name = "lnkViewAll";
-        lnkViewAll.Text = "View all  >";
+        lnkViewAll.Text = "View all →";
         lnkViewAll.Click += LnkViewAll_Click;
 
         grid.AllowUserToAddRows = false;
@@ -271,7 +277,31 @@ partial class DashboardForm
         grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         grid.BackgroundColor = Color.White;
         grid.BorderStyle = BorderStyle.None;
-        grid.ColumnHeadersHeight = 32;
+        grid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+        grid.GridColor = Color.FromArgb(238, 241, 244);
+        grid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+        grid.ColumnHeadersHeight = 36;
+        grid.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
+        {
+            BackColor = Color.FromArgb(248, 250, 252),
+            ForeColor = textMuted,
+            Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
+            SelectionBackColor = Color.FromArgb(248, 250, 252),
+            SelectionForeColor = textMuted,
+            Alignment = DataGridViewContentAlignment.MiddleLeft,
+            Padding = new Padding(4, 0, 0, 0)
+        };
+        grid.DefaultCellStyle = new DataGridViewCellStyle
+        {
+            BackColor = Color.White,
+            ForeColor = textMain,
+            SelectionBackColor = Color.FromArgb(232, 245, 238),
+            SelectionForeColor = textMain,
+            Font = new Font("Segoe UI", 9F),
+            Padding = new Padding(4, 2, 0, 2)
+        };
+        grid.EnableHeadersVisualStyles = false;
+        grid.RowTemplate.Height = 36;
         grid.Dock = DockStyle.Fill;
         grid.MultiSelect = false;
         grid.Name = "grid";
@@ -281,48 +311,49 @@ partial class DashboardForm
 
         lblEmpty.Dock = DockStyle.Fill;
         lblEmpty.Font = new Font("Segoe UI", 10F);
-        lblEmpty.ForeColor = Color.FromArgb(120, 130, 145);
+        lblEmpty.ForeColor = textMuted;
         lblEmpty.Name = "lblEmpty";
         lblEmpty.Text = "No recent activity yet.";
         lblEmpty.TextAlign = ContentAlignment.MiddleCenter;
         lblEmpty.Visible = false;
 
-        insightsCard.BackColor = Color.White;
-        insightsCard.BorderStyle = BorderStyle.FixedSingle;
+        StyleSoftCard(insightsCard);
         insightsCard.Dock = DockStyle.Fill;
-        insightsCard.Margin = new Padding(0, 0, 10, 0);
-        insightsCard.Padding = new Padding(12);
+        insightsCard.Margin = new Padding(0, 0, 12, 0);
+        insightsCard.Padding = new Padding(16);
         insightsCard.Name = "insightsCard";
 
         lblInsightsTitle.Dock = DockStyle.Top;
         lblInsightsTitle.Height = 28;
-        lblInsightsTitle.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold);
-        lblInsightsTitle.ForeColor = Color.FromArgb(24, 32, 40);
+        lblInsightsTitle.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
+        lblInsightsTitle.ForeColor = textMain;
         lblInsightsTitle.Text = "Insights";
         lblInsightsTitle.TextAlign = ContentAlignment.MiddleLeft;
         lblInsightsTitle.Name = "lblInsightsTitle";
 
         lblHealthTitle.Dock = DockStyle.Top;
-        lblHealthTitle.Height = 20;
-        lblHealthTitle.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-        lblHealthTitle.ForeColor = Color.FromArgb(100, 110, 125);
+        lblHealthTitle.Height = 22;
+        lblHealthTitle.Font = new Font("Segoe UI", 8.5F);
+        lblHealthTitle.ForeColor = textMuted;
         lblHealthTitle.Text = "Stock health";
         lblHealthTitle.Name = "lblHealthTitle";
 
         pnlStockHealth.Dock = DockStyle.Top;
         pnlStockHealth.Height = 148;
         pnlStockHealth.BackColor = Color.White;
+        pnlStockHealth.BorderStyle = BorderStyle.None;
         pnlStockHealth.Name = "pnlStockHealth";
 
         lblMovementTitle.Dock = DockStyle.Top;
-        lblMovementTitle.Height = 20;
-        lblMovementTitle.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-        lblMovementTitle.ForeColor = Color.FromArgb(100, 110, 125);
+        lblMovementTitle.Height = 22;
+        lblMovementTitle.Font = new Font("Segoe UI", 8.5F);
+        lblMovementTitle.ForeColor = textMuted;
         lblMovementTitle.Text = "Weekly movement";
         lblMovementTitle.Name = "lblMovementTitle";
 
         pnlMovement.Dock = DockStyle.Fill;
         pnlMovement.BackColor = Color.White;
+        pnlMovement.BorderStyle = BorderStyle.None;
         pnlMovement.Name = "pnlMovement";
 
         insightsCard.Controls.Add(pnlMovement);
@@ -331,8 +362,7 @@ partial class DashboardForm
         insightsCard.Controls.Add(lblHealthTitle);
         insightsCard.Controls.Add(lblInsightsTitle);
 
-        actionsPanel.BackColor = Color.White;
-        actionsPanel.BorderStyle = BorderStyle.FixedSingle;
+        StyleSoftCard(actionsPanel);
         actionsPanel.Controls.Add(btnQaUsers);
         actionsPanel.Controls.Add(btnQaAdjustment);
         actionsPanel.Controls.Add(btnQaProducts);
@@ -340,22 +370,22 @@ partial class DashboardForm
         actionsPanel.Controls.Add(btnQaStockIn);
         actionsPanel.Controls.Add(lblQa);
         actionsPanel.Dock = DockStyle.Fill;
-        actionsPanel.Padding = new Padding(12);
+        actionsPanel.Padding = new Padding(14);
         actionsPanel.Name = "actionsPanel";
 
         lblQa.Dock = DockStyle.Top;
-        lblQa.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold);
-        lblQa.ForeColor = Color.FromArgb(24, 32, 40);
-        lblQa.Height = 30;
+        lblQa.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
+        lblQa.ForeColor = textMain;
+        lblQa.Height = 32;
         lblQa.Name = "lblQa";
         lblQa.Text = "Quick Actions";
         lblQa.TextAlign = ContentAlignment.MiddleLeft;
 
-        ConfigureQaButton(btnQaStockIn, "btnQaStockIn", "  Record Stock-In", 42, true, accentGreen, cardBorder);
-        ConfigureQaButton(btnQaStockOut, "btnQaStockOut", "  Record Stock-Out", 86, false, accentGreen, cardBorder);
-        ConfigureQaButton(btnQaProducts, "btnQaProducts", "  Search Products", 130, false, accentGreen, cardBorder);
-        ConfigureQaButton(btnQaAdjustment, "btnQaAdjustment", "  Inventory Adjustment", 174, false, accentGreen, cardBorder);
-        ConfigureQaButton(btnQaUsers, "btnQaUsers", "  Manage Users", 218, false, accentGreen, cardBorder);
+        ConfigureQaButton(btnQaStockIn, "btnQaStockIn", "  Record Stock-In", 44, true, accent);
+        ConfigureQaButton(btnQaStockOut, "btnQaStockOut", "  Record Stock-Out", 90, false, accent);
+        ConfigureQaButton(btnQaProducts, "btnQaProducts", "  Search Products", 136, false, accent);
+        ConfigureQaButton(btnQaAdjustment, "btnQaAdjustment", "  Inventory Adjustment", 182, false, accent);
+        ConfigureQaButton(btnQaUsers, "btnQaUsers", "  Manage Users", 228, false, accent);
 
         btnQaStockIn.Click += BtnQaStockIn_Click;
         btnQaStockOut.Click += BtnQaStockOut_Click;
@@ -374,7 +404,7 @@ partial class DashboardForm
         Font = new Font("Segoe UI", 10F);
         FormBorderStyle = FormBorderStyle.None;
         Name = "DashboardForm";
-        Padding = new Padding(18, 6, 18, 10);
+        Padding = new Padding(24, 8, 24, 16);
         Text = "Dashboard";
 
         welcomePanel.ResumeLayout(false);
@@ -396,6 +426,12 @@ partial class DashboardForm
         ResumeLayout(false);
     }
 
+    private static void StyleSoftCard(Panel card)
+    {
+        card.BackColor = Color.White;
+        card.BorderStyle = BorderStyle.None; // no black system border
+    }
+
     private static void ConfigureMetricTile(
         Panel tile,
         Label cap, Label value, Label sub,
@@ -404,31 +440,30 @@ partial class DashboardForm
         int tab, bool primary)
     {
         tile.BackColor = tileBg;
-        tile.BorderStyle = primary ? BorderStyle.None : BorderStyle.FixedSingle;
-        tile.Margin = new Padding(0, 0, 10, 0);
-        tile.Size = new Size(158, 100);
+        tile.BorderStyle = BorderStyle.None;
+        tile.Margin = new Padding(0, 0, 12, 0);
+        tile.Size = new Size(160, 104);
         tile.TabIndex = tab;
-        tile.Padding = new Padding(12, 10, 12, 8);
 
         cap.AutoSize = false;
-        cap.Font = new Font("Segoe UI", 8F);
-        cap.ForeColor = primary ? Color.FromArgb(200, 230, 210) : Color.FromArgb(110, 120, 135);
-        cap.Location = new Point(12, 10);
-        cap.Size = new Size(134, 18);
+        cap.Font = new Font("Segoe UI", 8.25F);
+        cap.ForeColor = primary ? Color.FromArgb(200, 232, 215) : Color.FromArgb(130, 140, 152);
+        cap.Location = new Point(14, 12);
+        cap.Size = new Size(132, 18);
         cap.Text = capText;
 
         value.AutoSize = false;
-        value.Font = new Font("Segoe UI", 22F, FontStyle.Bold);
+        value.Font = new Font("Segoe UI", 24F, FontStyle.Bold);
         value.ForeColor = valueColor;
-        value.Location = new Point(12, 32);
-        value.Size = new Size(134, 36);
+        value.Location = new Point(14, 34);
+        value.Size = new Size(132, 40);
         value.Text = "—";
 
         sub.AutoSize = false;
         sub.Font = new Font("Segoe UI", 7.5F);
         sub.ForeColor = mutedColor;
-        sub.Location = new Point(12, 72);
-        sub.Size = new Size(134, 18);
+        sub.Location = new Point(14, 78);
+        sub.Size = new Size(132, 16);
         sub.Text = subText;
 
         tile.Controls.Add(sub);
@@ -437,32 +472,30 @@ partial class DashboardForm
     }
 
     private static void ConfigureQaButton(
-        Button btn, string name, string text, int top, bool primary,
-        Color accentGreen, Color cardBorder)
+        Button btn, string name, string text, int top, bool primary, Color accent)
     {
         btn.FlatStyle = FlatStyle.Flat;
         btn.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-        btn.Location = new Point(12, top);
+        btn.Location = new Point(14, top);
         btn.Name = name;
-        btn.Size = new Size(220, 36);
+        btn.Size = new Size(220, 38);
         btn.Text = text;
         btn.UseVisualStyleBackColor = false;
         btn.Cursor = Cursors.Hand;
         btn.TextAlign = ContentAlignment.MiddleLeft;
-        btn.Padding = new Padding(8, 0, 6, 0);
+        btn.Padding = new Padding(10, 0, 6, 0);
+        btn.FlatAppearance.BorderSize = 0;
 
         if (primary)
         {
-            btn.BackColor = accentGreen;
+            btn.BackColor = accent;
             btn.ForeColor = Color.White;
-            btn.FlatAppearance.BorderSize = 0;
         }
         else
         {
-            btn.BackColor = Color.White;
-            btn.ForeColor = accentGreen;
-            btn.FlatAppearance.BorderColor = cardBorder;
-            btn.FlatAppearance.BorderSize = 1;
+            btn.BackColor = Color.FromArgb(246, 248, 250);
+            btn.ForeColor = accent;
+            btn.FlatAppearance.BorderSize = 0;
         }
     }
 }
