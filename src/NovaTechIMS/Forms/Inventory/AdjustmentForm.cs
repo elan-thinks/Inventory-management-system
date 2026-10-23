@@ -8,15 +8,16 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Inventory Adjustment — fixed action bar, no overlap with notes.</summary>
+/// <summary>
+/// Inventory Adjustment — compact fixed layout, action bar INSIDE white card, no scroll/cut.
+/// </summary>
 public partial class AdjustmentForm : Form
 {
     private AdjustmentService? _service;
     private int _previousQty;
     private int _contentRight = 700;
 
-    private const int Pad = 32;
-    private const int Gap = 20;
+    private const int Pad = 28;
 
     private AdjustmentService Service => _service ??= new AdjustmentService();
 
@@ -30,7 +31,7 @@ public partial class AdjustmentForm : Form
         ApplyRuntimeStyling();
         WireCardBorder();
 
-        // Keep action bar on top of free-positioned fields so notes never cover buttons
+        // Dock order: header top, actions bottom, fields free — keep actions above fields
         actionsBar.BringToFront();
 
         Load += (_, _) =>
@@ -53,6 +54,13 @@ public partial class AdjustmentForm : Form
             e.Graphics.DrawPath(pen, path);
         };
 
+        // Soft top rule on action bar so it reads as part of the card
+        actionsBar.Paint += (_, e) =>
+        {
+            using var pen = new Pen(UiTheme.Border, 1);
+            e.Graphics.DrawLine(pen, 0, 0, actionsBar.Width, 0);
+        };
+
         previewBanner.Paint += (_, e) =>
         {
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
@@ -67,54 +75,66 @@ public partial class AdjustmentForm : Form
     {
         if (formCard is null || actionsBar is null) return;
 
-        // Content width ~72% of card, max 640 — balanced, not stretched
-        int usable = Math.Max(520, formCard.ClientSize.Width - Pad * 2);
-        int blockW = Math.Clamp((int)(usable * 0.72), 480, 640);
+        // Content block width — balanced, not edge-to-edge empty stretch
+        int usable = Math.Max(480, formCard.ClientSize.Width - Pad * 2);
+        int blockW = Math.Clamp((int)(usable * 0.70), 460, 620);
         _contentRight = Pad + blockW;
 
-        // Product
-        lblProduct.Left = Pad;
-        cboProduct.Left = Pad;
+        // Compact fixed vertical rhythm (fits typical MDI host without scroll)
+        int y = 72; // under header
+
+        lblProduct.Location = new Point(Pad, y);
+        y += 22;
+        cboProduct.Location = new Point(Pad, y);
         cboProduct.Width = blockW;
-        helpProduct.Left = Pad;
+        y += 30;
+        helpProduct.Location = new Point(Pad, y);
+        y += 28;
 
-        // Qty row: Current | New | Date | Difference
-        int qtyW = 120;
-        int dateW = 140;
+        // Qty row
+        int qtyW = 110;
+        int dateW = 130;
+        int col2 = Pad + 140;
+        int col3 = col2 + qtyW + 16;
+        int col4 = col3 + dateW + 16;
 
-        lblPreviousCaption.Left = Pad;
-        lblPreviousQty.Left = Pad;
+        lblPreviousCaption.Location = new Point(Pad, y);
+        lblNewQty.Location = new Point(col2, y);
+        lblDate.Location = new Point(col3, y);
+        lblDiffCaption.Location = new Point(col4, y);
+        y += 22;
 
-        lblNewQty.Left = Pad + 150;
-        nudNewQty.Left = Pad + 150;
+        lblPreviousQty.Location = new Point(Pad, y);
+        nudNewQty.Location = new Point(col2, y);
         nudNewQty.Width = qtyW;
-
-        lblDate.Left = Pad + 150 + qtyW + Gap;
-        dtpDate.Left = Pad + 150 + qtyW + Gap;
+        dtpDate.Location = new Point(col3, y);
         dtpDate.Width = dateW;
+        lblDifference.Location = new Point(col4, y);
+        y += 36;
 
-        lblDiffCaption.Left = Pad + 150 + qtyW + Gap + dateW + Gap;
-        lblDifference.Left = lblDiffCaption.Left;
+        previewBanner.Location = new Point(Pad, y);
+        previewBanner.Size = new Size(blockW, 34);
+        y += 44;
 
-        previewBanner.Left = Pad;
-        previewBanner.Width = blockW;
-
-        lblReason.Left = Pad;
-        txtReason.Left = Pad;
+        lblReason.Location = new Point(Pad, y);
+        y += 22;
+        txtReason.Location = new Point(Pad, y);
         txtReason.Width = blockW;
+        y += 34;
 
-        lblNotes.Left = Pad;
-        helpNotes.Left = Pad;
-        txtNotes.Left = Pad;
+        lblNotes.Location = new Point(Pad, y);
+        y += 20;
+        helpNotes.Location = new Point(Pad, y);
+        y += 18;
+
+        txtNotes.Location = new Point(Pad, y);
         txtNotes.Width = blockW;
 
-        // Hard stop: notes must end above the docked action bar (never overlap)
-        int actionTop = formCard.ClientSize.Height - actionsBar.Height;
-        int notesMaxBottom = actionTop - 16;
-        int notesDesired = Math.Min(100, Math.Max(64, notesMaxBottom - txtNotes.Top));
-        if (txtNotes.Top + notesDesired > notesMaxBottom)
-            notesDesired = Math.Max(48, notesMaxBottom - txtNotes.Top);
-        txtNotes.Height = notesDesired;
+        // Notes height: fixed compact, always above action bar — never cut
+        int actionH = Math.Max(56, actionsBar.Height);
+        int maxNotesBottom = formCard.ClientSize.Height - actionH - 12;
+        int notesH = Math.Max(52, Math.Min(72, maxNotesBottom - y));
+        txtNotes.Height = notesH;
 
         LayoutActions();
         actionsBar.BringToFront();
@@ -124,13 +144,13 @@ public partial class AdjustmentForm : Form
     {
         if (actionsBar is null || btnSave is null || btnClear is null) return;
         int right = Math.Min(_contentRight, actionsBar.ClientSize.Width - Pad);
-        btnSave.Left = Math.Max(Pad + 180, right - btnSave.Width);
-        btnSave.Top = 12;
-        btnClear.Left = btnSave.Left - btnClear.Width - 12;
-        btnClear.Top = 12;
+        btnSave.Top = 10;
+        btnClear.Top = 10;
+        btnSave.Left = Math.Max(Pad + 160, right - btnSave.Width);
+        btnClear.Left = btnSave.Left - btnClear.Width - 10;
         lblError.Left = Pad;
-        lblError.Top = 16;
-        lblError.Width = Math.Max(120, btnClear.Left - Pad - 12);
+        lblError.Top = 14;
+        lblError.Width = Math.Max(100, btnClear.Left - Pad - 8);
     }
 
     private void ApplyRuntimeStyling()
@@ -138,7 +158,10 @@ public partial class AdjustmentForm : Form
         Font = UiTheme.Body;
         BackColor = UiTheme.Background;
         formCard.BackColor = UiTheme.Surface;
-        actionsBar.BackColor = UiTheme.Background; // subtle bar separation
+
+        // IMPORTANT: action bar stays WHITE so it reads as part of the card
+        actionsBar.BackColor = UiTheme.Surface;
+        actionsBar.Height = 56;
 
         lblFormTitle.Font = UiTheme.ScreenTitle;
         lblFormTitle.ForeColor = UiTheme.Text;
@@ -146,15 +169,15 @@ public partial class AdjustmentForm : Form
 
         foreach (var lbl in new[] { lblProduct, lblPreviousCaption, lblNewQty, lblDate, lblDiffCaption, lblReason, lblNotes })
         {
-            lbl.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
+            lbl.Font = new Font("Segoe UI", 9.25f, FontStyle.Bold);
             lbl.ForeColor = UiTheme.Text;
         }
 
         helpProduct.ForeColor = UiTheme.TextMuted;
         helpNotes.ForeColor = UiTheme.TextMuted;
         lblPreviousQty.ForeColor = UiTheme.TextMuted;
-        lblPreviousQty.Font = new Font("Segoe UI", 16f, FontStyle.Bold);
-        lblDifference.Font = new Font("Segoe UI", 16f, FontStyle.Bold);
+        lblPreviousQty.Font = new Font("Segoe UI", 15f, FontStyle.Bold);
+        lblDifference.Font = new Font("Segoe UI", 15f, FontStyle.Bold);
 
         previewBanner.BackColor = UiTheme.InfoTint;
         lblPreview.ForeColor = UiTheme.Text;
@@ -171,6 +194,8 @@ public partial class AdjustmentForm : Form
         txtReason.BackColor = Color.White;
         txtNotes.BorderStyle = BorderStyle.FixedSingle;
         txtNotes.BackColor = Color.White;
+        // No inner scroll needed for short notes
+        txtNotes.ScrollBars = ScrollBars.None;
 
         btnSave.BackColor = UiTheme.Primary;
         btnSave.ForeColor = Color.White;
