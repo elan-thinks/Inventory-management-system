@@ -8,7 +8,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Stock-In (FR-SIN) — designer owns layout; this file is data + save only.</summary>
+/// <summary>Stock-In (FR-SIN) — modern card UI; designer owns layout.</summary>
 public partial class StockInForm : Form
 {
     private StockInService? _service;
@@ -24,27 +24,46 @@ public partial class StockInForm : Form
             return;
 
         grid.Columns.Clear();
-        grid.ColumnCount = 0;
-
         ApplyRuntimeStyling();
         Load += (_, _) =>
         {
             LoadLookups();
             ReloadRecent();
             UpdatePreview();
+            LayoutFormCard();
         };
+        Resize += (_, _) => LayoutFormCard();
+    }
+
+    private void LayoutFormCard()
+    {
+        if (formCard is null) return;
+        int contentW = Math.Max(640, ClientSize.Width - Padding.Horizontal - 4);
+        formCard.Width = contentW;
+
+        int inner = contentW - 40;
+        secProductPanel.Width = inner;
+        secMovementPanel.Width = inner;
+        secNotesPanel.Width = inner;
+        actionsBar.Width = inner;
+
+        cboProduct.Width = Math.Max(320, inner - 40);
+        cboSupplier.Width = Math.Max(320, inner - 40);
+        txtNotes.Width = Math.Max(320, inner - 40);
+        previewBanner.Width = Math.Max(320, inner - 40);
+
+        btnSave.Left = Math.Max(200, actionsBar.Width - btnSave.Width);
+        btnClear.Left = btnSave.Left - btnClear.Width - 10;
     }
 
     private void ApplyRuntimeStyling()
     {
         Font = UiTheme.Body;
         BackColor = UiTheme.Background;
-        formPanel.BackColor = UiTheme.Surface;
-        formPanel.Paint += (_, e) =>
-        {
-            using var pen = new Pen(UiTheme.Border, 1);
-            e.Graphics.DrawRectangle(pen, 0, 0, formPanel.Width - 1, formPanel.Height - 1);
-        };
+        formCard.BackColor = UiTheme.Surface;
+
+        foreach (var p in new[] { secProductPanel, secMovementPanel, secNotesPanel })
+            p.BackColor = Color.FromArgb(252, 253, 254);
 
         foreach (var sec in new[] { secProduct, secMovement, secNotes })
         {
@@ -52,15 +71,10 @@ public partial class StockInForm : Form
             sec.ForeColor = UiTheme.Secondary;
         }
 
-        foreach (Control c in formPanel.Controls)
+        foreach (var lbl in new[] { lblProduct, lblSupplier, lblQuantity, lblDate, lblUnitPrice, lblNotes })
         {
-            if (c is Label lbl && lbl != lblError && lbl != lblPreview
-                && lbl != secProduct && lbl != secMovement && lbl != secNotes
-                && lbl != helpProduct && lbl != helpSupplier)
-            {
-                lbl.Font = UiTheme.Label;
-                lbl.ForeColor = UiTheme.Text;
-            }
+            lbl.Font = UiTheme.LabelSemibold;
+            lbl.ForeColor = UiTheme.Text;
         }
 
         helpProduct.ForeColor = UiTheme.TextMuted;
@@ -70,8 +84,8 @@ public partial class StockInForm : Form
         lblPreview.ForeColor = UiTheme.Text;
         lblError.Font = UiTheme.Label;
         lblError.ForeColor = UiTheme.Error;
-        lblHint.Font = UiTheme.Label;
-        lblHint.ForeColor = UiTheme.TextMuted;
+        lblHint.Font = UiTheme.LabelSemibold;
+        lblHint.ForeColor = UiTheme.Text;
 
         UiTheme.StyleComboBox(cboProduct);
         UiTheme.StyleComboBox(cboSupplier);
@@ -79,6 +93,12 @@ public partial class StockInForm : Form
         UiTheme.StyleTextBox(txtNotes);
         UiTheme.StyleDatePicker(dtpDate);
         UiTheme.StyleButton(btnSave, UiTheme.ButtonKind.Primary);
+        UiTheme.StyleButton(btnClear, UiTheme.ButtonKind.Secondary);
+        btnClear.ForeColor = UiTheme.Primary;
+        btnClear.FlatAppearance.BorderColor = UiTheme.Primary;
+
+        AppIcons.ApplyToButton(btnSave, "icons-stockIn.png", 16);
+
         UiTheme.ApplyGridTheme(grid);
 
         dtpDate.MaxDate = DateTime.Today;
@@ -107,6 +127,19 @@ public partial class StockInForm : Form
             lblError.Text = "Could not load products/suppliers. " + ErrorPresenter.Classify(DbExceptionMapper.Map(ex)).Message;
             lblError.Visible = true;
         }
+    }
+
+    private void BtnClear_Click(object? sender, EventArgs e)
+    {
+        if (DesignTime.IsActive) return;
+        if (cboProduct.Items.Count > 0) cboProduct.SelectedIndex = 0;
+        if (cboSupplier.Items.Count > 0) cboSupplier.SelectedIndex = 0;
+        nudQuantity.Value = 1;
+        dtpDate.Value = DateTime.Today;
+        txtUnitPrice.Text = "0.00";
+        txtNotes.Clear();
+        lblError.Visible = false;
+        UpdatePreview();
     }
 
     private void CboProduct_SelectedIndexChanged(object? sender, EventArgs e)
@@ -163,7 +196,7 @@ public partial class StockInForm : Form
 
         var qty = (int)nudQuantity.Value;
         var neu = _currentOnHand + qty;
-        lblPreview.Text = $"  New quantity on hand will be: {_currentOnHand} + {qty} = {neu}";
+        lblPreview.Text = $"  New on hand: {_currentOnHand:N0}  +  {qty:N0}  =  {neu:N0}";
     }
 
     private void BtnSave_Click(object? sender, EventArgs e)
@@ -218,9 +251,7 @@ public partial class StockInForm : Form
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
 
-            nudQuantity.Value = 1;
-            txtNotes.Clear();
-            CboProduct_SelectedIndexChanged(null, EventArgs.Empty);
+            BtnClear_Click(null, EventArgs.Empty);
             ReloadRecent();
         }
         catch (AppException ex)
