@@ -4,7 +4,7 @@ using System.Windows.Forms;
 namespace NovaTechIMS.Forms;
 
 /// <summary>
-/// Dashboard — pastel metrics + insight charts (Designer-visible).
+/// Dashboard — Donezo-inspired green metrics + insights (Designer-visible).
 /// </summary>
 partial class DashboardForm
 {
@@ -21,20 +21,6 @@ partial class DashboardForm
     private Panel tileTotalQty;
     private Panel tileLow;
     private Panel tileOut;
-
-    private Panel chipProducts;
-    private Panel chipCategories;
-    private Panel chipSuppliers;
-    private Panel chipTotalQty;
-    private Panel chipLow;
-    private Panel chipOut;
-
-    private PictureBox icoProducts;
-    private PictureBox icoCategories;
-    private PictureBox icoSuppliers;
-    private PictureBox icoTotalQty;
-    private PictureBox icoLow;
-    private PictureBox icoOut;
 
     private Label capProducts;
     private Label lblProducts;
@@ -80,6 +66,13 @@ partial class DashboardForm
     private Button btnQaAdjustment;
     private Button btnQaUsers;
 
+    // Donezo green palette
+    private static readonly Color DonezoGreen = Color.FromArgb(15, 118, 70);
+    private static readonly Color DonezoGreenSoft = Color.FromArgb(232, 245, 238);
+    private static readonly Color DonezoGreenMid = Color.FromArgb(46, 160, 100);
+    private static readonly Color PageBg = Color.FromArgb(245, 247, 250);
+    private static readonly Color CardBorder = Color.FromArgb(228, 232, 238);
+
     protected override void Dispose(bool disposing)
     {
         if (disposing && components != null)
@@ -95,38 +88,26 @@ partial class DashboardForm
 
         metricsPanel = new FlowLayoutPanel();
         tileProducts = new Panel();
-        chipProducts = new Panel();
-        icoProducts = new PictureBox();
         capProducts = new Label();
         lblProducts = new Label();
         subProducts = new Label();
         tileCategories = new Panel();
-        chipCategories = new Panel();
-        icoCategories = new PictureBox();
         capCategories = new Label();
         lblCategories = new Label();
         subCategories = new Label();
         tileSuppliers = new Panel();
-        chipSuppliers = new Panel();
-        icoSuppliers = new PictureBox();
         capSuppliers = new Label();
         lblSuppliers = new Label();
         subSuppliers = new Label();
         tileTotalQty = new Panel();
-        chipTotalQty = new Panel();
-        icoTotalQty = new PictureBox();
         capTotalQty = new Label();
         lblTotalQty = new Label();
         subTotalQty = new Label();
         tileLow = new Panel();
-        chipLow = new Panel();
-        icoLow = new PictureBox();
         capLow = new Label();
         lblLow = new Label();
         subLow = new Label();
         tileOut = new Panel();
-        chipOut = new Panel();
-        icoOut = new PictureBox();
         capOut = new Label();
         lblOut = new Label();
         subOut = new Label();
@@ -159,23 +140,11 @@ partial class DashboardForm
         welcomePanel.SuspendLayout();
         metricsPanel.SuspendLayout();
         tileProducts.SuspendLayout();
-        chipProducts.SuspendLayout();
         tileCategories.SuspendLayout();
-        chipCategories.SuspendLayout();
         tileSuppliers.SuspendLayout();
-        chipSuppliers.SuspendLayout();
         tileTotalQty.SuspendLayout();
-        chipTotalQty.SuspendLayout();
         tileLow.SuspendLayout();
-        chipLow.SuspendLayout();
         tileOut.SuspendLayout();
-        chipOut.SuspendLayout();
-        ((System.ComponentModel.ISupportInitialize)icoProducts).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)icoCategories).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)icoSuppliers).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)icoTotalQty).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)icoLow).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)icoOut).BeginInit();
         bottom.SuspendLayout();
         activityCard.SuspendLayout();
         activityHeader.SuspendLayout();
@@ -187,29 +156,29 @@ partial class DashboardForm
         // Welcome
         welcomePanel.Dock = DockStyle.Top;
         welcomePanel.Height = 52;
-        welcomePanel.BackColor = Color.FromArgb(244, 246, 248);
+        welcomePanel.BackColor = PageBg;
         welcomePanel.Name = "welcomePanel";
 
         lblWelcome.AutoSize = true;
-        lblWelcome.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
-        lblWelcome.ForeColor = Color.FromArgb(31, 41, 51);
+        lblWelcome.Font = new Font("Segoe UI Semibold", 16F, FontStyle.Bold);
+        lblWelcome.ForeColor = Color.FromArgb(24, 32, 40);
         lblWelcome.Location = new Point(0, 2);
         lblWelcome.Name = "lblWelcome";
-        lblWelcome.Text = "Inventory overview";
+        lblWelcome.Text = "Dashboard";
 
         lblWelcomeSub.AutoSize = true;
         lblWelcomeSub.Font = new Font("Segoe UI", 9F);
-        lblWelcomeSub.ForeColor = Color.FromArgb(107, 119, 133);
+        lblWelcomeSub.ForeColor = Color.FromArgb(120, 130, 145);
         lblWelcomeSub.Location = new Point(2, 30);
         lblWelcomeSub.Name = "lblWelcomeSub";
-        lblWelcomeSub.Text = "Here’s what’s happening in your stock right now.";
+        lblWelcomeSub.Text = "Track inventory health and daily stock movement.";
 
         welcomePanel.Controls.Add(lblWelcome);
         welcomePanel.Controls.Add(lblWelcomeSub);
 
-        // Metrics
+        // Metrics row
         metricsPanel.AutoScroll = true;
-        metricsPanel.BackColor = Color.FromArgb(244, 246, 248);
+        metricsPanel.BackColor = PageBg;
         metricsPanel.Controls.Add(tileProducts);
         metricsPanel.Controls.Add(tileCategories);
         metricsPanel.Controls.Add(tileSuppliers);
@@ -217,37 +186,35 @@ partial class DashboardForm
         metricsPanel.Controls.Add(tileLow);
         metricsPanel.Controls.Add(tileOut);
         metricsPanel.Dock = DockStyle.Top;
-        metricsPanel.Padding = new Padding(0, 0, 0, 10);
-        metricsPanel.Size = new Size(980, 128);
+        metricsPanel.Padding = new Padding(0, 4, 0, 12);
+        metricsPanel.Size = new Size(1000, 118);
         metricsPanel.Name = "metricsPanel";
         metricsPanel.WrapContents = false;
 
-        ConfigureMetricTile(tileProducts, chipProducts, icoProducts,
-            capProducts, lblProducts, subProducts,
-            "Active Products", "Catalog items",
-            Color.FromArgb(255, 248, 235), Color.FromArgb(255, 236, 200), 0);
-        ConfigureMetricTile(tileCategories, chipCategories, icoCategories,
-            capCategories, lblCategories, subCategories,
+        // Donezo-style: first card solid green, rest white
+        ConfigureMetricTile(tileProducts, capProducts, lblProducts, subProducts,
+            "Active Products", "In catalog",
+            DonezoGreen, Color.White, Color.FromArgb(200, 230, 210), 0, true);
+
+        ConfigureMetricTile(tileCategories, capCategories, lblCategories, subCategories,
             "Categories", "Groupings",
-            Color.FromArgb(243, 232, 255), Color.FromArgb(230, 210, 255), 1);
-        ConfigureMetricTile(tileSuppliers, chipSuppliers, icoSuppliers,
-            capSuppliers, lblSuppliers, subSuppliers,
+            Color.White, Color.FromArgb(24, 32, 40), Color.FromArgb(120, 130, 145), 1, false);
+
+        ConfigureMetricTile(tileSuppliers, capSuppliers, lblSuppliers, subSuppliers,
             "Suppliers", "Active vendors",
-            Color.FromArgb(230, 247, 255), Color.FromArgb(200, 235, 255), 2);
-        ConfigureMetricTile(tileTotalQty, chipTotalQty, icoTotalQty,
-            capTotalQty, lblTotalQty, subTotalQty,
+            Color.White, Color.FromArgb(24, 32, 40), Color.FromArgb(120, 130, 145), 2, false);
+
+        ConfigureMetricTile(tileTotalQty, capTotalQty, lblTotalQty, subTotalQty,
             "Units on hand", "Total quantity",
-            Color.FromArgb(232, 248, 240), Color.FromArgb(200, 240, 220), 3);
-        ConfigureMetricTile(tileLow, chipLow, icoLow,
-            capLow, lblLow, subLow,
+            Color.White, Color.FromArgb(24, 32, 40), Color.FromArgb(120, 130, 145), 3, false);
+
+        ConfigureMetricTile(tileLow, capLow, lblLow, subLow,
             "Low stock", "Below minimum",
-            Color.FromArgb(255, 243, 224), Color.FromArgb(255, 224, 180),
-            4, Color.FromArgb(199, 119, 0));
-        ConfigureMetricTile(tileOut, chipOut, icoOut,
-            capOut, lblOut, subOut,
+            Color.White, Color.FromArgb(199, 119, 0), Color.FromArgb(160, 120, 60), 4, false);
+
+        ConfigureMetricTile(tileOut, capOut, lblOut, subOut,
             "Out of stock", "Zero quantity",
-            Color.FromArgb(254, 236, 234), Color.FromArgb(255, 210, 205),
-            5, Color.FromArgb(192, 57, 43));
+            Color.White, Color.FromArgb(192, 57, 43), Color.FromArgb(160, 90, 80), 5, false);
 
         lblError.Dock = DockStyle.Top;
         lblError.ForeColor = Color.FromArgb(192, 57, 43);
@@ -256,10 +223,9 @@ partial class DashboardForm
         lblError.Name = "lblError";
         lblError.Visible = false;
 
-        // Bottom: Activity | Insights | Quick Actions
         bottom.ColumnCount = 3;
-        bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 46F));
-        bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28F));
+        bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 44F));
+        bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
         bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 26F));
         bottom.Controls.Add(activityCard, 0, 0);
         bottom.Controls.Add(insightsCard, 1, 0);
@@ -268,7 +234,7 @@ partial class DashboardForm
         bottom.Name = "bottom";
         bottom.RowCount = 1;
         bottom.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-        bottom.Padding = new Padding(0, 4, 0, 0);
+        bottom.Padding = new Padding(0, 2, 0, 0);
 
         // Activity
         activityCard.BackColor = Color.White;
@@ -285,11 +251,12 @@ partial class DashboardForm
         activityHeader.Controls.Add(lnkViewAll);
         activityHeader.Dock = DockStyle.Top;
         activityHeader.Height = 30;
+        activityHeader.BackColor = Color.White;
         activityHeader.Name = "activityHeader";
 
         lblAct.AutoSize = true;
-        lblAct.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-        lblAct.ForeColor = Color.FromArgb(31, 41, 51);
+        lblAct.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold);
+        lblAct.ForeColor = Color.FromArgb(24, 32, 40);
         lblAct.Location = new Point(0, 4);
         lblAct.Name = "lblAct";
         lblAct.Text = "Recent Activity";
@@ -297,8 +264,8 @@ partial class DashboardForm
         lnkViewAll.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         lnkViewAll.AutoSize = true;
         lnkViewAll.LinkBehavior = LinkBehavior.HoverUnderline;
-        lnkViewAll.LinkColor = Color.FromArgb(30, 75, 143);
-        lnkViewAll.Location = new Point(400, 6);
+        lnkViewAll.LinkColor = DonezoGreen;
+        lnkViewAll.Location = new Point(360, 6);
         lnkViewAll.Name = "lnkViewAll";
         lnkViewAll.Text = "View all  >";
         lnkViewAll.Click += LnkViewAll_Click;
@@ -319,13 +286,13 @@ partial class DashboardForm
 
         lblEmpty.Dock = DockStyle.Fill;
         lblEmpty.Font = new Font("Segoe UI", 10F);
-        lblEmpty.ForeColor = Color.FromArgb(107, 119, 133);
+        lblEmpty.ForeColor = Color.FromArgb(120, 130, 145);
         lblEmpty.Name = "lblEmpty";
         lblEmpty.Text = "No recent activity yet.";
         lblEmpty.TextAlign = ContentAlignment.MiddleCenter;
         lblEmpty.Visible = false;
 
-        // Insights card (charts)
+        // Insights
         insightsCard.BackColor = Color.White;
         insightsCard.BorderStyle = BorderStyle.FixedSingle;
         insightsCard.Dock = DockStyle.Fill;
@@ -335,43 +302,42 @@ partial class DashboardForm
 
         lblInsightsTitle.Dock = DockStyle.Top;
         lblInsightsTitle.Height = 28;
-        lblInsightsTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-        lblInsightsTitle.ForeColor = Color.FromArgb(31, 41, 51);
+        lblInsightsTitle.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold);
+        lblInsightsTitle.ForeColor = Color.FromArgb(24, 32, 40);
         lblInsightsTitle.Text = "Insights";
         lblInsightsTitle.TextAlign = ContentAlignment.MiddleLeft;
         lblInsightsTitle.Name = "lblInsightsTitle";
 
         lblHealthTitle.Dock = DockStyle.Top;
-        lblHealthTitle.Height = 22;
+        lblHealthTitle.Height = 20;
         lblHealthTitle.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-        lblHealthTitle.ForeColor = Color.FromArgb(90, 100, 115);
+        lblHealthTitle.ForeColor = Color.FromArgb(100, 110, 125);
         lblHealthTitle.Text = "Stock health";
         lblHealthTitle.Name = "lblHealthTitle";
 
         pnlStockHealth.Dock = DockStyle.Top;
-        pnlStockHealth.Height = 150;
+        pnlStockHealth.Height = 148;
         pnlStockHealth.BackColor = Color.White;
         pnlStockHealth.Name = "pnlStockHealth";
 
         lblMovementTitle.Dock = DockStyle.Top;
-        lblMovementTitle.Height = 22;
+        lblMovementTitle.Height = 20;
         lblMovementTitle.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-        lblMovementTitle.ForeColor = Color.FromArgb(90, 100, 115);
-        lblMovementTitle.Text = "Recent movement (qty)";
+        lblMovementTitle.ForeColor = Color.FromArgb(100, 110, 125);
+        lblMovementTitle.Text = "Weekly movement";
         lblMovementTitle.Name = "lblMovementTitle";
 
         pnlMovement.Dock = DockStyle.Fill;
         pnlMovement.BackColor = Color.White;
         pnlMovement.Name = "pnlMovement";
 
-        // Add order: Fill first, then tops
         insightsCard.Controls.Add(pnlMovement);
         insightsCard.Controls.Add(lblMovementTitle);
         insightsCard.Controls.Add(pnlStockHealth);
         insightsCard.Controls.Add(lblHealthTitle);
         insightsCard.Controls.Add(lblInsightsTitle);
 
-        // Quick Actions
+        // Quick Actions — green primary
         actionsPanel.BackColor = Color.White;
         actionsPanel.BorderStyle = BorderStyle.FixedSingle;
         actionsPanel.Controls.Add(btnQaUsers);
@@ -385,8 +351,8 @@ partial class DashboardForm
         actionsPanel.Name = "actionsPanel";
 
         lblQa.Dock = DockStyle.Top;
-        lblQa.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-        lblQa.ForeColor = Color.FromArgb(31, 41, 51);
+        lblQa.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold);
+        lblQa.ForeColor = Color.FromArgb(24, 32, 40);
         lblQa.Height = 30;
         lblQa.Name = "lblQa";
         lblQa.Text = "Quick Actions";
@@ -406,8 +372,8 @@ partial class DashboardForm
 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        BackColor = Color.FromArgb(244, 246, 248);
-        ClientSize = new Size(1020, 620);
+        BackColor = PageBg;
+        ClientSize = new Size(1040, 640);
         Controls.Add(bottom);
         Controls.Add(lblError);
         Controls.Add(metricsPanel);
@@ -422,23 +388,11 @@ partial class DashboardForm
         welcomePanel.PerformLayout();
         metricsPanel.ResumeLayout(false);
         tileProducts.ResumeLayout(false);
-        chipProducts.ResumeLayout(false);
         tileCategories.ResumeLayout(false);
-        chipCategories.ResumeLayout(false);
         tileSuppliers.ResumeLayout(false);
-        chipSuppliers.ResumeLayout(false);
         tileTotalQty.ResumeLayout(false);
-        chipTotalQty.ResumeLayout(false);
         tileLow.ResumeLayout(false);
-        chipLow.ResumeLayout(false);
         tileOut.ResumeLayout(false);
-        chipOut.ResumeLayout(false);
-        ((System.ComponentModel.ISupportInitialize)icoProducts).EndInit();
-        ((System.ComponentModel.ISupportInitialize)icoCategories).EndInit();
-        ((System.ComponentModel.ISupportInitialize)icoSuppliers).EndInit();
-        ((System.ComponentModel.ISupportInitialize)icoTotalQty).EndInit();
-        ((System.ComponentModel.ISupportInitialize)icoLow).EndInit();
-        ((System.ComponentModel.ISupportInitialize)icoOut).EndInit();
         bottom.ResumeLayout(false);
         activityCard.ResumeLayout(false);
         activityHeader.ResumeLayout(false);
@@ -450,53 +404,43 @@ partial class DashboardForm
     }
 
     private static void ConfigureMetricTile(
-        Panel tile, Panel chip, PictureBox ico,
+        Panel tile,
         Label cap, Label value, Label sub,
         string capText, string subText,
-        Color tileBg, Color chipBg, int tab,
-        Color? valueColor = null)
+        Color tileBg, Color valueColor, Color mutedColor,
+        int tab, bool primary)
     {
         tile.BackColor = tileBg;
-        tile.BorderStyle = BorderStyle.None;
-        tile.Margin = new Padding(0, 0, 12, 0);
-        tile.Size = new Size(168, 112);
+        tile.BorderStyle = primary ? BorderStyle.None : BorderStyle.FixedSingle;
+        tile.Margin = new Padding(0, 0, 10, 0);
+        tile.Size = new Size(158, 100);
         tile.TabIndex = tab;
-
-        chip.BackColor = chipBg;
-        chip.Location = new Point(12, 12);
-        chip.Size = new Size(36, 36);
-
-        ico.Location = new Point(8, 8);
-        ico.Size = new Size(20, 20);
-        ico.SizeMode = PictureBoxSizeMode.Zoom;
-        ico.TabStop = false;
-        chip.Controls.Add(ico);
+        tile.Padding = new Padding(12, 10, 12, 8);
 
         cap.AutoSize = false;
-        cap.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
-        cap.ForeColor = Color.FromArgb(90, 100, 115);
-        cap.Location = new Point(54, 12);
-        cap.Size = new Size(106, 30);
+        cap.Font = new Font("Segoe UI", 8F);
+        cap.ForeColor = primary ? Color.FromArgb(200, 230, 210) : Color.FromArgb(110, 120, 135);
+        cap.Location = new Point(12, 10);
+        cap.Size = new Size(134, 18);
         cap.Text = capText;
 
         value.AutoSize = false;
-        value.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
-        value.ForeColor = valueColor ?? Color.FromArgb(31, 41, 51);
-        value.Location = new Point(12, 54);
-        value.Size = new Size(144, 30);
+        value.Font = new Font("Segoe UI", 22F, FontStyle.Bold);
+        value.ForeColor = valueColor;
+        value.Location = new Point(12, 32);
+        value.Size = new Size(134, 36);
         value.Text = "—";
 
         sub.AutoSize = false;
         sub.Font = new Font("Segoe UI", 7.5F);
-        sub.ForeColor = Color.FromArgb(120, 130, 145);
-        sub.Location = new Point(12, 88);
-        sub.Size = new Size(144, 16);
+        sub.ForeColor = mutedColor;
+        sub.Location = new Point(12, 72);
+        sub.Size = new Size(134, 18);
         sub.Text = subText;
 
         tile.Controls.Add(sub);
         tile.Controls.Add(value);
         tile.Controls.Add(cap);
-        tile.Controls.Add(chip);
     }
 
     private static void ConfigureQaButton(Button btn, string name, string text, int top, bool primary)
@@ -514,15 +458,15 @@ partial class DashboardForm
 
         if (primary)
         {
-            btn.BackColor = Color.FromArgb(30, 75, 143);
+            btn.BackColor = DonezoGreen;
             btn.ForeColor = Color.White;
             btn.FlatAppearance.BorderSize = 0;
         }
         else
         {
             btn.BackColor = Color.White;
-            btn.ForeColor = Color.FromArgb(30, 75, 143);
-            btn.FlatAppearance.BorderColor = Color.FromArgb(215, 220, 225);
+            btn.ForeColor = DonezoGreen;
+            btn.FlatAppearance.BorderColor = CardBorder;
             btn.FlatAppearance.BorderSize = 1;
         }
     }

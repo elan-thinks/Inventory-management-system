@@ -14,10 +14,15 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms;
 
 /// <summary>
-/// SCR-002 Dashboard — metrics, insight charts, activity, quick actions.
+/// SCR-002 Dashboard — Donezo-style green metrics + insight charts.
 /// </summary>
 public partial class DashboardForm : Form
 {
+    private static readonly Color DonezoGreen = Color.FromArgb(15, 118, 70);
+    private static readonly Color DonezoGreenMid = Color.FromArgb(46, 160, 100);
+    private static readonly Color DonezoGreenLight = Color.FromArgb(140, 200, 160);
+    private static readonly Color DonezoBarMuted = Color.FromArgb(210, 230, 218);
+
     private DashboardService? _service;
     private readonly CurrentUser _user;
     private readonly Action<string>? _navigate;
@@ -26,7 +31,7 @@ public partial class DashboardForm : Form
     private int _healthy;
     private int _low;
     private int _out;
-    private readonly List<(string Label, int InQty, int OutQty)> _movementBars = new();
+    private readonly List<(string Label, int TotalQty)> _movementBars = new();
 
     private DashboardService Service => _service ??= new DashboardService();
 
@@ -46,7 +51,6 @@ public partial class DashboardForm : Form
             return;
 
         ApplyRuntimeTouches();
-        ApplyMetricIcons();
         ApplyQuickActionIcons();
         ApplyQuickActionVisibility();
         WireChartPaint();
@@ -54,7 +58,8 @@ public partial class DashboardForm : Form
         Load += (_, _) =>
         {
             var first = _user.FullName.Split(' ')[0];
-            lblWelcome.Text = $"Welcome, {first} 👋";
+            lblWelcome.Text = $"Welcome, {first}";
+            lblWelcomeSub.Text = "Track inventory health and daily stock movement.";
             PositionViewAllLink();
             Reload();
         };
@@ -87,23 +92,6 @@ public partial class DashboardForm : Form
         }
     }
 
-    private void ApplyMetricIcons()
-    {
-        void Set(PictureBox box, string file)
-        {
-            var img = AppIcons.Get(file, 18);
-            if (img is not null)
-                box.Image = img;
-        }
-
-        Set(icoProducts, "icons-totalProduct.png");
-        Set(icoCategories, "icons-catagory-tag.png");
-        Set(icoSuppliers, "icons-suppliers.png");
-        Set(icoTotalQty, "icons-dashboard.png");
-        Set(icoLow, "icons-warning.png");
-        Set(icoOut, "icons-x-error.png");
-    }
-
     private void ApplyQuickActionIcons()
     {
         AppIcons.ApplyToButton(btnQaStockIn, "icons-stockIn.png", 16);
@@ -112,47 +100,43 @@ public partial class DashboardForm : Form
         AppIcons.ApplyToButton(btnQaAdjustment, "icons-Inventory-adjust.png", 16);
         AppIcons.ApplyToButton(btnQaUsers, "icons-user.png", 16);
 
-        btnQaStockOut.ForeColor = UiTheme.Primary;
-        btnQaProducts.ForeColor = UiTheme.Primary;
-        btnQaAdjustment.ForeColor = UiTheme.Primary;
-        btnQaUsers.ForeColor = UiTheme.Primary;
+        btnQaStockOut.ForeColor = DonezoGreen;
+        btnQaProducts.ForeColor = DonezoGreen;
+        btnQaAdjustment.ForeColor = DonezoGreen;
+        btnQaUsers.ForeColor = DonezoGreen;
     }
 
     private void ApplyRuntimeTouches()
     {
         Font = UiTheme.Body;
-        BackColor = UiTheme.Background;
-        metricsPanel.BackColor = UiTheme.Background;
-        welcomePanel.BackColor = UiTheme.Background;
+        BackColor = Color.FromArgb(245, 247, 250);
+        metricsPanel.BackColor = BackColor;
+        welcomePanel.BackColor = BackColor;
 
-        activityCard.BackColor = UiTheme.Surface;
-        insightsCard.BackColor = UiTheme.Surface;
-        actionsPanel.BackColor = UiTheme.Surface;
-        activityHeader.BackColor = UiTheme.Surface;
+        activityCard.BackColor = Color.White;
+        insightsCard.BackColor = Color.White;
+        actionsPanel.BackColor = Color.White;
+        activityHeader.BackColor = Color.White;
 
-        lblAct.Font = UiTheme.SectionTitle;
-        lblAct.ForeColor = UiTheme.Text;
-        lblInsightsTitle.Font = UiTheme.SectionTitle;
-        lblInsightsTitle.ForeColor = UiTheme.Text;
-        lblQa.Font = UiTheme.SectionTitle;
-        lblQa.ForeColor = UiTheme.Text;
-        lblEmpty.Font = UiTheme.Body;
-        lblEmpty.ForeColor = UiTheme.TextMuted;
-        lblError.Font = UiTheme.Label;
+        lblAct.ForeColor = Color.FromArgb(24, 32, 40);
+        lblInsightsTitle.ForeColor = Color.FromArgb(24, 32, 40);
+        lblQa.ForeColor = Color.FromArgb(24, 32, 40);
+        lblEmpty.ForeColor = Color.FromArgb(120, 130, 145);
         lblError.ForeColor = UiTheme.Error;
 
-        lnkViewAll.LinkColor = UiTheme.Primary;
-        lnkViewAll.ActiveLinkColor = UiTheme.PrimaryHover;
+        lnkViewAll.LinkColor = DonezoGreen;
+        lnkViewAll.ActiveLinkColor = DonezoGreenMid;
 
-        UiTheme.StyleButton(btnQaStockIn, UiTheme.ButtonKind.Primary);
-        UiTheme.StyleButton(btnQaStockOut, UiTheme.ButtonKind.Secondary);
-        UiTheme.StyleButton(btnQaProducts, UiTheme.ButtonKind.Secondary);
-        UiTheme.StyleButton(btnQaAdjustment, UiTheme.ButtonKind.Secondary);
-        UiTheme.StyleButton(btnQaUsers, UiTheme.ButtonKind.Secondary);
+        btnQaStockIn.BackColor = DonezoGreen;
+        btnQaStockIn.ForeColor = Color.White;
+        btnQaStockIn.FlatAppearance.BorderSize = 0;
 
         foreach (var b in new[] { btnQaStockOut, btnQaProducts, btnQaAdjustment, btnQaUsers })
         {
-            b.ForeColor = UiTheme.Primary;
+            b.BackColor = Color.White;
+            b.ForeColor = DonezoGreen;
+            b.FlatAppearance.BorderColor = Color.FromArgb(228, 232, 238);
+            b.FlatAppearance.BorderSize = 1;
             b.TextAlign = ContentAlignment.MiddleLeft;
             b.Padding = new Padding(8, 0, 6, 0);
         }
@@ -213,18 +197,18 @@ public partial class DashboardForm : Form
             lblLow.Text = m.LowStockCount.ToString("N0", nfi);
             lblOut.Text = m.OutOfStockCount.ToString("N0", nfi);
 
-            subProducts.Text = m.ActiveProductCount == 1 ? "1 active item" : $"{m.ActiveProductCount:N0} active items";
-            subCategories.Text = "Product groupings";
+            subProducts.Text = "In catalog";
+            subCategories.Text = "Groupings";
             subSuppliers.Text = "Active vendors";
-            subTotalQty.Text = "Across all products";
-            subLow.Text = m.LowStockCount == 0 ? "All healthy ✓" : "Needs attention";
-            subOut.Text = m.OutOfStockCount == 0 ? "None out of stock ✓" : "Restock needed";
+            subTotalQty.Text = "Total quantity";
+            subLow.Text = m.LowStockCount == 0 ? "All healthy" : "Needs attention";
+            subOut.Text = m.OutOfStockCount == 0 ? "None out" : "Restock needed";
 
             _healthy = Math.Max(0, m.ActiveProductCount - m.LowStockCount - m.OutOfStockCount);
             _low = m.LowStockCount;
             _out = m.OutOfStockCount;
 
-            var rows = Service.GetRecentActivity(30);
+            var rows = Service.GetRecentActivity(40);
             BuildMovementBars(rows);
             pnlStockHealth.Invalidate();
             pnlMovement.Invalidate();
@@ -304,10 +288,9 @@ public partial class DashboardForm : Form
         for (int i = 6; i >= 0; i--)
         {
             var day = today.AddDays(-i);
-            var dayRows = rows.Where(r => r.TransactionDate.Date == day).ToList();
-            int inQty = dayRows.Where(r => r.TypeLabel == "Stock-In").Sum(r => r.Quantity);
-            int outQty = dayRows.Where(r => r.TypeLabel == "Stock-Out").Sum(r => r.Quantity);
-            _movementBars.Add((day.ToString("ddd"), inQty, outQty));
+            var dayRows = rows.Where(r => r.TransactionDate.Date == day);
+            int total = dayRows.Sum(r => r.Quantity);
+            _movementBars.Add((day.ToString("ddd")[..1], total)); // S M T W T F S
         }
     }
 
@@ -318,18 +301,18 @@ public partial class DashboardForm : Form
         g.Clear(Color.White);
 
         int total = _healthy + _low + _out;
-        var rect = new Rectangle(18, 10, 100, 100);
+        var rect = new Rectangle(24, 12, 110, 110);
+
+        // Track ring
+        using (var track = new Pen(Color.FromArgb(230, 236, 232), 14))
+            g.DrawEllipse(track, rect);
 
         if (total <= 0)
         {
-            using (var emptyPen = new Pen(Color.FromArgb(220, 225, 230), 14))
-                g.DrawEllipse(emptyPen, rect);
-
             using (var emptyFont = new Font("Segoe UI", 9F, FontStyle.Bold))
-            using (var emptyBrush = new SolidBrush(UiTheme.TextMuted))
-                g.DrawString("No data", emptyFont, emptyBrush, 38, 52);
-
-            DrawLegend(g, 130, 20);
+            using (var emptyBrush = new SolidBrush(Color.FromArgb(140, 150, 160)))
+                g.DrawString("No data", emptyFont, emptyBrush, 48, 58);
+            DrawLegend(g, 150, 28);
             return;
         }
 
@@ -338,52 +321,52 @@ public partial class DashboardForm : Form
         {
             if (value <= 0) return;
             float sweep = 360f * value / total;
-            using (var slicePen = new Pen(color, 16) { StartCap = LineCap.Round, EndCap = LineCap.Round })
+            using (var slicePen = new Pen(color, 14) { StartCap = LineCap.Round, EndCap = LineCap.Round })
                 g.DrawArc(slicePen, rect, start, sweep);
             start += sweep;
         }
 
-        Slice(_healthy, Color.FromArgb(46, 160, 100));
+        Slice(_healthy, DonezoGreen);
         Slice(_low, Color.FromArgb(230, 160, 40));
         Slice(_out, Color.FromArgb(210, 70, 60));
 
         int healthyPct = (int)Math.Round(100.0 * _healthy / total);
 
-        using (var pctFont = new Font("Segoe UI", 14F, FontStyle.Bold))
-        using (var pctBrush = new SolidBrush(UiTheme.Text))
+        using (var pctFont = new Font("Segoe UI", 16F, FontStyle.Bold))
+        using (var pctBrush = new SolidBrush(Color.FromArgb(24, 32, 40)))
         {
             var s = $"{healthyPct}%";
             var sz = g.MeasureString(s, pctFont);
-            g.DrawString(s, pctFont, pctBrush, rect.X + (rect.Width - sz.Width) / 2, rect.Y + 34);
+            g.DrawString(s, pctFont, pctBrush, rect.X + (rect.Width - sz.Width) / 2, rect.Y + 36);
         }
 
         using (var labelFont = new Font("Segoe UI", 7.5F))
-        using (var labelBrush = new SolidBrush(UiTheme.TextMuted))
+        using (var labelBrush = new SolidBrush(Color.FromArgb(120, 130, 145)))
         {
             const string s = "healthy";
             var sz = g.MeasureString(s, labelFont);
-            g.DrawString(s, labelFont, labelBrush, rect.X + (rect.Width - sz.Width) / 2, rect.Y + 58);
+            g.DrawString(s, labelFont, labelBrush, rect.X + (rect.Width - sz.Width) / 2, rect.Y + 62);
         }
 
-        DrawLegend(g, 130, 18);
+        DrawLegend(g, 150, 28);
     }
 
     private void DrawLegend(Graphics g, int x, int y)
     {
         void Row(Color c, string text, int count, int rowIndex)
         {
-            int yy = y + rowIndex * 28;
+            int yy = y + rowIndex * 26;
             using (var brush = new SolidBrush(c))
                 g.FillEllipse(brush, x, yy + 4, 10, 10);
 
             using (var legendFont = new Font("Segoe UI", 8F))
-            using (var textBrush = new SolidBrush(UiTheme.Text))
+            using (var textBrush = new SolidBrush(Color.FromArgb(50, 60, 70)))
                 g.DrawString($"{text}  ({count})", legendFont, textBrush, x + 16, yy);
         }
 
-        Row(Color.FromArgb(46, 160, 100), "Healthy", _healthy, 0);
-        Row(Color.FromArgb(230, 160, 40), "Low stock", _low, 1);
-        Row(Color.FromArgb(210, 70, 60), "Out of stock", _out, 2);
+        Row(DonezoGreen, "Healthy", _healthy, 0);
+        Row(Color.FromArgb(230, 160, 40), "Low", _low, 1);
+        Row(Color.FromArgb(210, 70, 60), "Out", _out, 2);
     }
 
     private void PnlMovement_Paint(object? sender, PaintEventArgs e)
@@ -395,46 +378,57 @@ public partial class DashboardForm : Form
         if (_movementBars.Count == 0)
         {
             using (var emptyFont = new Font("Segoe UI", 8.5F))
-            using (var emptyBrush = new SolidBrush(UiTheme.TextMuted))
-                g.DrawString("No movement data yet", emptyFont, emptyBrush, 8, 20);
+            using (var emptyBrush = new SolidBrush(Color.FromArgb(140, 150, 160)))
+                g.DrawString("No movement yet", emptyFont, emptyBrush, 8, 20);
             return;
         }
 
-        int max = Math.Max(1, _movementBars.Max(b => Math.Max(b.InQty, b.OutQty)));
-        int left = 8;
-        int bottom = pnlMovement.Height - 22;
-        int top = 8;
-        int chartH = Math.Max(20, bottom - top);
-        int slotW = Math.Max(18, (pnlMovement.Width - 16) / _movementBars.Count);
+        int max = Math.Max(1, _movementBars.Max(b => b.TotalQty));
+        int left = 10;
+        int bottom = pnlMovement.Height - 20;
+        int top = 6;
+        int chartH = Math.Max(24, bottom - top);
+        int slotW = Math.Max(20, (pnlMovement.Width - 20) / _movementBars.Count);
+        int barW = Math.Max(10, slotW - 8);
 
-        using var inBrush = new SolidBrush(Color.FromArgb(46, 160, 100));
-        using var outBrush = new SolidBrush(Color.FromArgb(210, 90, 80));
-        using var dayFont = new Font("Segoe UI", 7F);
-        using var dayBrush = new SolidBrush(UiTheme.TextMuted);
+        using var dayFont = new Font("Segoe UI", 7.5F, FontStyle.Bold);
+        using var dayBrush = new SolidBrush(Color.FromArgb(120, 130, 145));
 
         for (int i = 0; i < _movementBars.Count; i++)
         {
-            var (label, inQty, outQty) = _movementBars[i];
-            int x = left + i * slotW;
-            int barW = Math.Max(4, slotW / 3);
+            var (label, qty) = _movementBars[i];
+            int x = left + i * slotW + (slotW - barW) / 2;
 
-            int inH = (int)(chartH * (inQty / (double)max));
-            int outH = (int)(chartH * (outQty / (double)max));
+            // muted track
+            using (var muted = new SolidBrush(DonezoBarMuted))
+                FillRoundedRect(g, muted, x, top, barW, chartH, 6);
 
-            if (inH > 0)
-                g.FillRectangle(inBrush, x, bottom - inH, barW, inH);
-            if (outH > 0)
-                g.FillRectangle(outBrush, x + barW + 2, bottom - outH, barW, outH);
+            int h = (int)(chartH * (qty / (double)max));
+            if (h < 4 && qty > 0) h = 4;
 
-            g.DrawString(label, dayFont, dayBrush, x, bottom + 2);
+            // highlight tallest bar with solid green; others mid green
+            bool isPeak = qty == max && qty > 0;
+            using (var barBrush = new SolidBrush(isPeak ? DonezoGreen : DonezoGreenMid))
+            {
+                if (h > 0)
+                    FillRoundedRect(g, barBrush, x, bottom - h, barW, h, 6);
+            }
+
+            g.DrawString(label, dayFont, dayBrush, x + (barW - 8) / 2f, bottom + 2);
         }
+    }
 
-        int lx = 8;
-        int ly = 0;
-        g.FillRectangle(inBrush, lx, ly, 8, 8);
-        g.DrawString("In", dayFont, dayBrush, lx + 10, ly - 2);
-        g.FillRectangle(outBrush, lx + 36, ly, 8, 8);
-        g.DrawString("Out", dayFont, dayBrush, lx + 46, ly - 2);
+    private static void FillRoundedRect(Graphics g, Brush brush, int x, int y, int w, int h, int r)
+    {
+        if (w <= 0 || h <= 0) return;
+        r = Math.Min(r, Math.Min(w, h) / 2);
+        using var path = new GraphicsPath();
+        path.AddArc(x, y, r * 2, r * 2, 180, 90);
+        path.AddArc(x + w - r * 2, y, r * 2, r * 2, 270, 90);
+        path.AddArc(x + w - r * 2, y + h - r * 2, r * 2, r * 2, 0, 90);
+        path.AddArc(x, y + h - r * 2, r * 2, r * 2, 90, 90);
+        path.CloseFigure();
+        g.FillPath(brush, path);
     }
 
     private void Grid_CellFormattingQty(object? sender, DataGridViewCellFormattingEventArgs e)
@@ -455,7 +449,7 @@ public partial class DashboardForm : Form
         {
             e.Value = q > 0 ? $"+{q}" : q.ToString();
             e.FormattingApplied = true;
-            e.CellStyle.ForeColor = UiTheme.Success;
+            e.CellStyle.ForeColor = DonezoGreenMid;
             e.CellStyle.Font = UiTheme.LabelSemibold;
         }
     }
