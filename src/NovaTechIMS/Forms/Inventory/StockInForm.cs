@@ -8,19 +8,15 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Stock-In — compact fields, no stretched dropdowns.</summary>
+/// <summary>Stock-In — balanced layout, buttons under content (not far-right empty gap).</summary>
 public partial class StockInForm : Form
 {
     private StockInService? _service;
     private int _currentOnHand;
+    private int _contentRight = 700; // right edge of field block for button alignment
 
-    // Compact sizes inspired by dense product/admin forms
-    private const int FieldComboW = 300;
-    private const int FieldQtyW = 120;
-    private const int FieldDateW = 140;
-    private const int FieldPriceW = 130;
-    private const int ColGap = 24;
-    private const int Pad = 28;
+    private const int Pad = 32;
+    private const int Gap = 20;
 
     private StockInService Service => _service ??= new StockInService();
 
@@ -62,35 +58,48 @@ public partial class StockInForm : Form
     {
         if (formCard is null) return;
 
-        // Row 1: Product | Supplier — fixed compact widths
+        // Use ~72% of card width for the form block (efficient, not edge-to-edge, not tiny)
+        int usable = Math.Max(520, formCard.ClientSize.Width - Pad * 2);
+        int blockW = Math.Min(usable, Math.Max(560, (int)(usable * 0.78)));
+
+        int comboW = (blockW - Gap) / 2;
+        comboW = Math.Clamp(comboW, 240, 360);
+
+        // Recalculate block from actual combo widths
+        blockW = comboW * 2 + Gap;
+        _contentRight = Pad + blockW;
+
+        // Row 1: Product | Supplier
         lblProduct.Left = Pad;
         cboProduct.Left = Pad;
-        cboProduct.Width = FieldComboW;
+        cboProduct.Width = comboW;
         helpProduct.Left = Pad;
 
-        int col2 = Pad + FieldComboW + ColGap;
+        int col2 = Pad + comboW + Gap;
         lblSupplier.Left = col2;
         cboSupplier.Left = col2;
-        cboSupplier.Width = FieldComboW;
+        cboSupplier.Width = comboW;
         helpSupplier.Left = col2;
 
-        // Row 2: Qty | Date | Price — short controls
+        // Row 2: Qty | Date | Price — proportional thirds of block
+        int qtyW = Math.Max(110, blockW / 5);
+        int dateW = Math.Max(130, blockW / 4);
+        int priceW = Math.Max(110, blockW / 5);
+
         lblQuantity.Left = Pad;
         nudQuantity.Left = Pad;
-        nudQuantity.Width = FieldQtyW;
+        nudQuantity.Width = qtyW;
 
-        int dLeft = Pad + FieldQtyW + ColGap;
+        int dLeft = Pad + qtyW + Gap;
         lblDate.Left = dLeft;
         dtpDate.Left = dLeft;
-        dtpDate.Width = FieldDateW;
+        dtpDate.Width = dateW;
 
-        int pLeft = dLeft + FieldDateW + ColGap;
+        int pLeft = dLeft + dateW + Gap;
         lblUnitPrice.Left = pLeft;
         txtUnitPrice.Left = pLeft;
-        txtUnitPrice.Width = FieldPriceW;
+        txtUnitPrice.Width = priceW;
 
-        // Preview + notes span the field block only (not full window)
-        int blockW = FieldComboW * 2 + ColGap;
         previewBanner.Left = Pad;
         previewBanner.Width = blockW;
 
@@ -99,7 +108,7 @@ public partial class StockInForm : Form
         txtNotes.Left = Pad;
         txtNotes.Width = blockW;
         int notesBottom = formCard.ClientSize.Height - actionsBar.Height - 16;
-        txtNotes.Height = Math.Max(72, Math.Min(120, notesBottom - txtNotes.Top));
+        txtNotes.Height = Math.Max(72, Math.Min(130, notesBottom - txtNotes.Top));
 
         LayoutActions();
     }
@@ -107,7 +116,9 @@ public partial class StockInForm : Form
     private void LayoutActions()
     {
         if (actionsBar is null || btnSave is null || btnClear is null) return;
-        btnSave.Left = Math.Max(200, actionsBar.ClientSize.Width - btnSave.Width - Pad);
+        // Align buttons to the content block right edge — not the far window edge
+        int right = Math.Min(_contentRight, actionsBar.ClientSize.Width - Pad);
+        btnSave.Left = Math.Max(Pad + 200, right - btnSave.Width);
         btnClear.Left = btnSave.Left - btnClear.Width - 12;
     }
 
@@ -141,7 +152,7 @@ public partial class StockInForm : Form
             cbo.BackColor = Color.White;
             cbo.ForeColor = UiTheme.Text;
             cbo.Font = UiTheme.Body;
-            cbo.DropDownWidth = 360; // list can be wider than control
+            cbo.DropDownWidth = 400;
         }
 
         nudQuantity.BorderStyle = BorderStyle.FixedSingle;
