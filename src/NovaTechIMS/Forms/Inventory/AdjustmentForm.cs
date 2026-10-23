@@ -8,7 +8,7 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Inventory Adjustment (FR-ADJ) — designer owns layout.</summary>
+/// <summary>Inventory Adjustment — full-width, no recent grid, pinned actions.</summary>
 public partial class AdjustmentForm : Form
 {
     private AdjustmentService? _service;
@@ -23,27 +23,46 @@ public partial class AdjustmentForm : Form
         if (DesignTime.IsActive)
             return;
 
-        grid.Columns.Clear();
-        grid.ColumnCount = 0;
-
         ApplyRuntimeStyling();
         Load += (_, _) =>
         {
+            LayoutFullWidth();
             LoadProducts();
-            ReloadRecent();
         };
+        Resize += (_, _) => LayoutFullWidth();
+        actionsBar.Resize += (_, _) => LayoutActions();
+    }
+
+    private void LayoutFullWidth()
+    {
+        int w = Math.Max(640, contentHost.ClientSize.Width - 4);
+        secProductPanel.Width = w;
+        secMovementPanel.Width = w;
+        secReasonPanel.Width = w;
+
+        int fieldW = Math.Max(400, w - 40);
+        cboProduct.Width = fieldW;
+        txtReason.Width = fieldW;
+        txtNotes.Width = fieldW;
+        previewBanner.Width = fieldW;
+
+        LayoutActions();
+    }
+
+    private void LayoutActions()
+    {
+        btnSave.Left = Math.Max(200, actionsBar.ClientSize.Width - btnSave.Width - 4);
+        btnClear.Left = btnSave.Left - btnClear.Width - 12;
     }
 
     private void ApplyRuntimeStyling()
     {
         Font = UiTheme.Body;
         BackColor = UiTheme.Background;
-        formPanel.BackColor = UiTheme.Surface;
-        formPanel.Paint += (_, e) =>
-        {
-            using var pen = new Pen(UiTheme.Border, 1);
-            e.Graphics.DrawRectangle(pen, 0, 0, formPanel.Width - 1, formPanel.Height - 1);
-        };
+        actionsBar.BackColor = UiTheme.Background;
+
+        foreach (var p in new[] { secProductPanel, secMovementPanel, secReasonPanel })
+            p.BackColor = UiTheme.Surface;
 
         foreach (var sec in new[] { secProduct, secMovement, secReason })
         {
@@ -51,16 +70,10 @@ public partial class AdjustmentForm : Form
             sec.ForeColor = UiTheme.Primary;
         }
 
-        foreach (Control c in formPanel.Controls)
+        foreach (var lbl in new[] { lblProduct, lblPreviousCaption, lblNewQty, lblDate, lblDiffCaption, lblReason, lblNotes })
         {
-            if (c is Label lbl && lbl != lblError && lbl != lblPreview
-                && lbl != lblPreviousQty && lbl != lblDifference
-                && lbl != secProduct && lbl != secMovement && lbl != secReason
-                && lbl != helpProduct)
-            {
-                lbl.Font = UiTheme.Label;
-                lbl.ForeColor = UiTheme.Text;
-            }
+            lbl.Font = UiTheme.LabelSemibold;
+            lbl.ForeColor = UiTheme.Text;
         }
 
         helpProduct.ForeColor = UiTheme.TextMuted;
@@ -70,22 +83,34 @@ public partial class AdjustmentForm : Form
         lblPreviousQty.ForeColor = UiTheme.TextMuted;
         lblError.Font = UiTheme.Label;
         lblError.ForeColor = UiTheme.Error;
-        lblHint.Font = UiTheme.Label;
-        lblHint.ForeColor = UiTheme.TextMuted;
 
         UiTheme.StyleComboBox(cboProduct);
         UiTheme.StyleTextBox(txtReason);
         UiTheme.StyleTextBox(txtNotes);
         UiTheme.StyleDatePicker(dtpDate);
-
         nudNewQty.BackColor = UiTheme.Surface;
         nudNewQty.ForeColor = UiTheme.Text;
 
         UiTheme.StyleButton(btnSave, UiTheme.ButtonKind.Primary);
-        UiTheme.ApplyGridTheme(grid);
+        UiTheme.StyleButton(btnClear, UiTheme.ButtonKind.Secondary);
+        btnClear.ForeColor = UiTheme.Primary;
+        btnClear.FlatAppearance.BorderColor = UiTheme.Primary;
+        AppIcons.ApplyToButton(btnSave, "icons-Inventory-adjust.png", 16);
 
         dtpDate.MaxDate = DateTime.Today;
         dtpDate.Value = DateTime.Today;
+    }
+
+    private void BtnClear_Click(object? sender, EventArgs e)
+    {
+        if (DesignTime.IsActive) return;
+        if (cboProduct.Items.Count > 0) cboProduct.SelectedIndex = 0;
+        nudNewQty.Value = 0;
+        dtpDate.Value = DateTime.Today;
+        txtReason.Clear();
+        txtNotes.Clear();
+        lblError.Visible = false;
+        UpdateDifference();
     }
 
     private void NudNewQty_ValueChanged(object? sender, EventArgs e)
@@ -149,7 +174,7 @@ public partial class AdjustmentForm : Form
         if (cboProduct.SelectedItem is not LookupItem item || item.Value <= 0)
             lblPreview.Text = "  Select a product and set the new quantity.";
         else
-            lblPreview.Text = $"  Quantity will change from {_previousQty} to {(int)nudNewQty.Value} (diff {lblDifference.Text}).";
+            lblPreview.Text = $"  Quantity will change from {_previousQty:N0} to {(int)nudNewQty.Value:N0} (diff {lblDifference.Text}).";
     }
 
     private void BtnSave_Click(object? sender, EventArgs e)
@@ -196,10 +221,7 @@ public partial class AdjustmentForm : Form
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
 
-            txtReason.Clear();
-            txtNotes.Clear();
-            CboProduct_SelectedIndexChanged(null, EventArgs.Empty);
-            ReloadRecent();
+            BtnClear_Click(null, EventArgs.Empty);
         }
         catch (AppException ex)
         {
@@ -215,38 +237,6 @@ public partial class AdjustmentForm : Form
         {
             btnSave.Enabled = true;
         }
-    }
-
-    private void ReloadRecent()
-    {
-        try
-        {
-            var rows = Service.GetRecentAdjustments(30);
-            grid.DataSource = null;
-            grid.Columns.Clear();
-            grid.DataSource = rows;
-
-            foreach (DataGridViewColumn col in grid.Columns)
-                col.Visible = false;
-
-            void Show(string name, string header, float w = 1f)
-            {
-                if (grid.Columns[name] is not DataGridViewColumn c) return;
-                c.Visible = true;
-                c.HeaderText = header;
-                c.FillWeight = w;
-            }
-
-            Show(nameof(TransactionHistoryRow.TransactionID), "ID", 0.4f);
-            Show(nameof(TransactionHistoryRow.TransactionDate), "Date", 0.7f);
-            Show(nameof(TransactionHistoryRow.ProductName), "Product", 1.3f);
-            Show(nameof(TransactionHistoryRow.PreviousQuantity), "Prev", 0.5f);
-            Show(nameof(TransactionHistoryRow.NewQuantity), "New", 0.5f);
-            Show(nameof(TransactionHistoryRow.Difference), "Diff", 0.5f);
-            Show(nameof(TransactionHistoryRow.Reason), "Reason", 1.4f);
-            Show(nameof(TransactionHistoryRow.UserFullName), "User", 1.0f);
-        }
-        catch { }
     }
 
     private sealed class LookupItem
