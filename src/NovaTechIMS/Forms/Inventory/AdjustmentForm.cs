@@ -8,11 +8,17 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Inventory Adjustment — controls styled directly.</summary>
+/// <summary>Inventory Adjustment — compact fields.</summary>
 public partial class AdjustmentForm : Form
 {
     private AdjustmentService? _service;
     private int _previousQty;
+
+    private const int FieldComboW = 420;
+    private const int FieldQtyW = 120;
+    private const int FieldDateW = 140;
+    private const int ColGap = 24;
+    private const int Pad = 28;
 
     private AdjustmentService Service => _service ??= new AdjustmentService();
 
@@ -52,41 +58,40 @@ public partial class AdjustmentForm : Form
     private void LayoutResponsive()
     {
         if (formCard is null) return;
-        int pad = 28;
-        int usable = Math.Max(600, formCard.ClientSize.Width - pad * 2);
 
-        lblProduct.Left = pad;
-        cboProduct.Left = pad;
-        cboProduct.Width = usable;
-        helpProduct.Left = pad;
+        lblProduct.Left = Pad;
+        cboProduct.Left = Pad;
+        cboProduct.Width = FieldComboW;
+        helpProduct.Left = Pad;
 
-        lblPreviousCaption.Left = pad;
-        lblPreviousQty.Left = pad;
+        lblPreviousCaption.Left = Pad;
+        lblPreviousQty.Left = Pad;
 
-        lblNewQty.Left = pad + 180;
-        nudNewQty.Left = pad + 180;
-        nudNewQty.Width = 160;
+        lblNewQty.Left = Pad + 160;
+        nudNewQty.Left = Pad + 160;
+        nudNewQty.Width = FieldQtyW;
 
-        lblDate.Left = pad + 360;
-        dtpDate.Left = pad + 360;
-        dtpDate.Width = 180;
+        lblDate.Left = Pad + 160 + FieldQtyW + ColGap;
+        dtpDate.Left = Pad + 160 + FieldQtyW + ColGap;
+        dtpDate.Width = FieldDateW;
 
-        lblDiffCaption.Left = pad + 560;
-        lblDifference.Left = pad + 560;
+        lblDiffCaption.Left = Pad + 160 + FieldQtyW + ColGap + FieldDateW + ColGap;
+        lblDifference.Left = lblDiffCaption.Left;
 
-        previewBanner.Left = pad;
-        previewBanner.Width = usable;
+        int blockW = FieldComboW;
+        previewBanner.Left = Pad;
+        previewBanner.Width = blockW;
 
-        lblReason.Left = pad;
-        txtReason.Left = pad;
-        txtReason.Width = usable;
+        lblReason.Left = Pad;
+        txtReason.Left = Pad;
+        txtReason.Width = blockW;
 
-        lblNotes.Left = pad;
-        helpNotes.Left = pad;
-        txtNotes.Left = pad;
-        txtNotes.Width = usable;
+        lblNotes.Left = Pad;
+        helpNotes.Left = Pad;
+        txtNotes.Left = Pad;
+        txtNotes.Width = blockW;
         int notesBottom = formCard.ClientSize.Height - actionsBar.Height - 16;
-        txtNotes.Height = Math.Max(60, notesBottom - txtNotes.Top);
+        txtNotes.Height = Math.Max(60, Math.Min(100, notesBottom - txtNotes.Top));
 
         LayoutActions();
     }
@@ -94,7 +99,7 @@ public partial class AdjustmentForm : Form
     private void LayoutActions()
     {
         if (actionsBar is null || btnSave is null || btnClear is null) return;
-        btnSave.Left = Math.Max(200, actionsBar.ClientSize.Width - btnSave.Width - 28);
+        btnSave.Left = Math.Max(200, actionsBar.ClientSize.Width - btnSave.Width - Pad);
         btnClear.Left = btnSave.Left - btnClear.Width - 12;
     }
 
@@ -125,6 +130,7 @@ public partial class AdjustmentForm : Form
         cboProduct.FlatStyle = FlatStyle.Standard;
         cboProduct.BackColor = Color.White;
         cboProduct.ForeColor = UiTheme.Text;
+        cboProduct.DropDownWidth = 480;
 
         nudNewQty.BorderStyle = BorderStyle.FixedSingle;
         nudNewQty.BackColor = Color.White;
