@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Globalization;
+using System.Linq;
 using System.Windows.Forms;
 using NovaTechIMS.Data;
 using NovaTechIMS.Models;
@@ -11,7 +14,7 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms;
 
 /// <summary>
-/// SCR-002 Dashboard — Starline-style pastel metrics + activity + quick actions.
+/// SCR-002 Dashboard — metrics, insight charts, activity, quick actions.
 /// </summary>
 public partial class DashboardForm : Form
 {
@@ -19,6 +22,11 @@ public partial class DashboardForm : Form
     private readonly CurrentUser _user;
     private readonly Action<string>? _navigate;
     private bool _badgeWired;
+
+    private int _healthy;
+    private int _low;
+    private int _out;
+    private readonly List<(string Label, int InQty, int OutQty)> _movementBars = new();
 
     private DashboardService Service => _service ??= new DashboardService();
 
@@ -41,14 +49,25 @@ public partial class DashboardForm : Form
         ApplyMetricIcons();
         ApplyQuickActionIcons();
         ApplyQuickActionVisibility();
+        WireChartPaint();
+
         Load += (_, _) =>
         {
-            lblWelcome.Text = $"Welcome, {_user.FullName.Split(' ')[0]} 👋";
+            var first = _user.FullName.Split(' ')[0];
+            lblWelcome.Text = $"Welcome, {first} 👋";
             PositionViewAllLink();
             Reload();
         };
         activityHeader.Resize += (_, _) => PositionViewAllLink();
         actionsPanel.Resize += (_, _) => ResizeQuickActionButtons();
+    }
+
+    private void WireChartPaint()
+    {
+        pnlStockHealth.Paint += PnlStockHealth_Paint;
+        pnlMovement.Paint += PnlMovement_Paint;
+        pnlStockHealth.Resize += (_, _) => pnlStockHealth.Invalidate();
+        pnlMovement.Resize += (_, _) => pnlMovement.Invalidate();
     }
 
     private void PositionViewAllLink()
@@ -60,7 +79,7 @@ public partial class DashboardForm : Form
     private void ResizeQuickActionButtons()
     {
         if (actionsPanel is null) return;
-        int w = Math.Max(160, actionsPanel.ClientSize.Width - 24);
+        int w = Math.Max(140, actionsPanel.ClientSize.Width - 24);
         foreach (Control c in actionsPanel.Controls)
         {
             if (c is Button b)
@@ -107,11 +126,14 @@ public partial class DashboardForm : Form
         welcomePanel.BackColor = UiTheme.Background;
 
         activityCard.BackColor = UiTheme.Surface;
+        insightsCard.BackColor = UiTheme.Surface;
         actionsPanel.BackColor = UiTheme.Surface;
         activityHeader.BackColor = UiTheme.Surface;
 
         lblAct.Font = UiTheme.SectionTitle;
         lblAct.ForeColor = UiTheme.Text;
+        lblInsightsTitle.Font = UiTheme.SectionTitle;
+        lblInsightsTitle.ForeColor = UiTheme.Text;
         lblQa.Font = UiTheme.SectionTitle;
         lblQa.ForeColor = UiTheme.Text;
         lblEmpty.Font = UiTheme.Body;
@@ -132,10 +154,10 @@ public partial class DashboardForm : Form
         {
             b.ForeColor = UiTheme.Primary;
             b.TextAlign = ContentAlignment.MiddleLeft;
-            b.Padding = new Padding(10, 0, 8, 0);
+            b.Padding = new Padding(8, 0, 6, 0);
         }
         btnQaStockIn.TextAlign = ContentAlignment.MiddleLeft;
-        btnQaStockIn.Padding = new Padding(10, 0, 8, 0);
+        btnQaStockIn.Padding = new Padding(8, 0, 6, 0);
 
         UiTheme.ApplyGridTheme(grid);
         ResizeQuickActionButtons();
@@ -149,7 +171,7 @@ public partial class DashboardForm : Form
         btnQaAdjustment.Visible = AuthorizationService.HasPermission(_user, Permissions.PerformAdjustment);
         btnQaUsers.Visible = AuthorizationService.HasPermission(_user, Permissions.ManageUsers);
 
-        int y = 48;
+        int y = 42;
         foreach (Control c in actionsPanel.Controls)
         {
             if (c is Button { Visible: true } b)
@@ -198,8 +220,17 @@ public partial class DashboardForm : Form
             subLow.Text = m.LowStockCount == 0 ? "All healthy ✓" : "Needs attention";
             subOut.Text = m.OutOfStockCount == 0 ? "None out of stock ✓" : "Restock needed";
 
-            var rows = Service.GetRecentActivity(10);
-            if (rows.Count == 0)
+            _healthy = Math.Max(0, m.ActiveProductCount - m.LowStockCount - m.OutOfStockCount);
+            _low = m.LowStockCount;
+            _out = m.OutOfStockCount;
+
+            var rows = Service.GetRecentActivity(30);
+            BuildMovementBars(rows);
+            pnlStockHealth.Invalidate();
+            pnlMovement.Invalidate();
+
+            var display = rows.Take(10).ToList();
+            if (display.Count == 0)
             {
                 grid.Visible = false;
                 lblEmpty.Visible = true;
@@ -210,7 +241,7 @@ public partial class DashboardForm : Form
                 grid.Visible = true;
                 grid.DataSource = null;
                 grid.Columns.Clear();
-                grid.DataSource = rows;
+                grid.DataSource = display;
 
                 foreach (DataGridViewColumn col in grid.Columns)
                     col.Visible = false;
@@ -227,7 +258,7 @@ public partial class DashboardForm : Form
 
                 Show(nameof(TransactionHistoryRow.TransactionDate), "Date", 0.9f);
                 Show(nameof(TransactionHistoryRow.TypeLabel), "Type", 0.85f);
-                Show(nameof(TransactionHistoryRow.ProductName), "Product", 1.5f);
+                Show(nameof(TransactionHistoryRow.ProductName), "Product", 1.4f);
                 Show(nameof(TransactionHistoryRow.Quantity), "Qty", 0.5f);
                 Show(nameof(TransactionHistoryRow.UserFullName), "User", 1.0f);
 
@@ -264,6 +295,142 @@ public partial class DashboardForm : Form
             lblError.Text = "Unable to load dashboard data. " + friendly;
             lblError.Visible = true;
         }
+    }
+
+    private void BuildMovementBars(IReadOnlyList<TransactionHistoryRow> rows)
+    {
+        _movementBars.Clear();
+        var today = DateTime.Today;
+        for (int i = 6; i >= 0; i--)
+        {
+            var day = today.AddDays(-i);
+            var dayRows = rows.Where(r => r.TransactionDate.Date == day).ToList();
+            int inQty = dayRows.Where(r => r.TypeLabel == "Stock-In").Sum(r => r.Quantity);
+            int outQty = dayRows.Where(r => r.TypeLabel == "Stock-Out").Sum(r => r.Quantity);
+            _movementBars.Add((day.ToString("ddd"), inQty, outQty));
+        }
+    }
+
+    private void PnlStockHealth_Paint(object? sender, PaintEventArgs e)
+    {
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.Clear(Color.White);
+
+        int total = _healthy + _low + _out;
+        var rect = new Rectangle(18, 10, 100, 100);
+
+        if (total <= 0)
+        {
+            using var pen = new Pen(Color.FromArgb(220, 225, 230), 14);
+            g.DrawEllipse(pen, rect);
+            using var f = new Font("Segoe UI", 9F, FontStyle.Bold);
+            using var br = new SolidBrush(UiTheme.TextMuted);
+            g.DrawString("No data", f, br, 38, 52);
+            DrawLegend(g, 130, 20);
+            return;
+        }
+
+        float start = -90f;
+        void Slice(int value, Color color)
+        {
+            if (value <= 0) return;
+            float sweep = 360f * value / total;
+            using var pen = new Pen(color, 16) { StartCap = LineCap.Round, EndCap = LineCap.Round };
+            g.DrawArc(pen, rect, start, sweep);
+            start += sweep;
+        }
+
+        Slice(_healthy, Color.FromArgb(46, 160, 100));
+        Slice(_low, Color.FromArgb(230, 160, 40));
+        Slice(_out, Color.FromArgb(210, 70, 60));
+
+        int healthyPct = (int)Math.Round(100.0 * _healthy / total);
+        using (var f = new Font("Segoe UI", 14F, FontStyle.Bold))
+        using (var br = new SolidBrush(UiTheme.Text))
+        {
+            var s = $"{healthyPct}%";
+            var sz = g.MeasureString(s, f);
+            g.DrawString(s, f, br, rect.X + (rect.Width - sz.Width) / 2, rect.Y + 34);
+        }
+        using (var f = new Font("Segoe UI", 7.5F))
+        using (var br = new SolidBrush(UiTheme.TextMuted))
+        {
+            var s = "healthy";
+            var sz = g.MeasureString(s, f);
+            g.DrawString(s, f, br, rect.X + (rect.Width - sz.Width) / 2, rect.Y + 58);
+        }
+
+        DrawLegend(g, 130, 18);
+    }
+
+    private void DrawLegend(Graphics g, int x, int y)
+    {
+        void Row(Color c, string text, int count, int row)
+        {
+            int yy = y + row * 28;
+            using var brush = new SolidBrush(c);
+            g.FillEllipse(brush, x, yy + 4, 10, 10);
+            using var f = new Font("Segoe UI", 8F);
+            using var tb = new SolidBrush(UiTheme.Text);
+            g.DrawString($"{text}  ({count})", f, tb, x + 16, yy);
+        }
+
+        Row(Color.FromArgb(46, 160, 100), "Healthy", _healthy, 0);
+        Row(Color.FromArgb(230, 160, 40), "Low stock", _low, 1);
+        Row(Color.FromArgb(210, 70, 60), "Out of stock", _out, 2);
+    }
+
+    private void PnlMovement_Paint(object? sender, PaintEventArgs e)
+    {
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.Clear(Color.White);
+
+        if (_movementBars.Count == 0)
+        {
+            using var f = new Font("Segoe UI", 8.5F);
+            using var br = new SolidBrush(UiTheme.TextMuted);
+            g.DrawString("No movement data yet", f, br, 8, 20);
+            return;
+        }
+
+        int max = Math.Max(1, _movementBars.Max(b => Math.Max(b.InQty, b.OutQty)));
+        int left = 8;
+        int bottom = pnlMovement.Height - 22;
+        int top = 8;
+        int chartH = Math.Max(20, bottom - top);
+        int slotW = Math.Max(18, (pnlMovement.Width - 16) / _movementBars.Count);
+
+        using var inBrush = new SolidBrush(Color.FromArgb(46, 160, 100));
+        using var outBrush = new SolidBrush(Color.FromArgb(210, 90, 80));
+        using var f = new Font("Segoe UI", 7F);
+        using var tb = new SolidBrush(UiTheme.TextMuted);
+
+        for (int i = 0; i < _movementBars.Count; i++)
+        {
+            var (label, inQty, outQty) = _movementBars[i];
+            int x = left + i * slotW;
+            int barW = Math.Max(4, slotW / 3);
+
+            int inH = (int)(chartH * (inQty / (double)max));
+            int outH = (int)(chartH * (outQty / (double)max));
+
+            if (inH > 0)
+                g.FillRectangle(inBrush, x, bottom - inH, barW, inH);
+            if (outH > 0)
+                g.FillRectangle(outBrush, x + barW + 2, bottom - outH, barW, outH);
+
+            g.DrawString(label, f, tb, x, bottom + 2);
+        }
+
+        // tiny legend
+        int lx = 8;
+        int ly = 0;
+        g.FillRectangle(inBrush, lx, ly, 8, 8);
+        g.DrawString("In", f, tb, lx + 10, ly - 2);
+        g.FillRectangle(outBrush, lx + 36, ly, 8, 8);
+        g.DrawString("Out", f, tb, lx + 46, ly - 2);
     }
 
     private void Grid_CellFormattingQty(object? sender, DataGridViewCellFormattingEventArgs e)
