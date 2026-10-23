@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Inventory Adjustment — inputs styled directly.</summary>
+/// <summary>Inventory Adjustment — inputs styled directly (Stock-Out pattern).</summary>
 partial class AdjustmentForm
 {
     private System.ComponentModel.IContainer components = null;
@@ -297,12 +297,12 @@ partial class AdjustmentForm
         lblReason.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
         lblReason.ForeColor = textMain;
         lblReason.AutoSize = true;
-        lblReason.Location = new Point(28, 296);
+        lblReason.Location = new Point(28, 292);
         lblReason.Name = "lblReason";
 
         txtReason.BorderStyle = BorderStyle.FixedSingle;
         txtReason.Font = new Font("Segoe UI", 10F);
-        txtReason.Location = new Point(28, 318);
+        txtReason.Location = new Point(28, 314);
         txtReason.Size = new Size(860, 28);
         txtReason.Name = "txtReason";
         txtReason.TabIndex = 3;
@@ -312,20 +312,20 @@ partial class AdjustmentForm
         lblNotes.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
         lblNotes.ForeColor = textMain;
         lblNotes.AutoSize = true;
-        lblNotes.Location = new Point(28, 360);
+        lblNotes.Location = new Point(28, 352);
         lblNotes.Name = "lblNotes";
 
         helpNotes.Text = "Optional extra detail";
         helpNotes.Font = new Font("Segoe UI", 8F);
         helpNotes.ForeColor = textMuted;
         helpNotes.AutoSize = true;
-        helpNotes.Location = new Point(28, 380);
+        helpNotes.Location = new Point(28, 372);
         helpNotes.Name = "helpNotes";
 
         txtNotes.BorderStyle = BorderStyle.FixedSingle;
         txtNotes.Font = new Font("Segoe UI", 10F);
-        txtNotes.Location = new Point(28, 400);
-        txtNotes.Size = new Size(860, 80);
+        txtNotes.Location = new Point(28, 392);
+        txtNotes.Size = new Size(860, 100);
         txtNotes.Multiline = true;
         txtNotes.MaxLength = 500;
         txtNotes.ScrollBars = ScrollBars.Vertical;
