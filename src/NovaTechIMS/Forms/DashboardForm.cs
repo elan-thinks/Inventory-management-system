@@ -14,7 +14,7 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms;
 
 /// <summary>
-/// SCR-002 Dashboard — soft iOS / Donezo visual language.
+/// SCR-002 Dashboard — soft metrics, icons, insights charts.
 /// </summary>
 public partial class DashboardForm : Form
 {
@@ -53,6 +53,7 @@ public partial class DashboardForm : Form
             return;
 
         ApplyRuntimeTouches();
+        ApplyMetricIcons();
         ApplyQuickActionIcons();
         ApplyQuickActionVisibility();
         WireChartPaint();
@@ -61,12 +62,31 @@ public partial class DashboardForm : Form
         {
             var first = _user.FullName.Split(' ')[0];
             lblWelcome.Text = $"Welcome, {first}";
-            lblWelcomeSub.Text = "Track inventory health and daily stock movement.";
+            lblWelcomeSub.Text = "Electronics stock health and recent movement at a glance.";
             PositionViewAllLink();
             Reload();
         };
         activityHeader.Resize += (_, _) => PositionViewAllLink();
         actionsPanel.Resize += (_, _) => ResizeQuickActionButtons();
+    }
+
+    private void ApplyMetricIcons()
+    {
+        void Set(PictureBox box, string file, bool onGreen)
+        {
+            var img = AppIcons.Get(file, 18);
+            if (img is null) return;
+            box.Image = img;
+            // White hero card: icon sits on green — leave as-is (PNG may be dark).
+            box.Visible = true;
+        }
+
+        Set(icoProducts, "icons-totalProduct.png", true);
+        Set(icoCategories, "icons-catagory-tag.png", false);
+        Set(icoSuppliers, "icons-suppliers.png", false);
+        Set(icoTotalQty, "icons-dashboard.png", false);
+        Set(icoLow, "icons-warning.png", false);
+        Set(icoOut, "icons-x-error.png", false);
     }
 
     private void WireChartPaint()
@@ -76,7 +96,6 @@ public partial class DashboardForm : Form
         pnlStockHealth.Resize += (_, _) => pnlStockHealth.Invalidate();
         pnlMovement.Resize += (_, _) => pnlMovement.Invalidate();
 
-        // Soft 1px edge on floating cards (no system black border)
         void SoftEdge(object? s, PaintEventArgs e)
         {
             if (s is not Panel p) return;
@@ -88,11 +107,8 @@ public partial class DashboardForm : Form
         insightsCard.Paint += SoftEdge;
         actionsPanel.Paint += SoftEdge;
 
-        // Soft edge on white metric tiles only
         foreach (var tile in new[] { tileCategories, tileSuppliers, tileTotalQty, tileLow, tileOut })
-        {
             tile.Paint += SoftEdge;
-        }
     }
 
     private void PositionViewAllLink()
@@ -104,7 +120,7 @@ public partial class DashboardForm : Form
     private void ResizeQuickActionButtons()
     {
         if (actionsPanel is null) return;
-        int w = Math.Max(140, actionsPanel.ClientSize.Width - 28);
+        int w = Math.Max(140, actionsPanel.ClientSize.Width - 24);
         foreach (Control c in actionsPanel.Controls)
         {
             if (c is Button b)
@@ -167,7 +183,6 @@ public partial class DashboardForm : Form
         btnQaStockIn.TextAlign = ContentAlignment.MiddleLeft;
         btnQaStockIn.Padding = new Padding(10, 0, 6, 0);
 
-        // Soft grid — already set in Designer; reinforce selection tint
         grid.EnableHeadersVisualStyles = false;
         grid.BackgroundColor = Color.White;
         grid.BorderStyle = BorderStyle.None;
@@ -186,7 +201,7 @@ public partial class DashboardForm : Form
         btnQaAdjustment.Visible = AuthorizationService.HasPermission(_user, Permissions.PerformAdjustment);
         btnQaUsers.Visible = AuthorizationService.HasPermission(_user, Permissions.ManageUsers);
 
-        int y = 44;
+        int y = 40;
         foreach (Control c in actionsPanel.Controls)
         {
             if (c is Button { Visible: true } b)
@@ -230,8 +245,8 @@ public partial class DashboardForm : Form
 
             subProducts.Text = "In catalog";
             subCategories.Text = "Groupings";
-            subSuppliers.Text = "Active vendors";
-            subTotalQty.Text = "Total quantity";
+            subSuppliers.Text = "Vendors";
+            subTotalQty.Text = "Total stock";
             subLow.Text = m.LowStockCount == 0 ? "All healthy" : "Needs attention";
             subOut.Text = m.OutOfStockCount == 0 ? "None out" : "Restock needed";
 
@@ -320,8 +335,7 @@ public partial class DashboardForm : Form
         for (int i = 6; i >= 0; i--)
         {
             var day = today.AddDays(-i);
-            // Map DayOfWeek to Mo..Su
-            int idx = ((int)day.DayOfWeek + 6) % 7; // Mon=0 ... Sun=6
+            int idx = ((int)day.DayOfWeek + 6) % 7;
             var dayRows = rows.Where(r => r.TransactionDate.Date == day);
             int total = dayRows.Sum(r => r.Quantity);
             _movementBars.Add((labels[idx], total));
@@ -335,7 +349,7 @@ public partial class DashboardForm : Form
         g.Clear(Color.White);
 
         int total = _healthy + _low + _out;
-        var rect = new Rectangle(20, 14, 108, 108);
+        var rect = new Rectangle(18, 14, 110, 110);
 
         using (var track = new Pen(Color.FromArgb(236, 242, 238), 12))
             g.DrawEllipse(track, rect);
@@ -344,8 +358,8 @@ public partial class DashboardForm : Form
         {
             using (var emptyFont = new Font("Segoe UI", 9F))
             using (var emptyBrush = new SolidBrush(TextMuted))
-                g.DrawString("No data", emptyFont, emptyBrush, 44, 58);
-            DrawLegend(g, 148, 30);
+                g.DrawString("No data", emptyFont, emptyBrush, 42, 58);
+            DrawLegend(g, 146, 30);
             return;
         }
 
@@ -381,7 +395,7 @@ public partial class DashboardForm : Form
             g.DrawString(s, labelFont, labelBrush, rect.X + (rect.Width - sz.Width) / 2, rect.Y + 62);
         }
 
-        DrawLegend(g, 148, 30);
+        DrawLegend(g, 146, 30);
     }
 
     private void DrawLegend(Graphics g, int x, int y)
@@ -432,7 +446,6 @@ public partial class DashboardForm : Form
             var (label, qty) = _movementBars[i];
             int x = left + i * slotW + (slotW - barW) / 2;
 
-            // soft track
             using (var muted = new SolidBrush(AccentGreenSoft))
                 FillRoundedRect(g, muted, x, top, barW, chartH, 8);
 
