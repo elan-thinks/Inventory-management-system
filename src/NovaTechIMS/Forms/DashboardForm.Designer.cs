@@ -4,12 +4,16 @@ using System.Windows.Forms;
 namespace NovaTechIMS.Forms;
 
 /// <summary>
-/// Dashboard — SRMS-inspired metric cards (colored icon chips) + activity + QA.
-/// All controls on the design surface for View Designer.
+/// Dashboard — Starline-inspired soft pastel metric cards.
+/// Designer-visible layout.
 /// </summary>
 partial class DashboardForm
 {
     private System.ComponentModel.IContainer components = null;
+
+    private Panel welcomePanel;
+    private Label lblWelcome;
+    private Label lblWelcomeSub;
 
     private FlowLayoutPanel metricsPanel;
     private Panel tileProducts;
@@ -35,16 +39,22 @@ partial class DashboardForm
 
     private Label capProducts;
     private Label lblProducts;
+    private Label subProducts;
     private Label capCategories;
     private Label lblCategories;
+    private Label subCategories;
     private Label capSuppliers;
     private Label lblSuppliers;
+    private Label subSuppliers;
     private Label capTotalQty;
     private Label lblTotalQty;
+    private Label subTotalQty;
     private Label capLow;
     private Label lblLow;
+    private Label subLow;
     private Label capOut;
     private Label lblOut;
+    private Label subOut;
 
     private Label lblError;
     private TableLayoutPanel bottom;
@@ -71,37 +81,48 @@ partial class DashboardForm
 
     private void InitializeComponent()
     {
+        welcomePanel = new Panel();
+        lblWelcome = new Label();
+        lblWelcomeSub = new Label();
+
         metricsPanel = new FlowLayoutPanel();
         tileProducts = new Panel();
         chipProducts = new Panel();
         icoProducts = new PictureBox();
         capProducts = new Label();
         lblProducts = new Label();
+        subProducts = new Label();
         tileCategories = new Panel();
         chipCategories = new Panel();
         icoCategories = new PictureBox();
         capCategories = new Label();
         lblCategories = new Label();
+        subCategories = new Label();
         tileSuppliers = new Panel();
         chipSuppliers = new Panel();
         icoSuppliers = new PictureBox();
         capSuppliers = new Label();
         lblSuppliers = new Label();
+        subSuppliers = new Label();
         tileTotalQty = new Panel();
         chipTotalQty = new Panel();
         icoTotalQty = new PictureBox();
         capTotalQty = new Label();
         lblTotalQty = new Label();
+        subTotalQty = new Label();
         tileLow = new Panel();
         chipLow = new Panel();
         icoLow = new PictureBox();
         capLow = new Label();
         lblLow = new Label();
+        subLow = new Label();
         tileOut = new Panel();
         chipOut = new Panel();
         icoOut = new PictureBox();
         capOut = new Label();
         lblOut = new Label();
+        subOut = new Label();
+
         lblError = new Label();
         bottom = new TableLayoutPanel();
         activityCard = new Panel();
@@ -118,6 +139,7 @@ partial class DashboardForm
         btnQaAdjustment = new Button();
         btnQaUsers = new Button();
 
+        welcomePanel.SuspendLayout();
         metricsPanel.SuspendLayout();
         tileProducts.SuspendLayout();
         chipProducts.SuspendLayout();
@@ -144,8 +166,31 @@ partial class DashboardForm
         actionsPanel.SuspendLayout();
         SuspendLayout();
 
-        // Metrics row — full width flow
-        metricsPanel.AutoScroll = false;
+        // Welcome strip
+        welcomePanel.Dock = DockStyle.Top;
+        welcomePanel.Height = 56;
+        welcomePanel.BackColor = Color.FromArgb(244, 246, 248);
+        welcomePanel.Name = "welcomePanel";
+
+        lblWelcome.AutoSize = true;
+        lblWelcome.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+        lblWelcome.ForeColor = Color.FromArgb(31, 41, 51);
+        lblWelcome.Location = new Point(0, 4);
+        lblWelcome.Name = "lblWelcome";
+        lblWelcome.Text = "Inventory overview";
+
+        lblWelcomeSub.AutoSize = true;
+        lblWelcomeSub.Font = new Font("Segoe UI", 9F);
+        lblWelcomeSub.ForeColor = Color.FromArgb(107, 119, 133);
+        lblWelcomeSub.Location = new Point(2, 32);
+        lblWelcomeSub.Name = "lblWelcomeSub";
+        lblWelcomeSub.Text = "Here’s what’s happening in your stock right now.";
+
+        welcomePanel.Controls.Add(lblWelcome);
+        welcomePanel.Controls.Add(lblWelcomeSub);
+
+        // Metrics — taller pastel cards
+        metricsPanel.AutoScroll = true;
         metricsPanel.BackColor = Color.FromArgb(244, 246, 248);
         metricsPanel.Controls.Add(tileProducts);
         metricsPanel.Controls.Add(tileCategories);
@@ -154,30 +199,43 @@ partial class DashboardForm
         metricsPanel.Controls.Add(tileLow);
         metricsPanel.Controls.Add(tileOut);
         metricsPanel.Dock = DockStyle.Top;
-        metricsPanel.Padding = new Padding(0, 4, 0, 12);
-        metricsPanel.Size = new Size(960, 118);
+        metricsPanel.Padding = new Padding(0, 0, 0, 12);
+        metricsPanel.Size = new Size(960, 140);
         metricsPanel.Name = "metricsPanel";
         metricsPanel.WrapContents = false;
 
-        // Colored chips inspired by SRMS dashboard
+        // Soft pastel fills (Starline style)
         ConfigureMetricTile(tileProducts, chipProducts, icoProducts,
-            capProducts, lblProducts, "Total Active Products",
-            Color.FromArgb(232, 240, 254), 0);
+            capProducts, lblProducts, subProducts,
+            "Active Products", "Catalog items in stock",
+            Color.FromArgb(255, 248, 235), Color.FromArgb(255, 236, 200), 0);
+
         ConfigureMetricTile(tileCategories, chipCategories, icoCategories,
-            capCategories, lblCategories, "Total Categories",
-            Color.FromArgb(232, 248, 240), 1);
+            capCategories, lblCategories, subCategories,
+            "Categories", "Product groupings",
+            Color.FromArgb(243, 232, 255), Color.FromArgb(230, 210, 255), 1);
+
         ConfigureMetricTile(tileSuppliers, chipSuppliers, icoSuppliers,
-            capSuppliers, lblSuppliers, "Total Suppliers",
-            Color.FromArgb(243, 232, 255), 2);
+            capSuppliers, lblSuppliers, subSuppliers,
+            "Suppliers", "Active vendors",
+            Color.FromArgb(230, 247, 255), Color.FromArgb(200, 235, 255), 2);
+
         ConfigureMetricTile(tileTotalQty, chipTotalQty, icoTotalQty,
-            capTotalQty, lblTotalQty, "Total Inventory Quantity",
-            Color.FromArgb(255, 247, 230), 3);
+            capTotalQty, lblTotalQty, subTotalQty,
+            "Units on hand", "Total inventory quantity",
+            Color.FromArgb(232, 248, 240), Color.FromArgb(200, 240, 220), 3);
+
         ConfigureMetricTile(tileLow, chipLow, icoLow,
-            capLow, lblLow, "Low-Stock Products",
-            Color.FromArgb(255, 243, 224), 4, Color.FromArgb(199, 119, 0));
+            capLow, lblLow, subLow,
+            "Low stock", "Below reorder level",
+            Color.FromArgb(255, 243, 224), Color.FromArgb(255, 224, 180),
+            4, Color.FromArgb(199, 119, 0));
+
         ConfigureMetricTile(tileOut, chipOut, icoOut,
-            capOut, lblOut, "Out-of-Stock Products",
-            Color.FromArgb(254, 236, 234), 5, Color.FromArgb(192, 57, 43));
+            capOut, lblOut, subOut,
+            "Out of stock", "Zero quantity items",
+            Color.FromArgb(254, 236, 234), Color.FromArgb(255, 210, 205),
+            5, Color.FromArgb(192, 57, 43));
 
         lblError.Dock = DockStyle.Top;
         lblError.ForeColor = Color.FromArgb(192, 57, 43);
@@ -286,16 +344,19 @@ partial class DashboardForm
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.FromArgb(244, 246, 248);
-        ClientSize = new Size(992, 560);
+        ClientSize = new Size(1000, 600);
         Controls.Add(bottom);
         Controls.Add(lblError);
         Controls.Add(metricsPanel);
+        Controls.Add(welcomePanel);
         Font = new Font("Segoe UI", 10F);
         FormBorderStyle = FormBorderStyle.None;
         Name = "DashboardForm";
-        Padding = new Padding(20, 12, 20, 12);
+        Padding = new Padding(20, 8, 20, 12);
         Text = "Dashboard";
 
+        welcomePanel.ResumeLayout(false);
+        welcomePanel.PerformLayout();
         metricsPanel.ResumeLayout(false);
         tileProducts.ResumeLayout(false);
         chipProducts.ResumeLayout(false);
@@ -326,41 +387,50 @@ partial class DashboardForm
 
     private static void ConfigureMetricTile(
         Panel tile, Panel chip, PictureBox ico,
-        Label cap, Label value, string capText,
-        Color chipColor, int tab,
+        Label cap, Label value, Label sub,
+        string capText, string subText,
+        Color tileBg, Color chipBg, int tab,
         Color? valueColor = null)
     {
-        tile.BackColor = Color.White;
-        tile.BorderStyle = BorderStyle.FixedSingle;
-        tile.Margin = new Padding(0, 0, 12, 0);
-        tile.Size = new Size(168, 100);
+        tile.BackColor = tileBg;
+        tile.BorderStyle = BorderStyle.None;
+        tile.Margin = new Padding(0, 0, 14, 0);
+        tile.Size = new Size(175, 118);
         tile.TabIndex = tab;
+        tile.Padding = new Padding(12);
 
-        chip.BackColor = chipColor;
-        chip.Location = new Point(12, 14);
-        chip.Size = new Size(36, 36);
-        chip.Name = "chip";
+        chip.BackColor = chipBg;
+        chip.Location = new Point(12, 12);
+        chip.Size = new Size(40, 40);
 
-        ico.Location = new Point(8, 8);
+        ico.Location = new Point(10, 10);
         ico.Size = new Size(20, 20);
         ico.SizeMode = PictureBoxSizeMode.Zoom;
         ico.TabStop = false;
         chip.Controls.Add(ico);
 
         cap.AutoSize = false;
-        cap.Font = new Font("Segoe UI", 8F);
-        cap.ForeColor = Color.FromArgb(107, 119, 133);
-        cap.Location = new Point(56, 12);
-        cap.Size = new Size(104, 32);
+        cap.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold);
+        cap.ForeColor = Color.FromArgb(90, 100, 115);
+        cap.Location = new Point(60, 14);
+        cap.Size = new Size(105, 32);
         cap.Text = capText;
 
         value.AutoSize = false;
-        value.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
+        value.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
         value.ForeColor = valueColor ?? Color.FromArgb(31, 41, 51);
-        value.Location = new Point(12, 56);
-        value.Size = new Size(148, 36);
-        value.Text = "0";
+        value.Location = new Point(12, 58);
+        value.Size = new Size(150, 32);
+        value.Text = "—";
 
+        sub.AutoSize = false;
+        sub.Font = new Font("Segoe UI", 7.5F);
+        sub.ForeColor = Color.FromArgb(120, 130, 145);
+        sub.Location = new Point(12, 92);
+        sub.Size = new Size(150, 18);
+        sub.Text = subText;
+
+        tile.Controls.Add(sub);
         tile.Controls.Add(value);
         tile.Controls.Add(cap);
         tile.Controls.Add(chip);

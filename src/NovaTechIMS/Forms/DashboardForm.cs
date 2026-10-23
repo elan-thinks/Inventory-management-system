@@ -11,8 +11,7 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms;
 
 /// <summary>
-/// SCR-002 Dashboard — layout is designer-owned; this file is data + permissions only.
-/// Visual target: UI/update-ui/.../dashboard.html (light mockup).
+/// SCR-002 Dashboard — Starline-style pastel metrics + activity + quick actions.
 /// </summary>
 public partial class DashboardForm : Form
 {
@@ -23,7 +22,6 @@ public partial class DashboardForm : Form
 
     private DashboardService Service => _service ??= new DashboardService();
 
-    /// <summary>Required by the WinForms designer.</summary>
     public DashboardForm()
         : this(DesignTime.PlaceholderUser, null)
     {
@@ -45,6 +43,7 @@ public partial class DashboardForm : Form
         ApplyQuickActionVisibility();
         Load += (_, _) =>
         {
+            lblWelcome.Text = $"Welcome, {_user.FullName.Split(' ')[0]} 👋";
             PositionViewAllLink();
             Reload();
         };
@@ -73,7 +72,7 @@ public partial class DashboardForm : Form
     {
         void Set(PictureBox box, string file)
         {
-            var img = AppIcons.Get(file, 16);
+            var img = AppIcons.Get(file, 18);
             if (img is not null)
                 box.Image = img;
         }
@@ -94,7 +93,6 @@ public partial class DashboardForm : Form
         AppIcons.ApplyToButton(btnQaAdjustment, "icons-Inventory-adjust.png", 16);
         AppIcons.ApplyToButton(btnQaUsers, "icons-user.png", 16);
 
-        // Primary remains white text; secondary mockup uses primary-colored text
         btnQaStockOut.ForeColor = UiTheme.Primary;
         btnQaProducts.ForeColor = UiTheme.Primary;
         btnQaAdjustment.ForeColor = UiTheme.Primary;
@@ -106,6 +104,7 @@ public partial class DashboardForm : Form
         Font = UiTheme.Body;
         BackColor = UiTheme.Background;
         metricsPanel.BackColor = UiTheme.Background;
+        welcomePanel.BackColor = UiTheme.Background;
 
         activityCard.BackColor = UiTheme.Surface;
         actionsPanel.BackColor = UiTheme.Surface;
@@ -129,7 +128,6 @@ public partial class DashboardForm : Form
         UiTheme.StyleButton(btnQaAdjustment, UiTheme.ButtonKind.Secondary);
         UiTheme.StyleButton(btnQaUsers, UiTheme.ButtonKind.Secondary);
 
-        // Mockup secondary QA: primary text color, left-aligned
         foreach (var b in new[] { btnQaStockOut, btnQaProducts, btnQaAdjustment, btnQaUsers })
         {
             b.ForeColor = UiTheme.Primary;
@@ -157,7 +155,7 @@ public partial class DashboardForm : Form
             if (c is Button { Visible: true } b)
             {
                 b.Top = y;
-                y += 40;
+                y += 44;
             }
         }
     }
@@ -193,6 +191,13 @@ public partial class DashboardForm : Form
             lblLow.Text = m.LowStockCount.ToString("N0", nfi);
             lblOut.Text = m.OutOfStockCount.ToString("N0", nfi);
 
+            subProducts.Text = m.ActiveProductCount == 1 ? "1 active item" : $"{m.ActiveProductCount:N0} active items";
+            subCategories.Text = "Product groupings";
+            subSuppliers.Text = "Active vendors";
+            subTotalQty.Text = "Across all products";
+            subLow.Text = m.LowStockCount == 0 ? "All healthy ✓" : "Needs attention";
+            subOut.Text = m.OutOfStockCount == 0 ? "None out of stock ✓" : "Restock needed";
+
             var rows = Service.GetRecentActivity(10);
             if (rows.Count == 0)
             {
@@ -210,7 +215,6 @@ public partial class DashboardForm : Form
                 foreach (DataGridViewColumn col in grid.Columns)
                     col.Visible = false;
 
-                // Mockup column order: Date · Type · Product · Qty · User
                 int di = 0;
                 void Show(string name, string header, float w)
                 {
@@ -248,12 +252,12 @@ public partial class DashboardForm : Form
         }
         catch (Exception ex)
         {
-            lblProducts.Text = "0";
-            lblCategories.Text = "0";
-            lblSuppliers.Text = "0";
-            lblTotalQty.Text = "0";
-            lblLow.Text = "0";
-            lblOut.Text = "0";
+            lblProducts.Text = "—";
+            lblCategories.Text = "—";
+            lblSuppliers.Text = "—";
+            lblTotalQty.Text = "—";
+            lblLow.Text = "—";
+            lblOut.Text = "—";
 
             var mapped = DbExceptionMapper.Map(ex);
             var friendly = ErrorPresenter.Classify(mapped).Message;
