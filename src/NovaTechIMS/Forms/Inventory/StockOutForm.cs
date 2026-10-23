@@ -8,18 +8,15 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Stock-Out — compact fields, no stretched dropdowns.</summary>
+/// <summary>Stock-Out — balanced layout, buttons under content block.</summary>
 public partial class StockOutForm : Form
 {
     private StockOutService? _service;
     private int _currentOnHand;
+    private int _contentRight = 700;
 
-    private const int FieldComboW = 300;
-    private const int FieldQtyW = 120;
-    private const int FieldDateW = 140;
-    private const int FieldPriceW = 130;
-    private const int ColGap = 24;
-    private const int Pad = 28;
+    private const int Pad = 32;
+    private const int Gap = 20;
 
     private StockOutService Service => _service ??= new StockOutService();
 
@@ -61,32 +58,43 @@ public partial class StockOutForm : Form
     {
         if (formCard is null) return;
 
+        int usable = Math.Max(520, formCard.ClientSize.Width - Pad * 2);
+        int blockW = Math.Min(usable, Math.Max(560, (int)(usable * 0.78)));
+
+        int comboW = (blockW - Gap) / 2;
+        comboW = Math.Clamp(comboW, 240, 360);
+        blockW = comboW * 2 + Gap;
+        _contentRight = Pad + blockW;
+
         lblProduct.Left = Pad;
         cboProduct.Left = Pad;
-        cboProduct.Width = FieldComboW;
+        cboProduct.Width = comboW;
         helpProduct.Left = Pad;
 
-        int col2 = Pad + FieldComboW + ColGap;
+        int col2 = Pad + comboW + Gap;
         lblCustomer.Left = col2;
         cboCustomer.Left = col2;
-        cboCustomer.Width = FieldComboW;
+        cboCustomer.Width = comboW;
         helpCustomer.Left = col2;
+
+        int qtyW = Math.Max(110, blockW / 5);
+        int dateW = Math.Max(130, blockW / 4);
+        int priceW = Math.Max(110, blockW / 5);
 
         lblQuantity.Left = Pad;
         nudQuantity.Left = Pad;
-        nudQuantity.Width = FieldQtyW;
+        nudQuantity.Width = qtyW;
 
-        int dLeft = Pad + FieldQtyW + ColGap;
+        int dLeft = Pad + qtyW + Gap;
         lblDate.Left = dLeft;
         dtpDate.Left = dLeft;
-        dtpDate.Width = FieldDateW;
+        dtpDate.Width = dateW;
 
-        int pLeft = dLeft + FieldDateW + ColGap;
+        int pLeft = dLeft + dateW + Gap;
         lblUnitPrice.Left = pLeft;
         txtUnitPrice.Left = pLeft;
-        txtUnitPrice.Width = FieldPriceW;
+        txtUnitPrice.Width = priceW;
 
-        int blockW = FieldComboW * 2 + ColGap;
         previewBanner.Left = Pad;
         previewBanner.Width = blockW;
 
@@ -95,7 +103,7 @@ public partial class StockOutForm : Form
         txtNotes.Left = Pad;
         txtNotes.Width = blockW;
         int notesBottom = formCard.ClientSize.Height - actionsBar.Height - 16;
-        txtNotes.Height = Math.Max(72, Math.Min(120, notesBottom - txtNotes.Top));
+        txtNotes.Height = Math.Max(72, Math.Min(130, notesBottom - txtNotes.Top));
 
         LayoutActions();
     }
@@ -103,7 +111,8 @@ public partial class StockOutForm : Form
     private void LayoutActions()
     {
         if (actionsBar is null || btnSave is null || btnClear is null) return;
-        btnSave.Left = Math.Max(200, actionsBar.ClientSize.Width - btnSave.Width - Pad);
+        int right = Math.Min(_contentRight, actionsBar.ClientSize.Width - Pad);
+        btnSave.Left = Math.Max(Pad + 200, right - btnSave.Width);
         btnClear.Left = btnSave.Left - btnClear.Width - 12;
     }
 
@@ -136,7 +145,7 @@ public partial class StockOutForm : Form
             cbo.FlatStyle = FlatStyle.Standard;
             cbo.BackColor = Color.White;
             cbo.ForeColor = UiTheme.Text;
-            cbo.DropDownWidth = 360;
+            cbo.DropDownWidth = 400;
         }
 
         nudQuantity.BorderStyle = BorderStyle.FixedSingle;

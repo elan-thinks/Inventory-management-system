@@ -8,17 +8,15 @@ using NovaTechIMS.Utilities;
 
 namespace NovaTechIMS.Forms.Inventory;
 
-/// <summary>Inventory Adjustment — compact fields.</summary>
+/// <summary>Inventory Adjustment — balanced layout, buttons under content.</summary>
 public partial class AdjustmentForm : Form
 {
     private AdjustmentService? _service;
     private int _previousQty;
+    private int _contentRight = 700;
 
-    private const int FieldComboW = 420;
-    private const int FieldQtyW = 120;
-    private const int FieldDateW = 140;
-    private const int ColGap = 24;
-    private const int Pad = 28;
+    private const int Pad = 32;
+    private const int Gap = 20;
 
     private AdjustmentService Service => _service ??= new AdjustmentService();
 
@@ -59,26 +57,32 @@ public partial class AdjustmentForm : Form
     {
         if (formCard is null) return;
 
+        int usable = Math.Max(520, formCard.ClientSize.Width - Pad * 2);
+        int blockW = Math.Min(usable, Math.Max(520, (int)(usable * 0.72)));
+        blockW = Math.Clamp(blockW, 480, 640);
+        _contentRight = Pad + blockW;
+
         lblProduct.Left = Pad;
         cboProduct.Left = Pad;
-        cboProduct.Width = FieldComboW;
+        cboProduct.Width = blockW;
         helpProduct.Left = Pad;
 
         lblPreviousCaption.Left = Pad;
         lblPreviousQty.Left = Pad;
 
-        lblNewQty.Left = Pad + 160;
-        nudNewQty.Left = Pad + 160;
-        nudNewQty.Width = FieldQtyW;
+        int qtyW = 120;
+        int dateW = 140;
+        lblNewQty.Left = Pad + 150;
+        nudNewQty.Left = Pad + 150;
+        nudNewQty.Width = qtyW;
 
-        lblDate.Left = Pad + 160 + FieldQtyW + ColGap;
-        dtpDate.Left = Pad + 160 + FieldQtyW + ColGap;
-        dtpDate.Width = FieldDateW;
+        lblDate.Left = Pad + 150 + qtyW + Gap;
+        dtpDate.Left = Pad + 150 + qtyW + Gap;
+        dtpDate.Width = dateW;
 
-        lblDiffCaption.Left = Pad + 160 + FieldQtyW + ColGap + FieldDateW + ColGap;
+        lblDiffCaption.Left = Pad + 150 + qtyW + Gap + dateW + Gap;
         lblDifference.Left = lblDiffCaption.Left;
 
-        int blockW = FieldComboW;
         previewBanner.Left = Pad;
         previewBanner.Width = blockW;
 
@@ -91,7 +95,7 @@ public partial class AdjustmentForm : Form
         txtNotes.Left = Pad;
         txtNotes.Width = blockW;
         int notesBottom = formCard.ClientSize.Height - actionsBar.Height - 16;
-        txtNotes.Height = Math.Max(60, Math.Min(100, notesBottom - txtNotes.Top));
+        txtNotes.Height = Math.Max(60, Math.Min(110, notesBottom - txtNotes.Top));
 
         LayoutActions();
     }
@@ -99,7 +103,8 @@ public partial class AdjustmentForm : Form
     private void LayoutActions()
     {
         if (actionsBar is null || btnSave is null || btnClear is null) return;
-        btnSave.Left = Math.Max(200, actionsBar.ClientSize.Width - btnSave.Width - Pad);
+        int right = Math.Min(_contentRight, actionsBar.ClientSize.Width - Pad);
+        btnSave.Left = Math.Max(Pad + 200, right - btnSave.Width);
         btnClear.Left = btnSave.Left - btnClear.Width - 12;
     }
 
