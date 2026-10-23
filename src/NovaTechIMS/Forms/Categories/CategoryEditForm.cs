@@ -6,7 +6,7 @@ using NovaTechIMS.Utilities;
 namespace NovaTechIMS.Forms.Categories;
 
 /// <summary>
-/// SCR-007 Category Add/Edit modal — Designer-based (partial).
+/// SCR-007 Category Add/Edit modal — soft dialog chrome.
 /// </summary>
 public partial class CategoryEditForm : Form
 {
@@ -17,7 +17,9 @@ public partial class CategoryEditForm : Form
     {
         _categoryId = categoryId;
         InitializeComponent();
-        ApplyRuntimeStyling();
+
+        if (!DesignTime.IsActive)
+            ApplyRuntimeStyling();
 
         if (_categoryId is int id)
         {
@@ -35,10 +37,8 @@ public partial class CategoryEditForm : Form
 
     private void ApplyRuntimeStyling()
     {
-        UiTheme.StyleTextBox(txtName);
-        UiTheme.StyleTextBox(txtDescription);
-        UiTheme.StyleButton(btnSave, UiTheme.ButtonKind.Primary);
-        UiTheme.StyleButton(btnCancel, UiTheme.ButtonKind.Secondary);
+        DialogChrome.Apply(this);
+        actionsBar.BackColor = UiTheme.Background;
     }
 
     private void BtnCancel_Click(object? sender, EventArgs e)
@@ -59,7 +59,7 @@ public partial class CategoryEditForm : Form
         }
         catch (AppException ex)
         {
-            MessageBox.Show(this, ex.Message, "Category", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            AppDialog.Warning(this, ex.Message, "Category");
             DialogResult = DialogResult.Cancel;
         }
     }
