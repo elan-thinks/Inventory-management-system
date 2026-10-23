@@ -6,71 +6,94 @@ using System.Windows.Forms;
 namespace NovaTechIMS.Utilities;
 
 /// <summary>
-/// Light-mode design tokens — Catalox / Donezo inspired soft UI.
-/// Light sidebar, green brand accent.
+/// iOS / Fusion-inspired light design tokens.
+/// Soft surfaces, generous radius, refined type, subtle borders.
 /// </summary>
 internal static class UiTheme
 {
     // ---- Brand / surfaces --------------------------------------------------
     public static readonly Color Primary = ColorTranslator.FromHtml("#0F7646");
     public static readonly Color PrimaryHover = ColorTranslator.FromHtml("#0B5C37");
+    public static readonly Color PrimarySoft = ColorTranslator.FromHtml("#E8F6EF");
     public static readonly Color Secondary = ColorTranslator.FromHtml("#3B7A8F");
-    public static readonly Color Background = ColorTranslator.FromHtml("#F6F8FA");
+
+    // Soft page wash (Fusion-like)
+    public static readonly Color Background = ColorTranslator.FromHtml("#F4F5F7");
     public static readonly Color Surface = ColorTranslator.FromHtml("#FFFFFF");
-    public static readonly Color Text = ColorTranslator.FromHtml("#1C232B");
-    public static readonly Color TextMuted = ColorTranslator.FromHtml("#828E98");
+    public static readonly Color SurfaceElevated = ColorTranslator.FromHtml("#FFFFFF");
 
-    public static readonly Color Success = ColorTranslator.FromHtml("#2E8B57");
-    public static readonly Color SuccessTint = ColorTranslator.FromHtml("#E4F3EA");
-    public static readonly Color Warning = ColorTranslator.FromHtml("#C77700");
-    public static readonly Color WarningTint = ColorTranslator.FromHtml("#FBEBD9");
-    public static readonly Color Error = ColorTranslator.FromHtml("#C0392B");
-    public static readonly Color ErrorTint = ColorTranslator.FromHtml("#FBEAE8");
-    public static readonly Color Info = ColorTranslator.FromHtml("#2E6E9E");
-    public static readonly Color InfoTint = ColorTranslator.FromHtml("#E7F0F7");
+    public static readonly Color Text = ColorTranslator.FromHtml("#1A1D21");
+    public static readonly Color TextSecondary = ColorTranslator.FromHtml("#5C6570");
+    public static readonly Color TextMuted = ColorTranslator.FromHtml("#8B949E");
 
-    public static readonly Color Border = ColorTranslator.FromHtml("#E4E8EC");
+    public static readonly Color Success = ColorTranslator.FromHtml("#1B8A4A");
+    public static readonly Color SuccessTint = ColorTranslator.FromHtml("#E6F6EC");
+    public static readonly Color Warning = ColorTranslator.FromHtml("#D4880F");
+    public static readonly Color WarningTint = ColorTranslator.FromHtml("#FBF0DC");
+    public static readonly Color Error = ColorTranslator.FromHtml("#D14343");
+    public static readonly Color ErrorTint = ColorTranslator.FromHtml("#FCEDED");
+    public static readonly Color Info = ColorTranslator.FromHtml("#2F6FED");
+    public static readonly Color InfoTint = ColorTranslator.FromHtml("#EAF1FD");
+
+    // Very soft borders (iOS hairline feel)
+    public static readonly Color Border = ColorTranslator.FromHtml("#E8EBEE");
+    public static readonly Color BorderSubtle = ColorTranslator.FromHtml("#F0F2F4");
     public static readonly Color BorderFocus = ColorTranslator.FromHtml("#0F7646");
-    public static readonly Color DisabledBackground = ColorTranslator.FromHtml("#ECEEF1");
-    public static readonly Color DisabledText = ColorTranslator.FromHtml("#9AA5B1");
 
-    public static readonly Color RowHover = ColorTranslator.FromHtml("#EAF7F0");
-    public static readonly Color RowSelected = ColorTranslator.FromHtml("#D6F0E2");
+    public static readonly Color DisabledBackground = ColorTranslator.FromHtml("#F0F1F3");
+    public static readonly Color DisabledText = ColorTranslator.FromHtml("#A0A8B0");
+
+    public static readonly Color RowHover = ColorTranslator.FromHtml("#F0F9F4");
+    public static readonly Color RowSelected = ColorTranslator.FromHtml("#DDF3E6");
     public static readonly Color RowAlternate = ColorTranslator.FromHtml("#FAFBFC");
 
-    // Catalox-style LIGHT sidebar
+    // Light sidebar
     public static readonly Color SidebarBackground = ColorTranslator.FromHtml("#FFFFFF");
-    public static readonly Color SidebarText = ColorTranslator.FromHtml("#5A6570");
+    public static readonly Color SidebarText = ColorTranslator.FromHtml("#5C6570");
     public static readonly Color SidebarTextActive = ColorTranslator.FromHtml("#0F7646");
     public static readonly Color SidebarAccent = ColorTranslator.FromHtml("#0F7646");
-    public static readonly Color SidebarHover = ColorTranslator.FromHtml("#F3F5F7");
-    public static readonly Color SidebarActiveBg = ColorTranslator.FromHtml("#E8F5EE");
-    public static readonly Color StatusStripBackground = ColorTranslator.FromHtml("#F0F2F5");
+    public static readonly Color SidebarHover = ColorTranslator.FromHtml("#F5F6F8");
+    public static readonly Color SidebarActiveBg = ColorTranslator.FromHtml("#E8F6EF");
+    public static readonly Color StatusStripBackground = ColorTranslator.FromHtml("#F4F5F7");
 
-    // ---- Typography ---------------------------------------------------
-    public static readonly Font ScreenTitle = new("Segoe UI", 14f, FontStyle.Bold);
-    public static readonly Font SectionTitle = new("Segoe UI", 11f, FontStyle.Bold);
+    // Metric tile pastels (Fusion cards)
+    public static readonly Color TileGreen = ColorTranslator.FromHtml("#E8F6EF");
+    public static readonly Color TileOrange = ColorTranslator.FromHtml("#FFF3E6");
+    public static readonly Color TileBlue = ColorTranslator.FromHtml("#EAF1FD");
+    public static readonly Color TilePink = ColorTranslator.FromHtml("#FCEDED");
+    public static readonly Color TilePurple = ColorTranslator.FromHtml("#F3EEFF");
+
+    // ---- Typography (slightly larger, cleaner hierarchy) -------------------
+    public static readonly Font DisplayTitle = new("Segoe UI", 22f, FontStyle.Bold);
+    public static readonly Font ScreenTitle = new("Segoe UI", 16f, FontStyle.Bold);
+    public static readonly Font SectionTitle = new("Segoe UI", 12f, FontStyle.Bold);
     public static readonly Font Body = new("Segoe UI", 10f, FontStyle.Regular);
-    public static readonly Font Label = new("Segoe UI", 9f, FontStyle.Regular);
-    public static readonly Font LabelSemibold = new("Segoe UI", 9f, FontStyle.Bold);
+    public static readonly Font BodyStrong = new("Segoe UI", 10f, FontStyle.Bold);
+    public static readonly Font Label = new("Segoe UI", 9.25f, FontStyle.Regular);
+    public static readonly Font LabelSemibold = new("Segoe UI", 9.25f, FontStyle.Bold);
     public static readonly Font Button = new("Segoe UI", 10f, FontStyle.Bold);
-    public static readonly Font HelperText = new("Segoe UI", 8.5f, FontStyle.Italic);
+    public static readonly Font HelperText = new("Segoe UI", 8.5f, FontStyle.Regular);
     public static readonly Font ErrorText = new("Segoe UI", 8.5f, FontStyle.Regular);
     public static readonly Font BadgeText = new("Segoe UI", 8.5f, FontStyle.Bold);
-    public static readonly Font SidebarItem = new("Segoe UI", 9.5f, FontStyle.Regular);
-    public static readonly Font SidebarItemActive = new("Segoe UI", 9.5f, FontStyle.Bold);
+    public static readonly Font SidebarItem = new("Segoe UI", 9.75f, FontStyle.Regular);
+    public static readonly Font SidebarItemActive = new("Segoe UI", 9.75f, FontStyle.Bold);
     public static readonly Font SidebarGroup = new("Segoe UI", 8f, FontStyle.Bold);
     public static readonly Font StatusStrip = new("Segoe UI", 9f, FontStyle.Regular);
+    public static readonly Font MetricValue = new("Segoe UI", 20f, FontStyle.Bold);
+    public static readonly Font MetricLabel = new("Segoe UI", 9f, FontStyle.Regular);
 
     // ---- Spacing / radius / dimensions ---------------------------------
-    public const int Sp1 = 4, Sp2 = 8, Sp3 = 12, Sp4 = 16, Sp6 = 24, Sp8 = 32;
-    public const int RadiusSm = 4, RadiusLg = 6;
-    public const int SidebarWidth = 228;
+    public const int Sp1 = 4, Sp2 = 8, Sp3 = 12, Sp4 = 16, Sp5 = 20, Sp6 = 24, Sp8 = 32;
+    public const int RadiusSm = 8;
+    public const int RadiusMd = 12;
+    public const int RadiusLg = 16;
+    public const int RadiusPill = 20;
+    public const int SidebarWidth = 232;
     public const int MinWindowWidth = 1024;
     public const int MinWindowHeight = 768;
-    public const int InputHeight = 28;
-    public const int ButtonHeight = 32;
-    public const int GridRowHeight = 30;
+    public const int InputHeight = 34;
+    public const int ButtonHeight = 38;
+    public const int GridRowHeight = 34;
 
     public enum ButtonKind { Primary, Secondary, Danger, Ghost }
 
@@ -83,7 +106,7 @@ internal static class UiTheme
             return path;
         }
 
-        int d = radius * 2;
+        int d = Math.Min(radius * 2, Math.Min(bounds.Width, bounds.Height));
         path.AddArc(bounds.X, bounds.Y, d, d, 180, 90);
         path.AddArc(bounds.Right - d, bounds.Y, d, d, 270, 90);
         path.AddArc(bounds.Right - d, bounds.Bottom - d, d, d, 0, 90);
@@ -104,6 +127,34 @@ internal static class UiTheme
         control.Resize += (_, _) => Apply();
     }
 
+    /// <summary>Soft 1px card edge (iOS hairline).</summary>
+    public static void PaintSoftCard(Control card)
+    {
+        card.Paint += (_, e) =>
+        {
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            using var pen = new Pen(Border, 1);
+            var r = new Rectangle(0, 0, card.Width - 1, card.Height - 1);
+            using var path = RoundedRect(r, RadiusMd);
+            e.Graphics.DrawPath(pen, path);
+        };
+    }
+
+    /// <summary>Rounded soft fill + border for a panel.</summary>
+    public static void PaintSoftFill(Control panel, Color fill, int radius = RadiusMd)
+    {
+        panel.Paint += (_, e) =>
+        {
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            var r = new Rectangle(0, 0, panel.Width - 1, panel.Height - 1);
+            using var path = RoundedRect(r, radius);
+            using var brush = new SolidBrush(fill);
+            e.Graphics.FillPath(brush, path);
+            using var pen = new Pen(Border, 1);
+            e.Graphics.DrawPath(pen, path);
+        };
+    }
+
     public static Button StyleButton(Button btn, ButtonKind kind)
     {
         btn.FlatStyle = FlatStyle.Flat;
@@ -121,10 +172,10 @@ internal static class UiTheme
                 baseColor = Primary; hoverColor = PrimaryHover; textColor = Color.White;
                 break;
             case ButtonKind.Danger:
-                baseColor = Error; hoverColor = ColorTranslator.FromHtml("#9E2E22"); textColor = Color.White;
+                baseColor = Error; hoverColor = ColorTranslator.FromHtml("#B53636"); textColor = Color.White;
                 break;
             case ButtonKind.Secondary:
-                baseColor = Surface; hoverColor = RowHover; textColor = Text;
+                baseColor = Surface; hoverColor = SidebarHover; textColor = Text;
                 btn.FlatAppearance.BorderColor = Border;
                 break;
             default:
@@ -159,7 +210,7 @@ internal static class UiTheme
     public static ComboBox StyleComboBox(ComboBox combo)
     {
         combo.Font = Body;
-        combo.FlatStyle = FlatStyle.Flat;
+        combo.FlatStyle = FlatStyle.Standard;
         combo.BackColor = Surface;
         combo.ForeColor = Text;
         return combo;
@@ -275,7 +326,7 @@ internal static class UiTheme
         int iconSize = 10;
         int pad = 8;
         int pillWidth = (int)textSize.Width + iconSize + pad * 3;
-        int pillHeight = Math.Min(cellBounds.Height - 6, 20);
+        int pillHeight = Math.Min(cellBounds.Height - 6, 22);
         var pillRect = new Rectangle(
             cellBounds.X + 6,
             cellBounds.Y + (cellBounds.Height - pillHeight) / 2,
@@ -300,7 +351,7 @@ internal static class UiTheme
         grid.BackgroundColor = Surface;
         grid.BorderStyle = BorderStyle.None;
         grid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-        grid.GridColor = Border;
+        grid.GridColor = BorderSubtle;
         grid.RowHeadersVisible = false;
         grid.EnableHeadersVisualStyles = false;
         grid.AllowUserToResizeRows = false;
@@ -310,14 +361,14 @@ internal static class UiTheme
         grid.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
         {
             Font = LabelSemibold,
-            BackColor = ColorTranslator.FromHtml("#F8FAFC"),
+            BackColor = ColorTranslator.FromHtml("#F8F9FB"),
             ForeColor = TextMuted,
             Alignment = DataGridViewContentAlignment.MiddleLeft,
-            Padding = new Padding(Sp2, 0, 0, 0),
-            SelectionBackColor = ColorTranslator.FromHtml("#F8FAFC"),
+            Padding = new Padding(Sp3, 0, 0, 0),
+            SelectionBackColor = ColorTranslator.FromHtml("#F8F9FB"),
             SelectionForeColor = TextMuted
         };
-        grid.ColumnHeadersHeight = 34;
+        grid.ColumnHeadersHeight = 38;
         grid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
 
         grid.DefaultCellStyle = new DataGridViewCellStyle
@@ -326,7 +377,7 @@ internal static class UiTheme
             ForeColor = Text,
             SelectionBackColor = RowSelected,
             SelectionForeColor = Text,
-            Padding = new Padding(Sp2, 0, 0, 0)
+            Padding = new Padding(Sp3, 0, 0, 0)
         };
         grid.AlternatingRowsDefaultCellStyle = new DataGridViewCellStyle
         {
